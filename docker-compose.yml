@@ -340,7 +340,7 @@ services:
           - start-attester
           - start-services
         healthcheck:
-            test: /hcp/sshd.py --healthcheck
+            test: /hcp/attested.py
             timeout: 3s
             interval: 6s
 
