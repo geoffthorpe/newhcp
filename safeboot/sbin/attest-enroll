@@ -136,7 +136,8 @@ chpasswd:
     root:password
     ubuntu:password
 EOF
-	echo "public meta-data user-data"
+	echo "public meta-data"
+	echo "public user-data"
 }
 
 genrootfskey() {
@@ -175,7 +176,8 @@ gentest1() {
 	local suffix=$RANDOM
 	echo test4$suffix > "${1}/test4-$suffix"
 	echo test4pub > "${1}/test4pub-$suffix"
-	echo "public test4-$suffix test4pub-$suffix"
+	echo "public test4-$suffix"
+	echo "public test4pub-$suffix"
 }
 
 gentest2() {
@@ -611,34 +613,34 @@ sign() {
 	[[ -z ${SIGNING_KEY_PUB:-} ]]		\
 	&& die "SIGNING_KEY_PUB not configured!"
 
-	# Sign using a TPM key if we can load it as a TPM key
-	if [[ $SIGNING_KEY_PRIV = *.priv ]]				\
-	   && tpm2 flushcontext --transient-object	2>/dev/null	\
-	   && tpm2 createprimary					\
-		--hierarchy o						\
-		--key-context "${tmp}/primary.ctx"			\
-	   && tpm2 load							\
-		--private "$SIGNING_KEY_PRIV"				\
-		--public "${SIGNING_KEY_PRIV%.priv}.pub"		\
-		--parent-context "${tmp}/primary.ctx"			\
-		--key-context "${tmp}/signing-key.ctx"; then
-		tpm2 flushcontext --transient-object
-		tpm2 flushcontext --loaded-session
-		if [[ -n ${SIGNING_KEY_POLICY:-} ]]; then
-			# Execute the policy
-			"${SIGNING_KEY_POLICY}" -e "${tmp}/s.ctx"
-		fi
-		tpm2 sign						\
-			--key-context "${tmp}/signing-key.ctx"		\
-			${SIGNING_KEY_POLICY:+--auth}			\
-			${SIGNING_KEY_POLICY:+session:"${tmp}"/s.ctx}	\
-			--scheme rsassa					\
-			--hash-algorithm sha256				\
-			--format plain					\
-			--signature "${1}.sig"				\
-			< "$1"
-		return 0
-	fi
+#	# Sign using a TPM key if we can load it as a TPM key
+#	if [[ $SIGNING_KEY_PRIV = *.priv ]]				\
+#	   && tpm2 flushcontext --transient-object	2>/dev/null	\
+#	   && tpm2 createprimary					\
+#		--hierarchy o						\
+#		--key-context "${tmp}/primary.ctx"			\
+#	   && tpm2 load							\
+#		--private "$SIGNING_KEY_PRIV"				\
+#		--public "${SIGNING_KEY_PRIV%.priv}.pem"		\
+#		--parent-context "${tmp}/primary.ctx"			\
+#		--key-context "${tmp}/signing-key.ctx"; then
+#		tpm2 flushcontext --transient-object
+#		tpm2 flushcontext --loaded-session
+#		if [[ -n ${SIGNING_KEY_POLICY:-} ]]; then
+#			# Execute the policy
+#			"${SIGNING_KEY_POLICY}" -e "${tmp}/s.ctx"
+#		fi
+#		tpm2 sign						\
+#			--key-context "${tmp}/signing-key.ctx"		\
+#			${SIGNING_KEY_POLICY:+--auth}			\
+#			${SIGNING_KEY_POLICY:+session:"${tmp}"/s.ctx}	\
+#			--scheme rsassa					\
+#			--hash-algorithm sha256				\
+#			--format plain					\
+#			--signature "${1}.sig"				\
+#			< "$1"
+#		return 0
+#	fi
 
 	# Sign using OpenSSL
 	openssl pkeyutl							\
@@ -786,36 +788,35 @@ for genprog in "${GENPROGS[@]}" genmanifest; do
 		info "GENPROG $genprog skipped${1:+": "}$*"
 		continue
 	fi
-	if (($# < 2)) ||
-	   [[ $1 != @(sensitive|public) ||
-	      ! -f $tmp/$2 ]]; then
-		warn "GENPROG $genprog output is unexpected: $*; skipping"
-		continue
-	fi
-	kind=$1
-	shift
-	if [[ $kind = sensitive ]]; then
-		# Encrypt file, escrow, and place into output dir.
-		info "Encrypting secret file from $genprog: $1"
-		encrypt "$genprog" "$1"
-		info "Signing ciphertext $1"
-		sign "${outdir}/${1}.enc"
-		did_something=true
-		shift
-	fi
-
-	# Copy any remaining files
 	while (($# > 0)); do
-		if [[ -f ${outdir}/$1 ]]; then
-			info "Replacing public file $1"
-			mv -f "${outdir}/$1" "${outdir}/${1}-"
-		else
-			info "Installing public file $1"
+		if (($# < 2)) ||
+		   [[ $1 != @(sensitive|public) ||
+		      ! -f $tmp/$2 ]]; then
+			warn "GENPROG $genprog output is unexpected: $*; skipping"
+			shift
+			continue
 		fi
-		cp -f "${tmp}/$1" "${outdir}/${1}"
-		info "Signing metadata file $1"
-		sign "${outdir}/$1"
-		did_something=true
+		kind=$1
+		shift
+		if [[ $kind = sensitive ]]; then
+			# Encrypt file, escrow, and place into output dir.
+			info "Encrypting secret file from $genprog: $1"
+			encrypt "$genprog" "$1"
+			info "Signing ciphertext $1"
+			sign "${outdir}/${1}.enc"
+			did_something=true
+		else
+			if [[ -f ${outdir}/$1 ]]; then
+				info "Replacing public file $1"
+				mv -f "${outdir}/$1" "${outdir}/${1}-"
+			else
+				info "Installing public file $1"
+			fi
+			cp -f "${tmp}/$1" "${outdir}/${1}"
+			info "Signing metadata file $1"
+			sign "${outdir}/$1"
+			did_something=true
+		fi
 		shift
 	done
 done

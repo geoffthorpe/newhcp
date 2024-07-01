@@ -196,4 +196,5 @@ openssl crl2pkcs7 -nocrl -certfile "${GENCERT_CA_CERT#*:}"		\
 
 grep -q PRIVATE cert.pem && die "Private key in cert file?!"
 trap true EXIT
-echo "sensitive cert-key.pem cert.pem"
+echo "sensitive cert-key.pem"
+echo "public cert.pem"
