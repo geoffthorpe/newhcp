@@ -1,0 +1,71 @@
+# This should be included from the main Makefile, ie. not used directly
+
+TESTCREDS_OUT := $(TOP)/_testcreds
+TESTCREDS_DONE :=
+TESTCREDS_ENROLLSIGNER := $(TESTCREDS_OUT)/enrollsigner
+TESTCREDS_DONE += $(TESTCREDS_ENROLLSIGNER)/key.pem
+TESTCREDS_ENROLLVERIFIER := $(TESTCREDS_OUT)/enrollverifier
+TESTCREDS_DONE += $(TESTCREDS_ENROLLVERIFIER)/key.pem
+TESTCREDS_ENROLLCERTISSUER := $(TESTCREDS_OUT)/enrollcertissuer
+TESTCREDS_DONE += $(TESTCREDS_ENROLLCERTISSUER)/CA.cert
+TESTCREDS_ENROLLCERTCHECKER := $(TESTCREDS_OUT)/enrollcertchecker
+TESTCREDS_DONE += $(TESTCREDS_ENROLLCERTCHECKER)/CA.cert
+TESTCREDS_ENROLLSERVER := $(TESTCREDS_OUT)/enrollserver
+TESTCREDS_DONE += $(TESTCREDS_ENROLLSERVER)/server.pem
+TESTCREDS_ENROLLCLIENT := $(TESTCREDS_OUT)/enrollclient
+TESTCREDS_DONE += $(TESTCREDS_ENROLLCLIENT)/client.pem
+TESTCREDS_CHILDREN := \
+	$(TESTCREDS_ENROLLSIGNER) \
+	$(TESTCREDS_ENROLLVERIFIER) \
+	$(TESTCREDS_ENROLLCERTISSUER) \
+	$(TESTCREDS_ENROLLCERTCHECKER) \
+	$(TESTCREDS_ENROLLSERVER) \
+	$(TESTCREDS_ENROLLCLIENT)
+$(TESTCREDS_CHILDREN): | $(TESTCREDS_OUT)
+$(TESTCREDS_OUT) $(TESTCREDS_CHILDREN):
+	$Qmkdir $@
+
+$(TESTCREDS_ENROLLSIGNER)/key.pem: | $(TESTCREDS_ENROLLSIGNER)
+	$Qcd $(TESTCREDS_ENROLLSIGNER) && \
+		openssl genrsa -out key.priv && \
+		openssl rsa -pubout -in key.priv -out key.pem
+$(TESTCREDS_ENROLLVERIFIER)/key.pem: | $(TESTCREDS_ENROLLVERIFIER)
+$(TESTCREDS_ENROLLVERIFIER)/key.pem: $(TESTCREDS_ENROLLSIGNER)/key.pem
+	$Qcp $< $@
+$(TESTCREDS_ENROLLCERTISSUER)/CA.cert: | $(TESTCREDS_ENROLLCERTISSUER)
+	$Qcd $(TESTCREDS_ENROLLCERTISSUER) && \
+		hxtool issue-certificate --self-signed --issue-ca \
+		--generate-key=rsa --subject="CN=CA,DC=hcphacking,DC=xyz" \
+		--lifetime=10years --certificate="FILE:CA.pem" && \
+		openssl x509 -in CA.pem -outform PEM -out "CA.cert"
+$(TESTCREDS_ENROLLCERTCHECKER)/CA.cert: | $(TESTCREDS_ENROLLCERTCHECKER)
+$(TESTCREDS_ENROLLCERTCHECKER)/CA.cert: $(TESTCREDS_ENROLLCERTISSUER)/CA.cert
+	$Qcp $< $@
+$(TESTCREDS_ENROLLSERVER)/server.pem: | $(TESTCREDS_ENROLLSERVER)
+$(TESTCREDS_ENROLLSERVER)/server.pem: $(TESTCREDS_ENROLLCERTISSUER)/CA.cert
+	$Qcd $(TESTCREDS_ENROLLSERVER) && \
+		hxtool issue-certificate \
+		--ca-certificate="FILE:$(TESTCREDS_ENROLLCERTISSUER)/CA.pem" \
+		--type=https-server \
+		--hostname="emgmt.hcphacking.xyz" \
+		--subject="UID=emgmt,DC=hcphacking,DC=xyz" \
+		--generate-key=rsa --key-bits=2048 \
+		--certificate="FILE:server.pem"
+$(TESTCREDS_ENROLLCLIENT)/client.pem: | $(TESTCREDS_ENROLLCLIENT)
+$(TESTCREDS_ENROLLCLIENT)/client.pem: $(TESTCREDS_ENROLLCERTISSUER)/CA.cert
+	$Qcd $(TESTCREDS_ENROLLCLIENT) && \
+		hxtool issue-certificate \
+		--ca-certificate="FILE:$(TESTCREDS_ENROLLCERTISSUER)/CA.pem" \
+		--type=https-client \
+		--hostname="orchestrator.hcphacking.xyz" \
+		--subject="UID=orchestrator,DC=hcphacking,DC=xyz" \
+			--email="orchestrator@hcphacking.xyz" \
+		--generate-key=rsa --key-bits=2048 \
+		--certificate="FILE:client.pem"
+
+testcreds: $(TESTCREDS_DONE)
+ifneq (,$(wildcard $(TESTCREDS_OUT)))
+clean_testcreds:
+	$Qrm -rf $(TESTCREDS_OUT)
+clean: clean_testcreds
+endif

@@ -1,0 +1,284 @@
+# vim: set expandtab shiftwidth=4 softtabstop=4 :
+# Using this version string helps with some older docker-compose versions that
+# we regularly encounter. It also ensures the 'extend' feature works.
+version: "2.4"
+
+volumes:
+    enrolldb:
+    attestdb:
+    kdc_primary:
+    kdc_secondary:
+    tpm_aclient:
+    tpmsocket_aclient:
+    tpm_kdc_primary:
+    tpmsocket_kdc_primary:
+    tpm_kdc_secondary:
+    tpmsocket_kdc_secondary:
+
+networks:
+    hcpnetwork:
+        # internal: true
+    emgmt_private:
+        internal: true
+    kdc_primary_private:
+        internal: true
+    kdc_secondary_private:
+        internal: true
+
+services:
+    common:
+        image: caboodle:trixie
+        build:
+          context: .
+          args:
+            MYTZ: US/Eastern
+        init: true
+        volumes:
+          - ./usecase:/usecase:ro
+        environment:
+          - HCP_LAUNCHER_TGTS=${HCP_LAUNCHER_TGTS:-}
+          - HCP_NOTRACEFILE=1
+          - VERBOSE=${VERBOSE:-0}
+
+    emgmt:
+        extends: common
+        hostname: emgmt.hcphacking.xyz
+        networks:
+          - hcpnetwork
+          - emgmt_private
+        volumes:
+          - enrolldb:/enrolldb:rw
+          - ./_testcreds/enrollsigner:/enrollsigner:ro
+          - ./_testcreds/enrollverifier:/enrollverifier:ro
+          - ./_testcreds/enrollcertissuer:/enrollcertissuer:ro
+          - ./_testcreds/enrollcertchecker:/enrollcertchecker:ro
+          - ./_testcreds/enrollclient:/enrollclient:ro
+          - ./_testcreds/enrollserver:/enrollserver:ro
+        environment:
+          - HCP_CONFIG_FILE=/usecase/emgmt.json
+        command:
+          - setup-global
+          - setup-local
+          - start-services
+        healthcheck:
+            test: /hcp/webapi.py --healthcheck
+            timeout: 3s
+            interval: 6s
+
+    emgmt_pol:
+        extends: common
+        hostname: policy.emgmt.hcphacking.xyz
+        networks:
+          - emgmt_private
+        environment:
+          - HCP_CONFIG_FILE=/usecase/emgmt_pol.json
+        command:
+          - start-services
+        healthcheck:
+            test: /hcp/webapi.py --healthcheck
+            timeout: 3s
+            interval: 6s
+
+    erepl:
+        extends: common
+        hostname: erepl.hcphacking.xyz
+        networks:
+          - hcpnetwork
+        volumes:
+          - enrolldb:/enrolldb:ro
+        environment:
+          - HCP_CONFIG_FILE=/usecase/erepl.json
+        command:
+          - setup-global
+          - setup-local
+          - start-services
+        healthcheck:
+            test: /hcp/enrollsvc/repl_healthcheck.sh
+            timeout: 3s
+            interval: 6s
+
+    arepl:
+        extends: common
+        hostname: arepl.hcphacking.xyz
+        networks:
+          - hcpnetwork
+        volumes:
+          - attestdb:/attestdb:rw
+        environment:
+          - HCP_CONFIG_FILE=/usecase/arepl.json
+        command:
+          - setup-global
+          - setup-local
+          - start-services
+        healthcheck:
+            test: test -f /attestdb/initialized && ! test -f /attestdb/hcp/transient-failure
+            timeout: 3s
+            interval: 6s
+
+    ahcp:
+        extends: common
+        hostname: ahcp.hcphacking.xyz
+        networks:
+          - hcpnetwork
+        volumes:
+          - attestdb:/attestdb:ro
+        environment:
+          - HCP_CONFIG_FILE=/usecase/ahcp.json
+        command:
+          - setup-global
+          - setup-local
+          - start-services
+        healthcheck:
+            test: /hcp/webapi.py --healthcheck
+            timeout: 3s
+            interval: 6s
+
+    orchestrator:
+        extends: common
+        hostname: orchestrator.hcphacking.xyz
+        networks:
+          - hcpnetwork
+        volumes:
+          - ./_testcreds/enrollcertchecker:/enrollcertchecker:ro
+          - ./_testcreds/enrollclient:/enrollclient:ro
+          - tpm_aclient:/tpm_aclient
+          - tpm_kdc_primary:/tpm_kdc_primary
+          - tpm_kdc_secondary:/tpm_kdc_secondary
+        environment:
+          - HCP_CONFIG_FILE=/usecase/orchestrator.json
+
+    aclient:
+        extends: common
+        hostname: aclient.hcphacking.xyz
+        networks:
+          - hcpnetwork
+        volumes:
+          - tpmsocket_aclient:/tpm_socket_aclient
+          - ./_testcreds/enrollverifier:/enrollverifier:ro
+        environment:
+          - HCP_CONFIG_FILE=/usecase/aclient.json
+
+    aclient_tpm:
+        extends: common
+        hostname: aclient_tpm.hcphacking.xyz
+        network_mode: "none"
+        volumes:
+          - tpm_aclient:/tpm_aclient
+          - tpmsocket_aclient:/tpm_socket_aclient
+        environment:
+          - HCP_CONFIG_FILE=/usecase/aclient_tpm.json
+        command:
+          - setup-global
+          - start-services
+        healthcheck:
+            test: /hcp/swtpm.py --healthcheck
+            timeout: 3s
+            interval: 6s
+
+    kdc_primary:
+        extends: common
+        hostname: primary.kdc.hcphacking.xyz
+        networks:
+          - hcpnetwork
+        volumes:
+          - kdc_primary:/kdc_primary
+          - tpmsocket_kdc_primary:/tpmsocket_kdc_primary
+          - ./_testcreds/enrollcertchecker:/enrollcertchecker:ro
+          - ./_testcreds/enrollclient:/enrollclient:ro
+          - ./_testcreds/enrollverifier:/enrollverifier:ro
+        environment:
+          - HCP_CONFIG_FILE=/usecase/kdc_primary.json
+        command:
+          - start-attester
+          - setup-global
+          - setup-local
+          - start-services
+        healthcheck:
+            test: /hcp/webapi.py --healthcheck
+            timeout: 3s
+            interval: 6s
+
+    kdc_primary_tpm:
+        extends: common
+        hostname: kdc_primary_tpm.hcphacking.xyz
+        network_mode: "none"
+        volumes:
+          - tpm_kdc_primary:/tpm_kdc_primary
+          - tpmsocket_kdc_primary:/tpm_socket_kdc_primary
+        environment:
+          - HCP_CONFIG_FILE=/usecase/kdc_primary_tpm.json
+        command:
+          - setup-global
+          - start-services
+        healthcheck:
+            test: /hcp/swtpm.py --healthcheck
+            timeout: 3s
+            interval: 6s
+
+    kdc_primary_pol:
+        extends: common
+        hostname: policy.primary.kdc.hcphacking.xyz
+        networks:
+          - kdc_primary_private
+        environment:
+          - HCP_CONFIG_FILE=/usecase/kdc_primary_pol.json
+        command:
+          - start-services
+        healthcheck:
+            test: /hcp/webapi.py --healthcheck
+            timeout: 3s
+            interval: 6s
+
+    kdc_secondary:
+        extends: common
+        hostname: secondary.kdc.hcphacking.xyz
+        networks:
+          - hcpnetwork
+        volumes:
+          - kdc_secondary:/kdc_secondary
+          - tpmsocket_kdc_secondary:/tpmsocket_kdc_secondary
+          - ./_testcreds/enrollcertchecker:/enrollcertchecker:ro
+          - ./_testcreds/enrollclient:/enrollclient:ro
+          - ./_testcreds/enrollverifier:/enrollverifier:ro
+        environment:
+          - HCP_CONFIG_FILE=/usecase/kdc_secondary.json
+        command:
+          - start-attester
+          - setup-global
+          - setup-local
+          - start-services
+        healthcheck:
+            test: /hcp/webapi.py --healthcheck
+            timeout: 3s
+            interval: 6s
+
+    kdc_secondary_tpm:
+        extends: common
+        hostname: kdc_secondary_tpm.hcphacking.xyz
+        network_mode: "none"
+        volumes:
+          - tpm_kdc_secondary:/tpm_kdc_secondary
+          - tpmsocket_kdc_secondary:/tpm_socket_kdc_secondary
+        environment:
+          - HCP_CONFIG_FILE=/usecase/kdc_secondary_tpm.json
+        command:
+          - setup-global
+          - start-services
+        healthcheck:
+            test: /hcp/swtpm.py --healthcheck
+            timeout: 3s
+            interval: 6s
+
+    kdc_secondary_pol:
+        extends: common
+        hostname: policy.secondary.kdc.hcphacking.xyz
+        networks:
+          - kdc_secondary_private
+        environment:
+          - HCP_CONFIG_FILE=/usecase/kdc_secondary_pol.json
+        command:
+          - start-services
+        healthcheck:
+            test: /hcp/webapi.py --healthcheck
+            timeout: 3s
+            interval: 6s

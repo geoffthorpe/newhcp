@@ -1,0 +1,59 @@
+
+ARG MYTZ
+RUN echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selections
+RUN apt-get update
+RUN apt-get install -y apt-utils
+RUN apt-get -y full-upgrade
+RUN echo "$MYTZ" > /etc/timezone
+RUN chmod 644 /etc/timezone
+RUN cd /etc && rm -f localtime && ln -s /usr/share/zoneinfo/$$MYTZ localtime
+
+#COPY chowner.sh /
+#RUN chmod 755 /chowner.sh
+
+RUN apt-get install -y vim net-tools \
+	openssl xxd procps iproute2 iputils-ping curl wget acl \
+	lsof git jq procmail file time sudo dnsutils \
+	json-glib-tools libjson-perl libncurses5-dev python3 \
+	python3-yaml python3-netifaces python3-psutil python3-cryptography \
+	python3-openssl python3-flask python3-requests uwsgi-plugin-python3 \
+	nginx uuid-runtime openssh-server gnutls-bin libglib2.0-0 socat
+
+RUN apt-get install -y libtpms0 swtpm-libs swtpm swtpm-tools tpm2-tools
+
+RUN apt-get install -y heimdal-kdc heimdal-servers heimdal-clients
+
+#RUN apt-get install -y vdeplug vde2 libvdeplug-slirp
+
+# Do our best to ensure that any/all shells come up with the environment (and
+# functions) set for best UX.
+RUN echo "source /hcp/common/hcp.sh" > /etc/profile.d/hcp_common.sh
+RUN echo "source /hcp/common/hcp.sh" > /root/.bashrc
+
+# If the system/default ssh client and/or server get used, we assume HCP is
+# being used to setup identities and SSO, so give our base image better
+# defaults than the distro does.
+COPY ssh_config /etc/ssh/
+RUN chmod 644 /etc/ssh/ssh_config
+RUN systemctl disable sshd
+
+# Restrain the system nginx from starting up
+RUN systemctl disable nginx
+
+RUN adduser --disabled-password --quiet --gecos "Attestsvc DB role,,,," auser
+RUN adduser --disabled-password --quiet --gecos "Attestsvc Flask role,,,," ahcpflask
+RUN adduser --disabled-password --quiet --gecos "Enrollsvc DB role,,,," emgmtdb
+RUN adduser --disabled-password --quiet --gecos "Enrollsvc Flask role,,,," emgmtflask
+RUN adduser --disabled-password --quiet --gecos "For remote logins,,,," luser
+RUN adduser --disabled-password --quiet --gecos "Alicia Not-Alice,,,," alicia
+RUN adduser --disabled-password --quiet --gecos "Test User 1,,,," user1
+RUN adduser --disabled-password --quiet --gecos "Test User 2,,,," user2
+RUN adduser --disabled-password --quiet --gecos "Test User 3,,,," user3
+
+# Set the launcher as our entrypoint
+ENTRYPOINT ["/hcp/common/launcher.py"]
+
+#### START OF NEWHCP ####
+
+COPY safeboot /install-safeboot
+COPY hcp /hcp
