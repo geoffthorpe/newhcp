@@ -3,7 +3,7 @@ ifndef V
 endif
 
 TOP ?= $(shell pwd)
-DEBVERSION ?= bookworm
+DEBVERSION ?= trixie
 TAG ?= $(DEBVERSION)
 TIMEZONE ?= US/Eastern
 
