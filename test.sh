@@ -39,7 +39,7 @@ STARTSERVICES="emgmt emgmt_pol erepl arepl ahcp aclient_tpm"
 STARTSERVICES="$STARTSERVICES kdc_primary kdc_secondary"
 STARTSERVICES="$STARTSERVICES kdc_primary_tpm kdc_secondary_tpm"
 STARTSERVICES="$STARTSERVICES kdc_primary_pol kdc_secondary_pol"
-STARTSERVICES="$STARTSERVICES sherver workstation1"
+STARTSERVICES="$STARTSERVICES sherver workstation1 bigbrother"
 STARTSERVICES="$STARTSERVICES sherver_tpm workstation1_tpm"
 do_run "Starting basic services" \
 	up "$STARTSERVICES"
@@ -62,5 +62,10 @@ do_run "Wait for workstation1 to be ready" \
 sso_cmd="/install-heimdal/bin/kinit -C FILE:/home/luser/.hcp/pkinit/user-luser-key.pem luser"
 sso_cmd="$sso_cmd ssh -l luser -p 2222 sherver.hcphacking.xyz echo"
 sso_cmd="$sso_cmd \"This output indicates successful SSO+ssh\""
-do_run "Do SSO login from workstation1 to sherver" \
+do_run "Do SSO login from workstation1 to sherver as 'luser'" \
 	exec "workstation1 $sso_cmd"
+sso_cmd="/install-heimdal/bin/kinit -C FILE:/root/.hcp/pkinit/user-root-key.pem root"
+sso_cmd="$sso_cmd ssh -l root -p 2222 sherver.hcphacking.xyz echo"
+sso_cmd="$sso_cmd \"If root==\$(whoami) then success\""
+do_run "Do SSO login from bigbrother to sherver as 'root'" \
+	exec "bigbrother $sso_cmd"
