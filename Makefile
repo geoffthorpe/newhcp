@@ -92,7 +92,8 @@ endif
 
 ctx/$(HEIMDAL_OUT): heimdal/$(HEIMDAL_OUT)
 	cp $< $@
-heimdal/$(HEIMDAL_OUT): $(hcp_builder_bookworm)
+# NB: the following dep uses "|" to avoid gratuitous rebuilds
+heimdal/$(HEIMDAL_OUT): | $(hcp_builder_bookworm)
 	$Q$(DRUN) -v $(TOP)/heimdal:/heimdal $(hcp_builder_bookworm_DNAME) bash -c \
 		"cd /heimdal && ./autogen.sh && MAKEINFO=true ./configure --disable-texinfo --prefix=/install-heimdal && MAKEINFO=true make && MAKEINFO=true make install && tar zcf heimdal-install.tar.gz /install-heimdal"
 ifneq (,ctx/$(HEIMDAL_OUT))
