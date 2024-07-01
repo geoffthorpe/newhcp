@@ -1,0 +1,20 @@
+ARG MYTZ
+RUN echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selections
+RUN apt-get update
+RUN apt-get install -y apt-utils
+RUN apt-get -y full-upgrade
+RUN echo "$MYTZ" > /etc/timezone
+RUN chmod 644 /etc/timezone
+RUN cd /etc && rm -f localtime && ln -s /usr/share/zoneinfo/$$MYTZ localtime
+
+#COPY chowner.sh /
+#RUN chmod 755 /chowner.sh
+
+RUN apt-get install -y vim net-tools \
+	openssl xxd procps iproute2 iputils-ping curl wget acl \
+	lsof git jq procmail file time sudo dnsutils \
+	json-glib-tools libjson-perl libncurses5-dev python3 \
+	python3-yaml python3-netifaces python3-psutil python3-cryptography \
+	python3-openssl python3-flask python3-requests uwsgi-plugin-python3 \
+	nginx uuid-runtime openssh-server gnutls-bin libglib2.0-0 socat \
+	libtpms0 swtpm-libs swtpm swtpm-tools tpm2-tools

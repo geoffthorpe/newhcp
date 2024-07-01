@@ -1,0 +1,57 @@
+define _parse_target
+$(eval IMG := $(strip $1))
+$(eval DEB := $(strip $3))
+$(eval FROM := $(strip $2))
+$(eval CB := $(strip $4))
+$(eval $(IMG)_$(DEB) := $(CRUD)/built_$(IMG)_$(DEB))
+$(eval $(IMG)_$(DEB)_CTX := $(CRUD)/ctx_$(IMG)_$(DEB))
+$(eval $(IMG)_$(DEB)_DFILE := $(CRUD)/Dockerfile.$(IMG)_$(DEB))
+$(if $(CB),
+$(eval $(IMG)_$(DEB)_SYNC := $(CRUD)/sync_$(IMG)_$(DEB))
+$(eval $(IMG)_$(DEB)_CB := $(CB)))
+$(eval $(IMG)_$(DEB)_IMG := $(IMG))
+$(eval $(IMG)_$(DEB)_DEB := $(DEB))
+$(eval $(IMG)_$(DEB)_FROM := $(FROM))
+$(eval $(IMG)_$(DEB)_DNAME := $(IMG):$(DEB))
+$(eval MDIRS += $($(IMG)_$(DEB)_CTX))
+$(eval TARGETS += $(IMG)_$(DEB))
+endef
+define parse_target
+$(eval IMG := $(strip $1))
+$(eval F := $(strip $2))
+$(eval CB := $(strip $3))
+$(eval $(IMG)_DFILE := Dockerfile.$(IMG))
+$(foreach d,$(DEBSUPPORTED),$(eval $(call _parse_target,$(IMG),$F,$d,$(CB))))
+endef
+
+define _gen_target_clean_rule
+$(eval T := $(strip $1))
+clean_$T:
+	$Q$(DRMV) $($T_DNAME)
+clean: clean_$T
+endef
+define _gen_target_rule_sync
+$(eval T := $(strip $1))
+$($T_SYNC): | $(CRUD)
+$(eval $(call $($T_CB),$T,$($T_CTX)))
+endef
+define _gen_target_rule
+$(eval T := $(strip $1))
+$($T_CTX): | $(CRUD)
+$(if $($T_SYNC),$(eval $(call _gen_target_rule_sync,$T)))
+$($T_DFILE): | $(CRUD)
+$($T_DFILE): $($($T_IMG)_DFILE)
+	$Qecho "FROM $($T_FROM):$($T_DEB)" > $$@
+	$Qcat $$< >> $$@
+$($T): | $(CRUD)
+$($T): $($T_SYNC) $($T_DFILE) $($T_CTX) $($($T_FROM)_$($T_DEB))
+	$Q$(DBCMD) -f $($T_DFILE) \
+		-t $($T_DNAME) \
+		$($T_CTX)
+	$Qtouch $$@
+$T: $($T)
+$(if $(wildcard $($T)),$(eval $(call _gen_target_clean_rule,$T)))
+endef
+define gen_rules
+$(foreach t,$(TARGETS),$(eval $(call _gen_target_rule,$t)))
+endef
