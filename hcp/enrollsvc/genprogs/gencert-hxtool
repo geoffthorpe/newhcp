@@ -67,7 +67,7 @@ for asset in certlist:
 	else:
 		assetname = asset
 	assetname_key = f"{certprefix}{assetname}-key.pem"
-	cmd += [ f'--certificate={assetname_key}' ]
+	cmd += [ f'--certificate=FILE:{assetname_key}' ]
 	cmd += [ f'--type={conf_asset.pop("type")}' ]
 	issuer_cert = conf_asset['ca-certificate']
 	# 'issuer_cert' points to a 'CA.pem' file containing the cert+key, and
@@ -102,6 +102,9 @@ for asset in certlist:
 				raise HcpErrorGencertHxtool(
 					f"Property {prop} has bad type: {type(propval)}")
 			else:
+				# Work-around for inconsistent hxtool UI
+				if prop == 'ca-certificate':
+					propval = f"FILE:{propval}"
 				cmd += [ f"--{prop}={propval}" ]
 	cmd += args
 	log(f" - cmd={cmd}")
@@ -144,8 +147,8 @@ for asset in certlist:
 
 # Finally, our stdout tells the enrollment process what we produced
 log(f"output_assets_sensitive={output_assets_sensitive}")
-if len(output_assets_sensitive) > 0:
-	print(f'sensitive {" ".join(output_assets_sensitive)}')
+for f in output_assets_sensitive:
+    print(f'sensitive {f}')
 log(f"output_assets_public={output_assets_public}")
-if len(output_assets_public) > 0:
-	print(f'public {" ".join(output_assets_public)}')
+for f in output_assets_public:
+    print(f'public {f}')
