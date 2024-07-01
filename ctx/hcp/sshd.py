@@ -13,6 +13,7 @@ import hcp_common as h
 myinstance = h.hcp_config_extract(".id", must_exist = True)
 myport = h.hcp_config_extract('.sshd.port', or_default = True, default = 22)
 myxtra = h.hcp_config_extract('.sshd.xtra', or_default = True, default = [])
+myhostname = h.hcp_config_extract('.sshd.hostname', or_default = True, default = 'localhost')
 
 myetc = f"/etc/hcp/{myinstance}"
 etcsshd = f"{myetc}/sshd"
@@ -45,7 +46,7 @@ os.environ['VERBOSE'] = f"{verbosity}"
 if args.healthcheck:
 	h.hlog(1, f"Running ssh-keyscan on localhost:{myport}")
 	while True:
-		c = subprocess.run(f"ssh-keyscan -p {myport} localhost".split(),
+		c = subprocess.run(f"ssh-keyscan -p {myport} -t rsa {myhostname}".split(),
 			capture_output = True)
 		if c.returncode == 0:
 			break
@@ -106,7 +107,8 @@ ChallengeResponseAuthentication no
 HostbasedAuthentication no
 IgnoreRhosts yes
 LoginGraceTime 120
-LogLevel VERBOSE
+LogLevel ERROR
+#LogLevel VERBOSE
 #LogLevel DEBUG2
 PermitEmptyPasswords no
 PermitRootLogin without-password
@@ -149,14 +151,7 @@ p = subprocess.Popen(
 		'-f', f"{etcsshdconfig}",
 		'-p', f"{myport}"
 	],
-	stderr = subprocess.PIPE,
 	text = True)
 
-print("Done. (Now, filtering healthchecks out of the output.)")
-while True:
-	nextline = p.stderr.readline()
-	if not nextline:
-		break
-	if nextline.find('127.0.0.1 port') == -1:
-		print(nextline.rstrip(), file = sys.stderr)
-		sys.stderr.flush()
+print("Done.")
+p.wait()
