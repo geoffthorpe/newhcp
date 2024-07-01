@@ -8,12 +8,15 @@ volumes:
     attestdb:
     kdc_primary:
     kdc_secondary:
+    sherver:
     tpm_aclient:
     tpmsocket_aclient:
     tpm_kdc_primary:
     tpmsocket_kdc_primary:
     tpm_kdc_secondary:
     tpmsocket_kdc_secondary:
+    tpm_sherver:
+    tpmsocket_sherver:
 
 networks:
     hcpnetwork:
@@ -140,6 +143,7 @@ services:
           - tpm_aclient:/tpm_aclient
           - tpm_kdc_primary:/tpm_kdc_primary
           - tpm_kdc_secondary:/tpm_kdc_secondary
+          - tpm_sherver:/tpm_sherver
         environment:
           - HCP_CONFIG_FILE=/usecase/orchestrator.json
 
@@ -276,5 +280,41 @@ services:
           - start-services
         healthcheck:
             test: /hcp/webapi.py --healthcheck
+            timeout: 3s
+            interval: 6s
+
+    sherver:
+        extends: common
+        hostname: sherver.hcphacking.xyz
+        networks:
+          - hcpnetwork
+        volumes:
+          - sherver:/sherver
+          - tpmsocket_sherver:/tpmsocket_sherver
+          - ./_testcreds/enrollverifier:/enrollverifier:ro
+        environment:
+          - HCP_CONFIG_FILE=/usecase/sherver.json
+        command:
+          - start-attester
+          - start-services
+        healthcheck:
+            test: /hcp/sshd.py --healthcheck
+            timeout: 3s
+            interval: 6s
+
+    sherver_tpm:
+        extends: common
+        hostname: sherver_tpm.hcphacking.xyz
+        network_mode: "none"
+        volumes:
+          - tpm_sherver:/tpm_sherver
+          - tpmsocket_sherver:/tpmsocket_sherver
+        environment:
+          - HCP_CONFIG_FILE=/usecase/sherver_tpm.json
+        command:
+          - setup-global
+          - start-services
+        healthcheck:
+            test: /hcp/swtpm.py --healthcheck
             timeout: 3s
             interval: 6s

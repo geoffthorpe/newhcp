@@ -33,17 +33,21 @@ do_exit() {
 	(Q=1 do_run "Cleaning up" down "")
 }
 
-trap do_exit EXIT
+[[ -n $NOTRAP ]] || trap do_exit EXIT
 
 do_run "Starting basic services" \
-	up "emgmt emgmt_pol erepl arepl ahcp aclient_tpm kdc_primary_tpm kdc_secondary_tpm kdc_primary_pol kdc_secondary_pol"
+	up "emgmt emgmt_pol erepl arepl ahcp aclient_tpm kdc_primary_tpm kdc_secondary_tpm kdc_primary_pol kdc_secondary_pol sherver_tpm"
 do_run "Fail a premature attestation" \
 	run "aclient /hcp/tools/run_client.sh -w"
-do_run "Create and enroll TPMs for aclient, kdc_primary, kdc_secondary" \
-	run "orchestrator /hcp/tools/run_orchestrator.sh -c -e aclient kdc_primary kdc_secondary"
+do_run "Create and enroll TPMs for aclient, kdc_primary, kdc_secondary, sherver" \
+	run "orchestrator /hcp/tools/run_orchestrator.sh -c -e aclient kdc_primary kdc_secondary sherver"
 do_run "Successful attestation" \
 	run "aclient /hcp/tools/run_client.sh -R 10 -P 1"
 do_run "Starting primary and secondary KDCs" \
 	up "kdc_primary kdc_secondary"
 do_run "Wait for secondary KDC to have realm replicated" \
 	exec "kdc_secondary /hcp/kdcsvc/realm_healthcheck.py -R 10 -P 1"
+do_run "Starting sherver (SSH server)" \
+	up "sherver"
+do_run "Wait for sherver to be ready" \
+	exec "sherver /hcp/sshd.py --healthcheck -R 10 -P 1"
