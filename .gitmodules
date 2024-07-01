@@ -1,0 +1,3 @@
+[submodule "heimdal"]
+	path = heimdal
+	url = https://github.com/heimdal/heimdal.git
