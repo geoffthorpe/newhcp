@@ -19,6 +19,7 @@ volumes:
     tpmsocket_sherver:
     tpm_workstation1:
     tpmsocket_workstation1:
+    tpm_bigbrother:
 
 networks:
     hcpnetwork:
@@ -147,6 +148,7 @@ services:
           - tpm_kdc_secondary:/tpm_kdc_secondary
           - tpm_sherver:/tpm_sherver
           - tpm_workstation1:/tpm_workstation1
+          - tpm_bigbrother:/tpm_bigbrother
         environment:
           - HCP_CONFIG_FILE=/usecase/orchestrator.json
 
@@ -356,5 +358,25 @@ services:
           - start-services
         healthcheck:
             test: /hcp/swtpm.py --healthcheck
+            timeout: 3s
+            interval: 6s
+
+    bigbrother:
+        extends: common
+        hostname: bigbrother.hcphacking.xyz
+        networks:
+          - hcpnetwork
+        volumes:
+          - tpm_bigbrother:/tpm_bigbrother
+          - ./_testcreds/enrollverifier:/enrollverifier:ro
+        environment:
+          - HCP_CONFIG_FILE=/usecase/bigbrother.json
+        command:
+          - setup-swtpm
+          - start-swtpm
+          - start-attester
+          - start-services
+        healthcheck:
+            test: /hcp/attested.py
             timeout: 3s
             interval: 6s
