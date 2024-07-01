@@ -27,11 +27,7 @@ networks:
 
 services:
     common:
-        image: caboodle:trixie
-        build:
-          context: .
-          args:
-            MYTZ: US/Eastern
+        image: hcp_caboodle:trixie
         init: true
         volumes:
           - ./usecase:/usecase:ro
