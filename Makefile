@@ -24,9 +24,8 @@ define do_target
 $(eval IMG := $(strip $1))
 $(eval DEB := $(strip $2))
 $(IMG)_$(DEB): $($(IMG)_$(DEB))
-$($(IMG)_$(DEB)): Dockerfile.$(DEB)
-$($(IMG)_$(DEB)): | $(CRUD)
-	$Q$(DBCMD) -f Dockerfile.$(DEB) -t $($(IMG)_$(DEB)_DNAME) --target $(IMG) ctx
+$($(IMG)_$(DEB)): $(CRUD)/Dockerfile.$(DEB)
+	$Q$(DBCMD) -f $(CRUD)/Dockerfile.$(DEB) -t $($(IMG)_$(DEB)_DNAME) --target $(IMG) ctx
 	$Qtouch $$@
 endef
 
@@ -46,7 +45,7 @@ endef
 #             |
 #         hcp_caboodle:trixie
 #
-# Sub-text: trixie breaks building heimdal, so we need to build on bookworm,
+# Sub-text: heimdal build is broken on trixie, so we need to build on bookworm,
 # but bookworm's swtpm/tpm2-tools is too old, so we need to install and run on
 # trixie. Fortunately, the bookworm-based build runs fine on trixie.
 
@@ -74,20 +73,20 @@ $(hcp_platform_trixie): $(hcp_baseline_trixie)
 $(hcp_platform_bookworm): $(hcp_baseline_bookworm)
 $(hcp_builder_bookworm): $(hcp_platform_bookworm)
 
-Dockerfile.trixie: Dockerfile.input Makefile
+$(CRUD)/Dockerfile.trixie: Dockerfile.input Makefile | $(CRUD)
 	$Qecho "FROM debian:trixie AS hcp_baseline" > $@
 	$Qcat $< >> $@
-ifneq (,$(wildcard Dockerfile.trixie))
+ifneq (,$(wildcard $(CRUD)/Dockerfile.trixie))
 clean_Dockerfile_trixie:
-	$Qrm Dockerfile.trixie
+	$Qrm $(CRUD)/Dockerfile.trixie
 clean: clean_Dockerfile_trixie
 endif
-Dockerfile.bookworm: Dockerfile.input Makefile
+$(CRUD)/Dockerfile.bookworm: Dockerfile.input Makefile | $(CRUD)
 	$Qecho "FROM debian:bookworm AS hcp_baseline" > $@
 	$Qcat $< >> $@
-ifneq (,$(wildcard Dockerfile.bookworm))
+ifneq (,$(wildcard $(CRUD)/Dockerfile.bookworm))
 clean_Dockerfile_bookworm:
-	$Qrm Dockerfile.bookworm
+	$Qrm $(CRUD)/Dockerfile.bookworm
 clean: clean_Dockerfile_bookworm
 endif
 
@@ -96,6 +95,11 @@ ctx/$(HEIMDAL_OUT): heimdal/$(HEIMDAL_OUT)
 heimdal/$(HEIMDAL_OUT): $(hcp_builder_bookworm)
 	$Q$(DRUN) -v $(TOP)/heimdal:/heimdal $(hcp_builder_bookworm_DNAME) bash -c \
 		"cd /heimdal && ./autogen.sh && MAKEINFO=true ./configure --disable-texinfo --prefix=/install-heimdal && MAKEINFO=true make && MAKEINFO=true make install && tar zcf heimdal-install.tar.gz /install-heimdal"
+ifneq (,ctx/$(HEIMDAL_OUT))
+clean_heimdal_tarball:
+	$Qrm ctx/$(HEIMDAL_OUT)
+clean: clean_heimdal_tarball
+endif
 
 ifneq (,$(wildcard $(hcp_caboodle_trixie)))
 clean_hcp_caboodle_trixie:
