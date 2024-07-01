@@ -1,0 +1,69 @@
+{
+    "_": " vim: set expandtab shiftwidth=4 softtabstop=4: ",
+
+    "id": "bigbrother",
+    "default_domain": "hcphacking.xyz",
+
+    "services": [
+        "swtpm",
+        "attester",
+        "sshd"
+    ],
+    "default_targets": [
+        "setup-swtpm",
+        "start-swtpm",
+        "start-attester",
+        "start-services"
+    ],
+
+    "swtpm": {
+        "setup": [ {
+            "tag": "swtpm",
+            "exec": [
+                "/hcp/common/wait_touchfile.py",
+                "/tpm_bigbrother/tpm/ek.pub"
+            ],
+            "touchfile": "/tpm_bigbrother/tpm/ek.pub"
+        }, {
+            "tag": "swtpm",
+            "exec": [ "mkdir", "/tpmsocket_bigbrother" ],
+            "touchdir": "/tpmsocket_bigbrother"
+        } ],
+        "exec": "/hcp/swtpm.py",
+        "state": "/tpm_bigbrother",
+        "sockdir": "/tpmsocket_bigbrother",
+        "tag": "swtpm"
+    },
+
+    "attester": {
+        "exec": "/hcp/common/attester.py",
+        "until": "/etc/hcp/bigbrother/touch-attested",
+        "nowait": 1,
+        "tag": "attester",
+        "period": 120,
+        "retry": 5,
+        "env": {
+            "unset": {
+                "HCP_NOTRACEFILE": null
+            }
+        }
+    },
+    "client": {
+        "exec": "/hcp/tools/run_client.sh",
+        "touchfile": "/etc/hcp/bigbrother/touch-attested",
+        "env": {
+            "unset": { "HCP_NOTRACEFILE": null }
+        },
+        "attest_url": "http://ahcp.hcphacking.xyz:8080",
+        "tcti": "swtpm:path=/tpmsocket_bigbrother/tpm",
+        "enroll_CA": "/enrollverifier/key.pem",
+        "callbacks": [ "/hcp/tools/attest_callback_common.py" ],
+        "global": true
+    },
+
+    "sshd": {
+        "exec": "/hcp/sshd.py",
+        "tag": "services",
+        "port": 22
+    }
+}

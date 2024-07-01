@@ -1,0 +1,20 @@
+{
+    "_": " vim: set expandtab shiftwidth=4 softtabstop=4: ",
+
+    "id": "orchestrator",
+    "default_domain": "hcphacking.xyz",
+
+    "services": [
+        "orchestrator"
+    ],
+    "default_targets": [
+        "start-orchestrator"
+    ],
+    "args_for": "orchestrator",
+
+    "orchestrator": {
+        "exec": "/hcp/tools/run_orchestrator.sh",
+        "tag": "orchestrator",
+        "fleet": "/usecase/fleet.json"
+    }
+}

@@ -1,0 +1,29 @@
+{
+    "_": " vim: set expandtab shiftwidth=4 softtabstop=4: ",
+
+    "id": "tpm.secondary.kdc",
+    "default_domain": "hcphacking.xyz",
+
+    "services": [
+        "swtpm"
+    ],
+    "default_targets": [
+        "setup-global",
+        "start-services"
+    ],
+
+    "swtpm": {
+        "setup": {
+            "tag": "global",
+            "exec": [
+                "/hcp/common/wait_touchfile.py",
+                "/tpm_kdc_secondary/tpm/ek.pub"
+            ],
+            "touchfile": "/tpm_kdc_secondary/tpm/ek.pub"
+        },
+        "exec": "/hcp/swtpm.py",
+        "state": "/tpm_kdc_secondary",
+        "sockdir": "/tpm_socket_kdc_secondary",
+        "tag": "services"
+    }
+}

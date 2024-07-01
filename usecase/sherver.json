@@ -1,0 +1,61 @@
+{
+    "_": " vim: set expandtab shiftwidth=4 softtabstop=4: ",
+
+    "id": "sherver",
+    "default_domain": "hcphacking.xyz",
+
+    "env": {
+        "set": {
+            "KRB5_KTNAME": "/etc/hcp/sherver/krb5.keytab",
+            "KRB5_CONFIG": "/etc/hcp/sherver/krb5.conf"
+        }
+    },
+
+    "services": [
+        "attester",
+        "sshd"
+    ],
+    "default_targets": [
+        "start-attester",
+        "start-services"
+    ],
+    "args_for": "sshd",
+
+    "attester": {
+        "exec": "/hcp/common/attester.py",
+        "until": "/etc/hcp/sherver/touch-attested",
+        "nowait": 1,
+        "tag": "attester",
+        "env": {
+            "unset": {
+                "HCP_NOTRACEFILE": null
+            },
+            "set": {
+                "HCP_ATTESTCLIENT_HOOK_KRB5KEYTAB": "/hcp/sshd.py --hup"
+            }
+        },
+        "period": 120,
+        "retry": 5
+    },
+    "client": {
+        "exec": "/hcp/tools/run_client.sh",
+        "touchfile": "/etc/hcp/sherver/touch-attested",
+        "env": {
+            "unset": { "HCP_NOTRACEFILE": null }
+        },
+        "attest_url": "http://ahcp.hcphacking.xyz:8080",
+        "tcti": "swtpm:path=/tpmsocket_sherver/tpm",
+        "enroll_CA": "/enrollverifier/key.pem",
+        "callbacks": [ "/hcp/tools/attest_callback_common.py" ]
+    },
+
+    "sshd": {
+        "exec": "/hcp/sshd.py",
+        "tag": "services",
+        "port": 2222,
+	"hostname": "sherver.hcphacking.xyz",
+        "xtra": [
+            "# GSSAPIStoreNonAn2Ln yes"
+        ]
+    }
+}

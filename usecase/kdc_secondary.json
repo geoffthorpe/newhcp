@@ -1,0 +1,142 @@
+{
+    "_": " vim: set expandtab shiftwidth=4 softtabstop=4: ",
+
+    "id": "secondary.kdc",
+    "default_domain": "hcphacking.xyz",
+
+    "env": {
+        "set": { "KRB5_CONFIG": "/etc/hcp/secondary.kdc/krb5.conf" }
+    },
+
+    "services": [
+        "attester",
+        "kdcsvc",
+        "webapi",
+        "kdcsvc_TGS",
+        "kdcsvc_iprop_secondary"
+    ],
+    "default_targets": [
+        "start-attester",
+        "setup-global",
+        "setup-local",
+        "start-services"
+    ],
+    "args_for": "kdcsvc_TGS",
+
+    "attester": {
+        "_": [
+            "We set 'retry' to 5 for devel purposes, so that unsynchronized",
+            "startup doesn't take too long. For prod, you'd probably want to",
+            "dial this down - otherwise any downtime of the attestation",
+            "could be followed by a DoS against efforts to bring it back up."
+        ],
+        "exec": "/hcp/common/attester.py",
+        "until": "/etc/hcp/secondary.kdc/touch-attested",
+        "nowait": 1,
+        "tag": "attester",
+        "env": {
+            "unset": {
+                "HCP_NOTRACEFILE": null
+            }
+        },
+        "period": 120,
+        "retry": 5
+    },
+    "client": {
+        "exec": "/hcp/tools/run_client.sh",
+        "touchfile": "/etc/hcp/secondary.kdc/touch-attested",
+        "env": {
+            "unset": { "HCP_NOTRACEFILE": null }
+        },
+        "attest_url": "http://ahcp.hcphacking.xyz:8080",
+        "tcti": "swtpm:path=/tpmsocket_kdc_secondary/tpm",
+        "enroll_CA": "/enrollverifier/key.pem",
+        "callbacks": [ "/hcp/tools/attest_callback_common.py" ]
+    },
+
+    "kdcsvc": {
+        "setup": [ {
+                "tag": "global",
+                "exec": "/hcp/kdcsvc/setup_global.sh",
+                "touchfile": "/kdc_secondary/initialized"
+            }, {
+                "tag": "local",
+                "exec": "/hcp/kdcsvc/setup_local.sh",
+                "touchfile": "/etc/hcp/secondary.kdc/touch-kdcsvc-local-setup"
+            } ],
+        "state": "/kdc_secondary",
+        "mode": "secondary",
+        "realm": "HCPHACKING.XYZ",
+        "namespace": "hcphacking.xyz",
+        "policy_url": "http://policy.secondary.kdc.hcphacking.xyz:9280",
+        "kadmin": {
+            "preclient": {
+                "_": [
+                    "Putting REALM in preclient allows the user to override it, so",
+                    "limitations (if any) can be enforced in the policysvc lookup.",
+                    "Alternatively, you can force the setting in postclient." ],
+                "__env": {
+                    "KDC_REALM": "HCPHACKING.XYZ",
+                    "KDC_DOMAIN": "hcphacking.xyz"
+                },
+                "<common>": {
+                    "realm": "{KDC_REALM}"
+                }
+            },
+            "postclient": {
+                "_": [
+                    "As a secondary, this interface should only allow 'get' and",
+                    "'ext_keytab'. We could enforce that in the policysvc (and will),",
+                    "but in an abundance of caution, or for lightweight cases that",
+                    "don't want a policysvc involved, we restrict that here too." ],
+                "allowed": [ "get", "ext_keytab", "realm_healthcheck" ]
+            }
+        }
+    },
+
+    "webapi": {
+        "setup": {
+            "touchfile": "/etc/hcp/secondary.kdc/touch-kdcsvc-local-setup"
+        },
+        "exec": "/hcp/webapi.py",
+        "tag": "services",
+        "servername": "secondary.kdc.hcphacking.xyz",
+        "port": 9190,
+        "app": "/hcp/kdcsvc/mgmt_api.py",
+        "uwsgi_env": {
+            "HCP_TRACEFILE": "/tmp"
+        },
+        "uwsgi_uid": "www-data",
+        "uwsgi_gid": "www-data"
+    },
+
+    "kdcsvc_TGS": {
+        "setup": {
+            "touchfile": "/etc/hcp/secondary.kdc/touch-kdcsvc-local-setup"
+        },
+        "exec": "/install-heimdal/libexec/kdc",
+        "args": [ "--config-file=/kdc_secondary/etc/kdc.conf", "--ports=3088" ],
+        "tag": "services"
+    },
+
+    "kdcsvc_iprop_secondary": {
+        "setup": {
+            "touchfile": "/etc/hcp/secondary.kdc/touch-kdcsvc-local-setup"
+        },
+        "exec": [
+            "/hcp/common/restarter.py", "-t", "5",
+            "kinit",
+            "-C",
+            "FILE:/etc/hcp/secondary.kdc/pkinit/iprop-key.pem",
+            "iprop/secondary.kdc.hcphacking.xyz@HCPHACKING.XYZ",
+            "/install-heimdal/libexec/ipropd-slave"
+        ],
+        "args": [
+            "--config-file=/kdc_secondary/etc/kdc.conf",
+            "--no-keytab",
+            "--verbose",
+            "primary.kdc.hcphacking.xyz"
+        ],
+        "tag": "services"
+    }
+}

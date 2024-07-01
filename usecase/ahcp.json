@@ -1,0 +1,54 @@
+{
+    "_": " vim: set expandtab shiftwidth=4 softtabstop=4: ",
+
+    "id": "ahcp",
+    "default_domain": "hcphacking.xyz",
+
+    "services": [
+        "attestsvc",
+        "webapi"
+    ],
+    "default_targets": [
+        "setup-global",
+        "setup-local",
+        "start-services"
+    ],
+
+    "attestsvc": {
+        "setup": [ {
+                "tag": "global",
+                "exec": [
+                    "/hcp/common/wait_touchfile.py",
+                    "/attestdb/initialized"
+                ],
+                "touchfile": "/attestdb/initialized"
+            }, {
+                "tag": "local",
+                "exec": "/hcp/attestsvc/setup_local.sh",
+                "touchfile": "/etc/hcp/ahcp/touch-attestsvc-local-setup"
+            } ],
+        "state": "/attestdb",
+        "enrollsvc": "git://erepl.hcphacking.xyz/enrolldb"
+    },
+
+    "webapi": {
+        "_": [
+            "The 'env' entries 'DIR', 'BINDIR', 'SAFEBOOT_DB_DIR' are to",
+            "support the safeboot scripts that can run underneath us." ],
+        "setup": { "touchfile": "/etc/hcp/ahcp/touch-attestsvc-local-setup" },
+        "exec": "/hcp/webapi.py",
+        "tag": "services",
+        "servername": "ahcp.hcphacking.xyz",
+        "port": 8080,
+        "app": "/hcp/attestsvc/hcp_api.py",
+        "uwsgi_env": {
+            "HOME": "/home/ahcpflask",
+            "HCP_TRACEFILE": "/home/ahcpflask",
+            "DIR": "/install-safeboot",
+            "BINDIR": "/install-safeboot",
+            "SAFEBOOT_DB_DIR": "/attestdb/db/current"
+        },
+        "uwsgi_uid": "ahcpflask",
+        "uwsgi_gid": "www-data"
+    }
+}

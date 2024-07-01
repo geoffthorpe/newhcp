@@ -1,0 +1,46 @@
+{
+    "_": " vim: set expandtab shiftwidth=4 softtabstop=4: ",
+
+    "id": "workstation1",
+    "default_domain": "hcphacking.xyz",
+
+    "services": [
+        "attester",
+        "do_nothing"
+    ],
+    "default_targets": [
+        "start-attester",
+        "start-services"
+    ],
+
+    "attester": {
+        "exec": "/hcp/common/attester.py",
+        "until": "/etc/hcp/workstation1/touch-attested",
+        "nowait": 1,
+        "tag": "attester",
+        "period": 120,
+        "retry": 5,
+        "env": {
+            "unset": {
+                "HCP_NOTRACEFILE": null
+            }
+        }
+    },
+    "client": {
+        "exec": "/hcp/tools/run_client.sh",
+        "touchfile": "/etc/hcp/workstation1/touch-attested",
+        "env": {
+            "unset": { "HCP_NOTRACEFILE": null }
+        },
+        "attest_url": "http://ahcp.hcphacking.xyz:8080",
+        "tcti": "swtpm:path=/tpmsocket_workstation1/tpm",
+        "enroll_CA": "/enrollverifier/key.pem",
+        "callbacks": [ "/hcp/tools/attest_callback_common.py" ],
+        "global": true
+    },
+
+    "do_nothing": {
+        "exec": "/hcp/common/do_nothing.sh",
+        "tag": "services"
+    }
+}

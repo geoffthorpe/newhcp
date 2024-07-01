@@ -1,0 +1,26 @@
+{
+    "_": " vim: set expandtab shiftwidth=4 softtabstop=4: ",
+
+    "id": "aclient",
+    "default_domain": "hcphacking.xyz",
+
+    "services": [
+        "client"
+    ],
+    "default_targets": [
+        "start-client"
+    ],
+    "args_for": "client",
+
+    "client": {
+        "exec": "/hcp/tools/run_client.sh",
+        "tag": "client",
+        "env": {
+            "unset": { "HCP_NOTRACEFILE": null }
+        },
+        "attest_url": "http://ahcp.hcphacking.xyz:8080",
+        "tcti": "swtpm:path=/tpm_socket_aclient/tpm",
+        "enroll_CA": "/enrollverifier/key.pem",
+        "callbacks": [ "/hcp/tools/attest_callback_common.py" ]
+    }
+}

@@ -1,0 +1,46 @@
+{
+    "_": " vim: set expandtab shiftwidth=4 softtabstop=4: ",
+
+    "id": "erepl",
+    "default_domain": "hcphacking.xyz",
+
+    "services": [
+        "enrollsvc",
+        "git-daemon"
+    ],
+    "default_targets": [
+        "setup-global",
+        "setup-local",
+        "start-services"
+    ],
+
+    "enrollsvc": {
+        "setup": [ {
+                "tag": "global",
+                "exec": [
+                    "/hcp/common/wait_touchfile.py",
+                    "/enrolldb/initialized"
+                ],
+                "touchfile": "/enrolldb/initialized"
+            }, {
+                "tag": "local",
+                "exec": "/hcp/enrollsvc/setup_local.sh",
+                "touchfile": "/etc/hcp/erepl/touch-enrollsvc-local-setup"
+            } ],
+        "state": "/enrolldb",
+        "realm": "HCPHACKING.XYZ"
+    },
+
+    "git-daemon": {
+        "setup": { "touchfile": "/etc/hcp/erepl/touch-enrollsvc-local-setup" },
+        "exec": "/usr/lib/git-core/git-daemon",
+        "args": [
+            "--reuseaddr",
+            "--listen=0.0.0.0",
+            "--port=9418",
+            "--base-path=/enrolldb/db"
+        ],
+        "tag": "services",
+        "uid": "emgmtdb"
+    }
+}
