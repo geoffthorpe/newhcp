@@ -158,9 +158,9 @@ server {{
 		# This is where uwsgi will be expecting us
 		uwsgi_pass     unix:{myuwsgisock};
 		# Pass the extra stuff that _we_ want the flask app to get
-		uwsgi_param    SSL_CLIENT_CERT           \$ssl_client_cert;
-		uwsgi_param    SSL_CLIENT_S_DN           \$ssl_client_s_dn;
-		uwsgi_param    SSL_CLIENT_S_DN_LEGACY    \$ssl_client_s_dn_legacy;
+		uwsgi_param    SSL_CLIENT_CERT           $ssl_client_cert;
+		uwsgi_param    SSL_CLIENT_S_DN           $ssl_client_s_dn;
+		uwsgi_param    SSL_CLIENT_S_DN_LEGACY    $ssl_client_s_dn_legacy;
 	}}
 }}
 '''.format(myport = myport, myservername = myservername,
@@ -205,7 +205,7 @@ gid = {mygid}
 wsgi-file = {myapp}
 callable = app
 die-on-term = true
-route-if = equal:\${{PATH_INFO}};/healthcheck donotlog:
+route-if = equal:${{PATH_INFO}};/healthcheck donotlog:
 harakiri = {myharakiri}
 '''.format(myuid = myuid, mygid = mygid, myapp = myapp, myharakiri = myharakiri))
 	for k in myenv:
@@ -226,7 +226,8 @@ stats = :{mystats}
 
 bin_uwsgi_python = shutil.which('uwsgi_python3')
 if not bin_uwsgi_python:
-	# On debian buster, we have a '37' (but no '3')
-	bin_uwsgi_python = shutil.which('uwsgi_python37')
+	# On debian buster+bullseye+bookworm we have a '37' (but no '3')
+	# On debian trixie we have a "312"
+	bin_uwsgi_python = shutil.which('uwsgi_python312')
 h.hlog(1, f"Starting uwsgi")
 subprocess.run([ bin_uwsgi_python, '--ini', etcuwsgi ])

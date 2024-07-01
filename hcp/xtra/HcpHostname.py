@@ -2,7 +2,7 @@ import re
 
 re_valid_hostname_char = "[A-Za-z0-9_-]"
 re_valid_hostname_node = f"{re_valid_hostname_char}+"
-re_valid_hostname_withdot = f"\.{re_valid_hostname_node}"
+re_valid_hostname_withdot = f".{re_valid_hostname_node}"
 re_valid_hostname = f"{re_valid_hostname_node}({re_valid_hostname_withdot})*"
 
 valid_hostname_prog = re.compile(re_valid_hostname)
