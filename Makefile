@@ -38,7 +38,7 @@ endef
 #             |
 #             +----------+
 #             |          |
-#             |     hcp_builder:trixie
+#             |     hcp_builder:bookworm
 #             |          |
 #             |   heimdal-install.tar.gz
 #             |          |
@@ -54,7 +54,7 @@ $(eval $(call prep_target,hcp_baseline,bookworm))
 $(eval $(call prep_target,hcp_baseline,trixie))
 $(eval $(call prep_target,hcp_platform,bookworm))
 $(eval $(call prep_target,hcp_platform,trixie))
-$(eval $(call prep_target,hcp_builder,trixie))
+$(eval $(call prep_target,hcp_builder,bookworm))
 $(eval $(call prep_target,hcp_caboodle,trixie))
 
 default: testcreds $(hcp_caboodle_trixie)
@@ -68,11 +68,11 @@ $(eval $(call do_target,hcp_baseline,trixie))
 $(eval $(call do_target,hcp_platform,bookworm))
 $(eval $(call do_target,hcp_platform,trixie))
 $(eval $(call do_target,hcp_caboodle,trixie))
-$(eval $(call do_target,hcp_builder,trixie))
+$(eval $(call do_target,hcp_builder,bookworm))
 $(hcp_caboodle_trixie): $(hcp_platform_trixie) ctx/$(HEIMDAL_OUT)
 $(hcp_platform_trixie): $(hcp_baseline_trixie)
 $(hcp_platform_bookworm): $(hcp_baseline_bookworm)
-$(hcp_builder_trixie): $(hcp_platform_trixie)
+$(hcp_builder_bookworm): $(hcp_platform_bookworm)
 
 Dockerfile.trixie: Dockerfile.input Makefile
 	$Qecho "FROM debian:trixie AS hcp_baseline" > $@
@@ -93,8 +93,8 @@ endif
 
 ctx/$(HEIMDAL_OUT): heimdal/$(HEIMDAL_OUT)
 	cp $< $@
-heimdal/$(HEIMDAL_OUT): $(hcp_builder_trixie)
-	$Q$(DRUN) -v $(TOP)/heimdal:/heimdal $(hcp_builder_trixie_DNAME) bash -c \
+heimdal/$(HEIMDAL_OUT): $(hcp_builder_bookworm)
+	$Q$(DRUN) -v $(TOP)/heimdal:/heimdal $(hcp_builder_bookworm_DNAME) bash -c \
 		"cd /heimdal && ./autogen.sh && MAKEINFO=true ./configure --disable-texinfo --prefix=/install-heimdal && MAKEINFO=true make && MAKEINFO=true make install && tar zcf heimdal-install.tar.gz /install-heimdal"
 
 ifneq (,$(wildcard $(hcp_caboodle_trixie)))
@@ -104,12 +104,12 @@ clean_hcp_caboodle_trixie:
 clean: clean_hcp_caboodle_trixie
 clean_hcp_platform_trixie: clean_hcp_caboodle_trixie
 endif
-ifneq (,$(wildcard $(hcp_builder_trixie)))
-clean_hcp_builder_trixie:
-	$Qdocker image rm $(hcp_builder_trixie_DNAME)
-	$Qrm -f $(hcp_builder_trixie)
-clean: clean_hcp_builder_trixie
-clean_hcp_platform_bookworm: clean_hcp_builder_trixie
+ifneq (,$(wildcard $(hcp_builder_bookworm)))
+clean_hcp_builder_bookworm:
+	$Qdocker image rm $(hcp_builder_bookworm_DNAME)
+	$Qrm -f $(hcp_builder_bookworm)
+clean: clean_hcp_builder_bookworm
+clean_hcp_platform_bookworm: clean_hcp_builder_bookworm
 endif
 ifneq (,$(wildcard $(hcp_platform_trixie)))
 clean_hcp_platform_trixie:
