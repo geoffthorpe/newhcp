@@ -75,7 +75,7 @@ luser@sherver:~$
 
 The HCP software has been and is the vehicle for multiple conveniences, so it is probably useful to identify which of them are of interest, and to recognize enough about the things that aren't of interest for them to not interfere in your understanding and use of HCP.
 
-* Extensible workflow for building inter-dependent docker images through programmatic use of GNU Make. Eg. with HCP this allows the host-building of heimdal to be integrated into the flow of container building, deals with multiple tags (distro versions) in parallel, and even allows cross-tag dependencies to be expressed (at the time of writing, it was necessary to build the development head of Heimdal in a different OS version to the one it is installed into).
+* Extensible workflow for building inter-dependent docker images through programmatic use of GNU Make. Eg. this allows the compiling and installing of heimdal to be integrated into the container building workflow, deals with multiple tags (distro versions) in parallel, and even allows cross-tag dependencies to be expressed (at the time of writing, it was necessary to build the development head of Heimdal with a different OS version than the one it is subsequently installed into).
 
 * TPM enrollment service (container), such that each enrollment is a TPM-sealed set of assets (keys, configs, ...) that gets periodically refreshed. This consists of "emgmt", which has read-write access to the enrollment database and exposes the enrollment API, and "erepl", which has read-only access to the enrollment database and supports replication to attestation service instances.
 
