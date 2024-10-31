@@ -4,7 +4,7 @@ There's a lot to unpack, as people may be coming to this project for multiple
 different reasons and I need to structure things so that each of them can find
 what they're looking for.
 
-* **[Quick reference](#quick-reference)** reference for building and running
+* **[Quick reference](#quick-reference)** for building and running
 * **[What](#what-it-is)** it is and what it does
 * **[Why](#why-it-exists)** it exists and works the way it does
 * **[How](#how-it-does-what-it-does)** it does what it does
