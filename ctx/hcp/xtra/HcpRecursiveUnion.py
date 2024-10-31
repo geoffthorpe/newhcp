@@ -27,9 +27,6 @@ import json
 #     resulting value.
 #   - otherwise the right value is used.
 
-class HcpUnion(Exception):
-	pass
-
 # TODO: this should be turned into one of those "class-factory"-like Python
 # classes.
 def union(a, b, noDictUnion=False, noListUnion=False, noSetUnion=False,

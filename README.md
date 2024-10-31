@@ -69,6 +69,12 @@ luser@workstation1:~$ ssh -p 2222 sherver.hcphacking.xyz
 luser@sherver:~$
 ```
 
+### Teardown all running containers
+
+```
+docker-compose down -v
+```
+
 ---
 
 ## What it is
