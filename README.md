@@ -33,7 +33,7 @@ make
 # Run the test, which will clean up after itself, with quiet output
 Q=1 ./test.sh
 
-# Run the test, with verbose output, and leave all the host containers
+# Run the test, with verbose output, and leave all the containers
 # running, in order to allow manual interaction.
 V=1 NOTRAP=1 ./test.sh
 ```
