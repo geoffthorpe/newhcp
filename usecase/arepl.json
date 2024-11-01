@@ -2,33 +2,17 @@
     "_": " vim: set expandtab shiftwidth=4 softtabstop=4: ",
 
     "id": "arepl",
-    "hostnames": [ "arepl" ],
     "default_domain": "hcphacking.xyz",
 
     "services": [
-        "fqdn_updater",
         "attestsvc",
         "replication_client"
     ],
     "default_targets": [
-        "start-fqdn",
         "setup-global",
         "setup-local",
         "start-services"
     ],
-
-    "fqdn_updater": {
-        "exec": "/hcp/common/fqdn_updater.py",
-        "until": "/etc/hcp/arepl/touch-fqdn-alive",
-        "nowait": 1,
-        "tag": "fqdn",
-        "env": {
-            "unset": { "HCP_NOTRACEFILE": null }
-        },
-        "path": "/fqdn-bus",
-        "refresh": 60,
-        "expiry": 300
-    },
 
     "attestsvc": {
         "setup": [ {
