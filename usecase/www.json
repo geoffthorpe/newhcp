@@ -1,0 +1,63 @@
+{
+    "_": " vim: set expandtab shiftwidth=4 softtabstop=4: ",
+
+    "id": "www",
+    "default_domain": "hcphacking.xyz",
+
+    "services": [
+        "attester",
+	"webapi",
+        "do_nothing"
+    ],
+    "default_targets": [
+        "start-attester",
+        "start-services"
+    ],
+
+    "attester": {
+        "exec": "/hcp/common/attester.py",
+        "until": "/etc/hcp/www/touch-attested",
+        "nowait": 1,
+        "tag": "attester",
+        "period": 120,
+        "retry": 5,
+        "env": {
+            "unset": {
+                "HCP_NOTRACEFILE": null
+            }
+        }
+    },
+    "client": {
+        "exec": "/hcp/tools/run_client.sh",
+        "touchfile": "/etc/hcp/www/touch-attested",
+        "env": {
+            "unset": { "HCP_NOTRACEFILE": null }
+        },
+        "attest_url": "http://ahcp.hcphacking.xyz:8080",
+        "tcti": "swtpm:path=/tpmsocket_www/tpm",
+        "enroll_CA": "/enrollverifier/key.pem",
+        "callbacks": [ "/hcp/tools/attest_callback_common.py" ],
+        "global": true
+    },
+
+    "webapi": {
+        "setup": { "touchfile": "/etc/https-server/www.hcphacking.xyz.pem" },
+        "exec": "/hcp/webapi.py",
+        "tag": "services",
+        "servername": "www.hcphacking.xyz",
+        "port": 8443,
+        "https": {
+            "certificate": "/etc/https-server/www.hcphacking.xyz-key.pem",
+            "client_CA": "/enrollcertchecker/CA.cert",
+            "healthclient": "/enrollclient/client.pem"
+        },
+        "app": "/hcp/tools/flask_dummy.py",
+        "uwsgi_uid": "www-data",
+        "uwsgi_gid": "www-data"
+    },
+
+    "do_nothing": {
+        "exec": "/hcp/common/do_nothing.sh",
+        "tag": "services"
+    }
+}

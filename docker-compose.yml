@@ -20,6 +20,8 @@ volumes:
     tpm_workstation1:
     tpmsocket_workstation1:
     tpm_bigbrother:
+    tpm_www:
+    tpmsocket_www:
 
 networks:
     hcpnetwork:
@@ -149,6 +151,7 @@ services:
           - tpm_sherver:/tpm_sherver
           - tpm_workstation1:/tpm_workstation1
           - tpm_bigbrother:/tpm_bigbrother
+          - tpm_www:/tpm_www
         environment:
           - HCP_CONFIG_FILE=/usecase/orchestrator.json
 
@@ -380,3 +383,41 @@ services:
             test: /hcp/attested.py
             timeout: 3s
             interval: 6s
+
+    www:
+        extends: common
+        hostname: www.hcphacking.xyz
+        networks:
+          - hcpnetwork
+        volumes:
+          - tpmsocket_www:/tpmsocket_www
+          - ./_testcreds/enrollverifier:/enrollverifier:ro
+          - ./_testcreds/enrollcertchecker:/enrollcertchecker:ro
+          - ./_testcreds/enrollclient:/enrollclient:ro
+        environment:
+          - HCP_CONFIG_FILE=/usecase/www.json
+        command:
+          - start-attester
+          - start-services
+        healthcheck:
+            test: /hcp/attested.py
+            timeout: 3s
+            interval: 6s
+
+    www_tpm:
+        extends: common
+        hostname: www_tpm.hcphacking.xyz
+        network_mode: "none"
+        volumes:
+          - tpm_www:/tpm_www
+          - tpmsocket_www:/tpmsocket_www
+        environment:
+          - HCP_CONFIG_FILE=/usecase/www_tpm.json
+        command:
+          - setup-global
+          - start-services
+        healthcheck:
+            test: /hcp/swtpm.py --healthcheck
+            timeout: 3s
+            interval: 6s
+
