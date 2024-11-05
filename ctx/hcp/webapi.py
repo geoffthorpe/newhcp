@@ -1,4 +1,5 @@
 #!/usr/bin/python3
+# vim: set expandtab shiftwidth=4 softtabstop=4: 
 
 import os
 import sys
@@ -11,6 +12,26 @@ import json
 sys.path.insert(1, '/hcp/common')
 import hcp_common as h
 
+parser = argparse.ArgumentParser()
+parser.add_argument("--healthcheck", action = "store_true",
+               help = "check that webapi is running ok")
+parser.add_argument("--hup", action = "store_true",
+		help = "send SIGHUP to currently-running webapi")
+parser.add_argument("-R", "--retries", type = int, default = 0,
+		help = "for healthcheck, max # of retries")
+parser.add_argument("-P", "--pause", type = int, default = 1,
+		help = "for healthcheck, pause (seconds) between retries")
+parser.add_argument("-v", "--verbose", default = 0, action = "count",
+		help = "increase output verbosity")
+parser.add_argument("-V", "--less-verbose", default = 0, action = "count",
+		help = "decrease output verbosity")
+parser.add_argument("-U", "--url", type = str, default = None,
+		help = "URL for 'healthcheck'ing the API")
+parser.add_argument("-A", "--curl-args", type = str, default = None,
+		help = "Pre-URL arguments to 'curl'")
+parser.add_argument("-C", "--config-section", type = str, default = "webapi",
+		help = "Section name in the JSON config")
+args = parser.parse_args()
 myworld = h.hcp_config_extract(".", must_exist = True)
 
 def param(field, _type, required = False, default = None,
@@ -26,11 +47,11 @@ def param(field, _type, required = False, default = None,
 
 myinstance = param('id', str, required = True)
 mydomain = param('default_domain', str, required = True)
-mywebapi = param('webapi', dict, required = True)
+mywebapi = param(args.config_section, dict, required = True)
 
 def webapi_param(field, _type, required = False, default = None):
 	return param(field, _type, required = required, default = default,
-			obj = mywebapi, objpath = f".webapi")
+			obj = mywebapi, objpath = f".{mywebapi}")
 
 myservername = webapi_param('servername', str)
 myport = webapi_param('port', int)
@@ -46,7 +67,7 @@ mygid = webapi_param('uwsgi_gid', str, default = 'www-data')
 if myhttps:
 	def https_param(field, _type, required = True, default = None):
 		return param(field, _type, required, default,
-			obj = myhttps, objpath = '.webapi.https')
+			obj = myhttps, objpath = f".{mywebapi}.https")
 	myservercert = https_param('certificate', str)
 	myCA = https_param('client_CA', str)
 	myhealthclient = https_param('healthclient', str)
@@ -65,38 +86,24 @@ if myhttps:
 	mycurlargs = f"{mycurlargs} --cacert {myCA} --cert {myhealthclient}"
 else:
 	myURL = f"http://{myURL}"
+if not args.curl_args:
+	args.curl_args = mycurlargs
+if not args.url:
+	args.url = myURL
 
-myetc = f"/etc/hcp/{myinstance}/webapi"
+myetc = f"/etc/hcp/{myservername}/webapi"
 etcnginx = f"{myetc}/nginx"
 etcuwsgi = f"{myetc}/uwsgi.ini"
 etcjson = f"{myetc}/json"
-myvarlog = f"/var/log/{myinstance}"
+myvarlog = f"/var/log/{myservername}"
 lognginx = f"{myvarlog}/nginx"
-myuwsgisock = f"/tmp/{myinstance}.uwsgi.sock"
+myuwsgisock = f"/tmp/{myservername}.uwsgi.sock"
 
 try:
 	verbosity = int(os.environ['VERBOSE'])
 except:
 	verbosity = 1
 
-parser = argparse.ArgumentParser()
-parser.add_argument("--healthcheck", action = "store_true",
-		help = "check that webapi is running ok")
-parser.add_argument("--hup", action = "store_true",
-		help = "send SIGHUP to currently-running webapi")
-parser.add_argument("-R", "--retries", type = int, default = 0,
-		help = "for healthcheck, max # of retries")
-parser.add_argument("-P", "--pause", type = int, default = 1,
-		help = "for healthcheck, pause (seconds) between retries")
-parser.add_argument("-v", "--verbose", default = 0, action = "count",
-		help = "increase output verbosity")
-parser.add_argument("-V", "--less-verbose", default = 0, action = "count",
-		help = "decrease output verbosity")
-parser.add_argument("-U", "--url", default = myURL,
-		help = "URL for 'healthcheck'ing the API")
-parser.add_argument("-A", "--curl-args", default = mycurlargs,
-		help = "Pre-URL arguments to 'curl'")
-args = parser.parse_args()
 verbosity = verbosity + args.verbose - args.less_verbose
 h.current_loglevel = verbosity
 os.environ['VERBOSE'] = f"{verbosity}"
@@ -134,10 +141,14 @@ if myhttps:
 	shutil.copytree('/etc/nginx', etcnginx)
 	# TODO: ugh. This feels like the wrong thing to do
 	for r in [ f"s,/etc/nginx,{etcnginx},g",
-			f"s,/var/log/nginx,{lognginx},g" ]:
+			f"s,/var/log/nginx,{lognginx},g",
+			f"s,/run/nginx,/run/{myservername},g" ]:
 		subprocess.run([
 			'bash', '-c',
 			f'find {etcnginx}/ -type f | xargs perl -pi -e {r}'])
+	if os.path.exists(f"{etcnginx}/sites-enabled/default"):
+		h.hlog(1, "Removing site file [...]/sites-enabled/default")
+		os.remove(f"{etcnginx}/sites-enabled/default")
 	h.hlog(1, f"Injecting site file [...]/sites-enabled/{myservername}")
 	open(f"{etcnginx}/sites-enabled/{myservername}", 'w').write('''
 server {{
