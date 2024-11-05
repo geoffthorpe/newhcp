@@ -1,7 +1,6 @@
-COPY heimdal-install.tar.gz /
+COPY heimdal-install.tar.gz nginx-install.tar.gz /
 RUN cd / && tar zxf heimdal-install.tar.gz && rm heimdal-install.tar.gz
-
-# RUN apt-get install -y heimdal-kdc heimdal-servers heimdal-clients
+RUN cd / && tar zxf nginx-install.tar.gz && rm nginx-install.tar.gz
 
 #RUN apt-get install -y vdeplug vde2 libvdeplug-slirp
 

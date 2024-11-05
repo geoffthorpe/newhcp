@@ -1,0 +1,2 @@
+COPY heimdal-install.tar.gz /
+RUN cd / && tar zxf heimdal-install.tar.gz && rm heimdal-install.tar.gz

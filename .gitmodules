@@ -1,3 +1,6 @@
 [submodule "heimdal"]
 	path = heimdal
 	url = https://github.com/heimdal/heimdal.git
+[submodule "nginx"]
+	path = nginx
+	url = https://github.com/nginx/nginx
