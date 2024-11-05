@@ -7,6 +7,7 @@
     "services": [
         "attester",
 	"webapi",
+	"webapi2",
         "do_nothing"
     ],
     "default_targets": [
@@ -48,6 +49,22 @@
         "port": 8443,
         "https": {
             "certificate": "/etc/https-server/www.hcphacking.xyz-key.pem",
+            "client_CA": "/enrollcertchecker/CA.cert",
+            "healthclient": "/enrollclient/client.pem"
+        },
+        "app": "/hcp/tools/flask_dummy.py",
+        "uwsgi_uid": "www-data",
+        "uwsgi_gid": "www-data"
+    },
+
+    "webapi2": {
+        "setup": { "touchfile": "/etc/https-server/www2.hcphacking.xyz.pem" },
+        "exec": [ "/hcp/webapi.py", "--config-section", "webapi2" ],
+        "tag": "services",
+        "servername": "www2.hcphacking.xyz",
+        "port": 8444,
+        "https": {
+            "certificate": "/etc/https-server/www2.hcphacking.xyz-key.pem",
             "client_CA": "/enrollcertchecker/CA.cert",
             "healthclient": "/enrollclient/client.pem"
         },

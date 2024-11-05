@@ -151,10 +151,14 @@
 			"tpm_path": "/tpm_www",
 			"enroll_hostname": "www.hcphacking.xyz",
 			"enroll_profile": {
+				"__env": {
+					"ENROLL_HOSTNAME2": "www2.hcphacking.xyz"
+				},
 				"genprogs": "genconf-krb5 gencert-hxtool genkrb5keytab",
 				"gencert-hxtool": {
 					"list": [
 						"default-https-hostclient",
+						"default-https-server2",
 						"default-https-server"
 					]
 				},

@@ -389,7 +389,9 @@ services:
         extends: common
         hostname: www.hcphacking.xyz
         networks:
-          - hcpnetwork
+          hcpnetwork:
+            aliases:
+              - www2.hcphacking.xyz
         volumes:
           - tpmsocket_www:/tpmsocket_www
           - ./_testcreds/enrollverifier:/enrollverifier:ro
@@ -401,7 +403,7 @@ services:
           - start-attester
           - start-services
         healthcheck:
-            test: /hcp/attested.py
+            test: /hcp/webapi.py --healthcheck -C webapi && /hcp/webapi.py --healthcheck -C webapi2
             timeout: 3s
             interval: 6s
 
