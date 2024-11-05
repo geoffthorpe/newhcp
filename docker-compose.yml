@@ -47,6 +47,12 @@ services:
             timeout: 10s
             interval: 20s
 
+    common_tpm:
+        extends: common
+        network_mode: "none"
+        healthcheck:
+            test: /hcp/swtpm.py --healthcheck
+
     emgmt:
         extends: common
         hostname: emgmt.hcphacking.xyz
@@ -142,16 +148,13 @@ services:
           - HCP_CONFIG_FILE=/usecase/aclient.json
 
     aclient_tpm:
-        extends: common
+        extends: common_tpm
         hostname: aclient_tpm.hcphacking.xyz
-        network_mode: "none"
         volumes:
           - tpm_aclient:/tpm_aclient
           - tpmsocket_aclient:/tpm_socket_aclient
         environment:
           - HCP_CONFIG_FILE=/usecase/aclient_tpm.json
-        healthcheck:
-            test: /hcp/swtpm.py --healthcheck
 
     kdc_primary:
         extends: common
@@ -171,16 +174,13 @@ services:
             test: /hcp/webapi.py --healthcheck
 
     kdc_primary_tpm:
-        extends: common
+        extends: common_tpm
         hostname: kdc_primary_tpm.hcphacking.xyz
-        network_mode: "none"
         volumes:
           - tpm_kdc_primary:/tpm_kdc_primary
           - tpmsocket_kdc_primary:/tpm_socket_kdc_primary
         environment:
           - HCP_CONFIG_FILE=/usecase/kdc_primary_tpm.json
-        healthcheck:
-            test: /hcp/swtpm.py --healthcheck
 
     kdc_primary_pol:
         extends: common
@@ -210,16 +210,13 @@ services:
             test: /hcp/webapi.py --healthcheck
 
     kdc_secondary_tpm:
-        extends: common
+        extends: common_tpm
         hostname: kdc_secondary_tpm.hcphacking.xyz
-        network_mode: "none"
         volumes:
           - tpm_kdc_secondary:/tpm_kdc_secondary
           - tpmsocket_kdc_secondary:/tpm_socket_kdc_secondary
         environment:
           - HCP_CONFIG_FILE=/usecase/kdc_secondary_tpm.json
-        healthcheck:
-            test: /hcp/swtpm.py --healthcheck
 
     kdc_secondary_pol:
         extends: common
@@ -246,16 +243,13 @@ services:
             test: /hcp/sshd.py --healthcheck
 
     sherver_tpm:
-        extends: common
+        extends: common_tpm
         hostname: sherver_tpm.hcphacking.xyz
-        network_mode: "none"
         volumes:
           - tpm_sherver:/tpm_sherver
           - tpmsocket_sherver:/tpmsocket_sherver
         environment:
           - HCP_CONFIG_FILE=/usecase/sherver_tpm.json
-        healthcheck:
-            test: /hcp/swtpm.py --healthcheck
 
     workstation1:
         extends: common
@@ -272,16 +266,13 @@ services:
             test: /hcp/attested.py
 
     workstation1_tpm:
-        extends: common
+        extends: common_tpm
         hostname: workstation1_tpm.hcphacking.xyz
-        network_mode: "none"
         volumes:
           - tpm_workstation1:/tpm_workstation1
           - tpmsocket_workstation1:/tpmsocket_workstation1
         environment:
           - HCP_CONFIG_FILE=/usecase/workstation1_tpm.json
-        healthcheck:
-            test: /hcp/swtpm.py --healthcheck
 
     bigbrother:
         extends: common
@@ -314,13 +305,10 @@ services:
             test: /hcp/webapi.py --healthcheck -C webapi && /hcp/webapi.py --healthcheck -C webapi2
 
     www_tpm:
-        extends: common
+        extends: common_tpm
         hostname: www_tpm.hcphacking.xyz
-        network_mode: "none"
         volumes:
           - tpm_www:/tpm_www
           - tpmsocket_www:/tpmsocket_www
         environment:
           - HCP_CONFIG_FILE=/usecase/www_tpm.json
-        healthcheck:
-            test: /hcp/swtpm.py --healthcheck
