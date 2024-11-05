@@ -103,6 +103,10 @@
                         "type": "https-server",
                         "hostname": "{ENROLL_HOSTNAME}"
                     },
+                    "default-https-server2": {
+                        "type": "https-server",
+                        "hostname": "{ENROLL_HOSTNAME2}"
+                    },
                     "default-https-hostclient": {
                         "type": "https-client",
                         "subject": "UID=host,{ENROLL_HOSTNAME2DC}",

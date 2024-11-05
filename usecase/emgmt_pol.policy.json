@@ -56,6 +56,7 @@
                     "default-pkinit-kdc",
                     "default-pkinit-iprop",
                     "default-https-server",
+                    "default-https-server2",
                     "default-https-hostclient",
                     "user-pkinit-user",
                     "user-pkinit-admin",
@@ -78,6 +79,15 @@
                     { "union": ".default-https-server",
                         "source1": ".<common>",
                         "source2": ".default-https-server" } ] },
+            { "action": "call", "if": [
+                    { "contains": ".list", "value": "default-https-server2" },
+                    { "exist": ".default-https-server2" } ],
+                "call": "hxtool-default-https-server2",
+                "scope": [
+                    { "import": ".", "source": "." },
+                    { "union": ".default-https-server2",
+                        "source1": ".<common>",
+                        "source2": ".default-https-server2" } ] },
             { "action": "call", "if": [
                     { "contains": ".list", "value": "default-pkinit-kdc" },
                     { "exist": ".default-pkinit-kdc" } ],
@@ -157,6 +167,18 @@
                     "lifetime": "1d",
                     "type": "https-server",
                     "hostname": "{ENROLL_HOSTNAME}",
+                    "ca-certificate": "{ENROLL_CA_ISSUER_PRIV}" } },
+            "action": "reject",
+            "otherwise": "return" },
+
+        "hxtool-default-https-server2": {
+            "_": "Exact match or fail",
+            "if": { "not-equal": ".default-https-server2", "value": {
+                    "generate-key": "rsa",
+                    "key-bits": "2048",
+                    "lifetime": "1d",
+                    "type": "https-server",
+                    "hostname": "{ENROLL_HOSTNAME2}",
                     "ca-certificate": "{ENROLL_CA_ISSUER_PRIV}" } },
             "action": "reject",
             "otherwise": "return" },
