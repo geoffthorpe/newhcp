@@ -137,7 +137,7 @@ os.makedirs(myetc)
 
 # Stand up an nginx HTTPS/TLS front-end iff there's a "myhttps" config
 if myhttps:
-    h.hlog(1, f"Putting template nginx config: {etcnginx}")
+    h.hlog(1, f"Converting template nginx config: {etcnginx}")
     shutil.copytree('/hcp/conf/nginx', etcnginx)
     with open(f"{etcnginx}/nginx.conf.template", "r") as _input:
         with open(f"{etcnginx}/nginx.conf", "w") as _output:
@@ -181,7 +181,7 @@ os.chmod(hcpcfg_new, 0o444)
 os.environ['HCP_CONFIG_FILE'] = hcpcfg_new
 
 # Produce the uwsgi config
-h.hlog(1, f"Producing uwsgi config: {etcuwsgi}")
+h.hlog(1, f"Converting template uwsgi config: {etcuwsgi}")
 with open(etcuwsgi, 'w') as fp:
     fp.write('''[uwsgi]
 master = true
@@ -216,5 +216,7 @@ if not bin_uwsgi_python:
     # On debian buster+bullseye+bookworm we have a '37' (but no '3')
     # On debian trixie we have a "312"
     bin_uwsgi_python = shutil.which('uwsgi_python312')
+if not bin_uwsgi_python:
+    bin_uwsgi_python = shutil.which('uwsgi_python37')
 h.hlog(1, f"Starting uwsgi")
 subprocess.run([ bin_uwsgi_python, '--ini', etcuwsgi ])
