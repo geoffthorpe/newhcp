@@ -16,5 +16,5 @@ RUN apt-get install -y vim net-tools \
 	json-glib-tools libjson-perl libncurses5-dev python3 \
 	python3-yaml python3-netifaces python3-psutil python3-cryptography \
 	python3-openssl python3-flask python3-requests uwsgi-plugin-python3 \
-	nginx uuid-runtime openssh-server gnutls-bin libglib2.0-0 socat \
+	uuid-runtime openssh-server gnutls-bin libglib2.0-0 socat \
 	libtpms0 swtpm-libs swtpm swtpm-tools tpm2-tools

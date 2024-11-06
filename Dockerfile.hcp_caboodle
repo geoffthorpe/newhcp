@@ -17,7 +17,8 @@ RUN chmod 644 /etc/ssh/ssh_config
 RUN systemctl disable sshd
 
 # Restrain the system nginx from starting up
-RUN systemctl disable nginx
+# TODO: actually we're building nginx from source for now...
+#RUN systemctl disable nginx
 
 RUN adduser --disabled-password --quiet --gecos "Attestsvc DB role,,,," auser
 RUN adduser --disabled-password --quiet --gecos "Attestsvc Flask role,,,," ahcpflask
