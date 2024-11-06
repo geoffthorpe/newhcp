@@ -76,8 +76,8 @@ heimdal/$(HEIMDAL_OUT): | $(hcp_builder_heimdal_bookworm)
 		"cd /heimdal && ./autogen.sh && MAKEINFO=true ./configure --disable-texinfo --prefix=/install-heimdal && MAKEINFO=true make && MAKEINFO=true make install && tar zcf heimdal-install.tar.gz /install-heimdal"
 
 nginx/$(NGINX_OUT): | $(hcp_builder_nginx_bookworm)
-	$Q$(DRUN) -v $(TOP)/nginx:/nginx $(hcp_builder_nginx_bookworm_DNAME) bash -c \
-		"cd /nginx && auto/configure --prefix=/install-nginx --with-http_ssl_module && make install && tar zcf nginx-install.tar.gz /install-nginx"
+	$Q$(DRUN) -v $(TOP)/nginx:/nginx -v$(TOP)/spnego-http-auth-nginx-module:/nginx/spnego-http-auth-nginx-module $(hcp_builder_nginx_bookworm_DNAME) bash -c \
+		"cd /nginx && auto/configure --prefix=/install-nginx --with-http_ssl_module --add-module=spnego-http-auth-nginx-module --with-cc-opt='-I /install-heimdal/include' --with-ld-opt='-L /install-heimdal/lib' && make install && tar zcf nginx-install.tar.gz /install-nginx"
 
 clean:
 ifneq (,$(wildcard $(CRUD)))
