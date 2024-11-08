@@ -6,8 +6,8 @@
 
     "services": [
         "attester",
-	"webapi",
-	"webapi2",
+        "webapi",
+        "webapi2",
         "do_nothing"
     ],
     "default_targets": [
@@ -49,8 +49,8 @@
         "port": 8443,
         "https": {
             "certificate": "/etc/https-server/www.hcphacking.xyz-key.pem",
-            "client_CA": "/enrollcertchecker/CA.cert",
-            "healthclient": "/enrollclient/client.pem"
+            "authentication": "kerberos",
+            "client_CA": "/enrollcertchecker/CA.cert"
         },
         "app": "/hcp/tools/flask_dummy.py",
         "uwsgi_uid": "www-data",
@@ -65,6 +65,7 @@
         "port": 8444,
         "https": {
             "certificate": "/etc/https-server/www2.hcphacking.xyz-key.pem",
+            "authentication": "clientcert",
             "client_CA": "/enrollcertchecker/CA.cert",
             "healthclient": "/enrollclient/client.pem"
         },

@@ -165,7 +165,8 @@
 				"genkrb5keytab": {
 					"principals": [
 						"host/{ENROLL_HOSTNAME}",
-						"HTTP/{ENROLL_HOSTNAME}"
+						"HTTP/{ENROLL_HOSTNAME}",
+						"HTTP/www2.hcphacking.xyz:8444"
 					]
 				}
 			}
