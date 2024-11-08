@@ -185,6 +185,7 @@
         "port": 8443,
         "https": {
             "certificate": "/enrollserver/server.pem",
+            "authentication": "clientcert",
             "client_CA": "/enrollcertchecker/CA.cert",
             "healthclient": "/enrollclient/client.pem"
         },
@@ -215,12 +216,12 @@
         "exec": "/hcp/common/purger.py",
         "nowait": 1,
         "tag": "services",
-	"dir": "/purger",
-	"period": 60,
-	"retry": 120,
-	"purgerlogdir": "/purger/logs",
-	"purgerlogfmt": "log-{t.year:04}{t.month:02}{t.day:02}{t.hour:02}",
-	"purgerlogjson": [
+        "dir": "/purger",
+        "period": 60,
+        "retry": 120,
+        "purgerlogdir": "/purger/logs",
+        "purgerlogfmt": "log-{t.year:04}{t.month:02}{t.day:02}{t.hour:02}",
+        "purgerlogjson": [
             {
                 "glob": "/purger/logs/log-*",
                 "hours": 5
@@ -237,6 +238,6 @@
                 "glob": "/root/debug-*",
                 "hours": 2
             }
-	]
+        ]
     }
 }

@@ -69,8 +69,15 @@ if myhttps:
         return param(field, _type, required, default,
             obj = myhttps, objpath = f".{mywebapi}.https")
     myservercert = https_param('certificate', str)
+    myauthentication = https_param('authentication', str)
     myCA = https_param('client_CA', str)
-    myhealthclient = https_param('healthclient', str)
+    mykerberos = False
+    if myauthentication == 'clientcert':
+        myhealthclient = https_param('healthclient', str)
+    elif myauthentication == 'kerberos':
+        mykerberos = True
+    elif myauthentication != 'none':
+        h.bail(f"Unrecognized 'authentication' value: {myauthentication}")
 
 if not myservername:
     myservername = f"{myinstance}.{mydomain}"
@@ -83,7 +90,10 @@ myURL = f"{myservername}:{myport}/healthcheck"
 mycurlargs = '-f -g --connect-timeout 2'
 if myhttps:
     myURL = f"https://{myURL}"
-    mycurlargs = f"{mycurlargs} --cacert {myCA} --cert {myhealthclient}"
+    if myauthentication == 'clientcert':
+        mycurlargs = f"{mycurlargs} --cacert {myCA} --cert {myhealthclient}"
+    elif myauthentication == 'kerberos':
+        mycurlargs = f"{mycurlargs} --negotiate -u :"
 else:
     myURL = f"http://{myURL}"
 if not args.curl_args:
@@ -149,7 +159,11 @@ if myhttps:
                     "{servername}", myservername).replace(
                     "{servercert}", myservercert).replace(
                     "{CAcert}", myCA).replace(
-                    "{uwsgisock}", myuwsgisock)) > 0:
+                    "{uwsgisock}", myuwsgisock).replace(
+                    "{sslverify}",
+                    'on' if myauthentication == 'clientcert' else 'off').replace(
+                    "{authgss}",
+                    'on' if myauthentication == 'kerberos' else 'off')) > 0:
                 pass
     # Create log directory
     h.hlog(1, f"Creating nginx log dir: {lognginx}")
