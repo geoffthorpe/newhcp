@@ -15,6 +15,7 @@
 
     "attester": {
         "exec": "/hcp/common/attester.py",
+	"__TODO_healthcheck": null,
         "until": "/etc/hcp/workstation1/touch-attested",
         "nowait": 1,
         "tag": "attester",
@@ -41,6 +42,7 @@
 
     "do_nothing": {
         "exec": "/hcp/common/do_nothing.sh",
+	"__TODO_healthcheck": null,
         "tag": "services"
     }
 }

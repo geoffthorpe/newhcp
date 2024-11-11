@@ -22,6 +22,7 @@
             "touchfile": "/tpm_kdc_primary/tpm/ek.pub"
         },
         "exec": "/hcp/swtpm.py",
+	"healthcheck": [ "/hcp/swtpm.py", "--healthcheck" ],
         "state": "/tpm_kdc_primary",
         "sockdir": "/tpm_socket_kdc_primary",
         "tag": "services"

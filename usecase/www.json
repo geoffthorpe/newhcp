@@ -60,6 +60,7 @@
     "webapi2": {
         "setup": { "touchfile": "/etc/https-server/www2.hcphacking.xyz.pem" },
         "exec": [ "/hcp/webapi.py", "--config-section", "webapi2" ],
+        "healthcheck": [ "/hcp/webapi.py", "--config-section", "webapi2", "--healthcheck" ],
         "tag": "services",
         "servername": "www2.hcphacking.xyz",
         "port": 8444,

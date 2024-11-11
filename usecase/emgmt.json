@@ -180,6 +180,7 @@
     "webapi": {
         "setup": { "touchfile": "/etc/hcp/emgmt/touch-enrollsvc-local-setup" },
         "exec": "/hcp/webapi.py",
+        "healthcheck": [ "/hcp/webapi.py", "--healthcheck" ],
         "tag": "services",
         "servername": "emgmt.hcphacking.xyz",
         "port": 8443,

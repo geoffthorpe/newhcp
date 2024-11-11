@@ -51,6 +51,7 @@
 
     "sshd": {
         "exec": "/hcp/sshd.py",
+	"healthcheck": [ "/hcp/sshd.py", "--healthcheck" ],
         "tag": "services",
         "port": 2222,
 	"hostname": "sherver.hcphacking.xyz",

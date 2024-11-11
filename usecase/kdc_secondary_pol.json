@@ -13,6 +13,7 @@
 
     "webapi": {
         "exec": "/hcp/webapi.py",
+	"healthcheck": [ "/hcp/webapi.py", "--healthcheck" ],
         "tag": "services",
         "servername": "policy.secondary.kdc.hcphacking.xyz",
         "port": 9280,

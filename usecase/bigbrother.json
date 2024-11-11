@@ -30,6 +30,7 @@
             "touchdir": "/tpmsocket_bigbrother"
         } ],
         "exec": "/hcp/swtpm.py",
+	"healthcheck": [ "/hcp/swtpm.py", "--healthcheck" ],
         "state": "/tpm_bigbrother",
         "sockdir": "/tpmsocket_bigbrother",
         "tag": "swtpm"
@@ -37,6 +38,7 @@
 
     "attester": {
         "exec": "/hcp/common/attester.py",
+	"__TODO_healthcheck": null,
         "until": "/etc/hcp/bigbrother/touch-attested",
         "nowait": 1,
         "tag": "attester",
@@ -63,6 +65,7 @@
 
     "sshd": {
         "exec": "/hcp/sshd.py",
+	"healthcheck": [ "/hcp/sshd.py", "--healthcheck" ],
         "tag": "services",
         "port": 22
     }

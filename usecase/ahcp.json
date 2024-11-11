@@ -37,6 +37,7 @@
             "support the safeboot scripts that can run underneath us." ],
         "setup": { "touchfile": "/etc/hcp/ahcp/touch-attestsvc-local-setup" },
         "exec": "/hcp/webapi.py",
+	"healthcheck": [ "/hcp/webapi.py", "--healthcheck" ],
         "tag": "services",
         "servername": "ahcp.hcphacking.xyz",
         "port": 8080,

@@ -101,6 +101,7 @@
     "webapi": {
         "setup": { "touchfile": "/etc/hcp/primary.kdc/touch-kdcsvc-local-setup" },
         "exec": "/hcp/webapi.py",
+	"healthcheck": [ "/hcp/webapi.py", "--healthcheck" ],
         "tag": "services",
         "servername": "primary.kdc.hcphacking.xyz",
         "port": 9090,
@@ -127,6 +128,7 @@
             "this non-standard port." ],
         "setup": { "touchfile": "/etc/hcp/primary.kdc/touch-kdcsvc-local-setup" },
         "exec": "/install-heimdal/libexec/kdc",
+	"__TODO_healthcheck": null,
         "args": [ "--config-file=/kdc_primary/etc/kdc.conf", "--ports=3089" ],
         "tag": "services"
     },
@@ -143,6 +145,7 @@
             "--hostname=primary.kdc.hcphacking.xyz",
             "--verbose"
         ],
+	"__TODO_healthcheck": null,
         "tag": "services"
     }
 }

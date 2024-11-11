@@ -22,6 +22,7 @@
             "touchfile": "/tpm_sherver/tpm/ek.pub"
         },
         "exec": "/hcp/swtpm.py",
+	"healthcheck": [ "/hcp/swtpm.py", "--healthcheck" ],
         "state": "/tpm_sherver",
         "sockdir": "/tpmsocket_sherver",
         "tag": "services"

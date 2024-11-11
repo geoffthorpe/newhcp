@@ -22,6 +22,7 @@
             "touchfile": "/tpm_www/tpm/ek.pub"
         },
         "exec": "/hcp/swtpm.py",
+	"healthcheck": [ "/hcp/swtpm.py", "--healthcheck" ],
         "state": "/tpm_www",
         "sockdir": "/tpmsocket_www",
         "tag": "services"

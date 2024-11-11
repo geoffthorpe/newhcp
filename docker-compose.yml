@@ -44,14 +44,13 @@ services:
           - HCP_NOTRACEFILE=1
           - VERBOSE=${VERBOSE:-0}
         healthcheck:
+            test: /hcp/common/healthcheck.py
             timeout: 10s
             interval: 20s
 
     common_tpm:
         extends: common
         network_mode: "none"
-        healthcheck:
-            test: /hcp/swtpm.py --healthcheck
 
     emgmt:
         extends: common
@@ -69,8 +68,6 @@ services:
           - ./_testcreds/enrollserver:/enrollserver:ro
         environment:
           - HCP_CONFIG_FILE=/usecase/emgmt.json
-        healthcheck:
-            test: /hcp/webapi.py --healthcheck
 
     emgmt_pol:
         extends: common
@@ -79,8 +76,6 @@ services:
           - emgmt_private
         environment:
           - HCP_CONFIG_FILE=/usecase/emgmt_pol.json
-        healthcheck:
-            test: /hcp/webapi.py --healthcheck
 
     erepl:
         extends: common
@@ -91,8 +86,6 @@ services:
           - enrolldb:/enrolldb:ro
         environment:
           - HCP_CONFIG_FILE=/usecase/erepl.json
-        healthcheck:
-            test: /hcp/enrollsvc/repl_healthcheck.sh
 
     arepl:
         extends: common
@@ -115,8 +108,6 @@ services:
           - attestdb:/attestdb:ro
         environment:
           - HCP_CONFIG_FILE=/usecase/ahcp.json
-        healthcheck:
-            test: /hcp/webapi.py --healthcheck
 
     orchestrator:
         extends: common
@@ -170,8 +161,6 @@ services:
           - ./_testcreds/enrollverifier:/enrollverifier:ro
         environment:
           - HCP_CONFIG_FILE=/usecase/kdc_primary.json
-        healthcheck:
-            test: /hcp/webapi.py --healthcheck
 
     kdc_primary_tpm:
         extends: common_tpm
@@ -206,8 +195,6 @@ services:
           - ./_testcreds/enrollverifier:/enrollverifier:ro
         environment:
           - HCP_CONFIG_FILE=/usecase/kdc_secondary.json
-        healthcheck:
-            test: /hcp/webapi.py --healthcheck
 
     kdc_secondary_tpm:
         extends: common_tpm
@@ -225,8 +212,6 @@ services:
           - kdc_secondary_private
         environment:
           - HCP_CONFIG_FILE=/usecase/kdc_secondary_pol.json
-        healthcheck:
-            test: /hcp/webapi.py --healthcheck
 
     sherver:
         extends: common
@@ -239,8 +224,6 @@ services:
           - ./_testcreds/enrollverifier:/enrollverifier:ro
         environment:
           - HCP_CONFIG_FILE=/usecase/sherver.json
-        healthcheck:
-            test: /hcp/sshd.py --healthcheck
 
     sherver_tpm:
         extends: common_tpm
@@ -262,8 +245,6 @@ services:
           - ./_testcreds/enrollcertchecker:/enrollcertchecker:ro
         environment:
           - HCP_CONFIG_FILE=/usecase/workstation1.json
-        healthcheck:
-            test: /hcp/attested.py
 
     workstation1_tpm:
         extends: common_tpm
@@ -284,8 +265,6 @@ services:
           - ./_testcreds/enrollverifier:/enrollverifier:ro
         environment:
           - HCP_CONFIG_FILE=/usecase/bigbrother.json
-        healthcheck:
-            test: /hcp/attested.py
 
     www:
         extends: common
@@ -301,8 +280,6 @@ services:
           - ./_testcreds/enrollclient:/enrollclient:ro
         environment:
           - HCP_CONFIG_FILE=/usecase/www.json
-        healthcheck:
-            test: /hcp/webapi.py --healthcheck -C webapi && /hcp/webapi.py --healthcheck -C webapi2
 
     www_tpm:
         extends: common_tpm

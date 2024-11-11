@@ -99,6 +99,7 @@
             "touchfile": "/etc/hcp/secondary.kdc/touch-kdcsvc-local-setup"
         },
         "exec": "/hcp/webapi.py",
+	"healthcheck": [ "/hcp/webapi.py", "--healthcheck" ],
         "tag": "services",
         "servername": "secondary.kdc.hcphacking.xyz",
         "port": 9190,
@@ -115,6 +116,7 @@
             "touchfile": "/etc/hcp/secondary.kdc/touch-kdcsvc-local-setup"
         },
         "exec": "/install-heimdal/libexec/kdc",
+	"__TODO_healthcheck": null,
         "args": [ "--config-file=/kdc_secondary/etc/kdc.conf", "--ports=3088" ],
         "tag": "services"
     },
@@ -137,6 +139,7 @@
             "--verbose",
             "primary.kdc.hcphacking.xyz"
         ],
+	"__TODO_healthcheck": null,
         "tag": "services"
     }
 }
