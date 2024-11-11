@@ -1,0 +1,248 @@
+# A "scope" allows a new data structure to be crafted from an existing one.
+#
+# The general form of "scope" consists of a array (list) of objects (dicts),
+# each of which contribute step-wise in constructing the new data structure,
+# which starts out as a new/empty JSON object (dict). Each object in the array
+# will specify exactly one method key ("set", "delete", "import", or "union")
+# to build on that JSON object. The value for the method key, whose value is a
+# jq-style path, specifies what path within the new object the method is being
+# applied to. The "import" method is the only operation that uses the existing
+# data structure (the "source" attribute indicates what path in the existing
+# data structure should be copied into the new one), the remaining methods all
+# act strictly within the new data structure.
+#
+# The following fictitous example shows the different methods and their
+# attributes;
+#     "scope": [
+#         { "set": ".tmp1", "value": [ 1, 2, { "a": "b" } ] },
+#         { "set": ".tmp2", "value": {
+#                 "name": "Blank",
+#                 "group": "Blank" } },
+#         { "import": ".tmp3", "source": ".details" },
+#         { "union": ".tmp3.headers", "source1": ".tmp3.headers",
+#             "source2": ".tmp2" },
+#         { "union": ".value", "source1": ".tmp1", "source2": ".tmp3.value" },
+#         { "delete": ".tmp3.do_not_care" },
+#         { "union": ".final", "source1": null, "source2": ".tmp3" },
+#         { "delete": ".tmp1" },
+#         { "delete": ".tmp2" },
+#         { "delete": ".tmp3" },
+#         { "delete": ".final.value" }
+#     ]
+# If the original data structure is;
+#     {
+#         "details": {
+#             "care": "something",
+#             "do_not_care": "something else",
+#             "value": [ 3, 4 ],
+#             "headers": {
+#                 "userid": 4015,
+#                 "name": "Nosferatu"
+#             }
+#         },
+#         "ignore_me": "ok"
+#     }
+# Then the "scope" example produces this new data structure;
+#     {
+#         "final": {
+#             "care": "something",
+#             "headers": {
+#                 "userid": 4015,
+#                 "name": "Blank",
+#                 "group": "Blank"
+#             },
+#         }
+#         "value": [ 1, 2, { "a": "b" }, 3, 4 ]
+#     }
+
+import json
+import os
+
+from HcpJsonPath import valid_path, extract_path, overwrite_path, delete_path, \
+        HcpJsonPathError
+from HcpRecursiveUnion import union
+
+import sys
+def log(s):
+	pass
+
+# Method-handling for "scope" constructs.
+def scope_valid_common(s, x, n):
+	if not isinstance(s[n], str):
+		raise HcpJsonPolicyError(f"{x}: invalid '{n}' scope")
+	try:
+		valid_path(s[n])
+	except HcpJsonPathError as e:
+		raise HcpJsonPolicyError(f"{x}: invalid '{n}' path\n{e}")
+def scope_valid_set(s, x, n):
+	log(f"FUNC scope_valid_set running; {s},{x},{n}")
+	scope_valid_common(s, x, n)
+	if len(s) != 2 or 'value' not in s:
+		raise HcpJsonPolicyError(f"{x}: '{n}' must have (only) 'value'")
+def scope_valid_delete(s, x, n):
+	log(f"FUNC scope_valid_delete running; {s},{x},{n}")
+	scope_valid_common(s, x, n)
+	if len(s) != 1:
+		raise HcpJsonPolicyError(f"{x}: '{n}' expects no attributes")
+def scope_valid_import(s, x, n):
+	log(f"FUNC scope_valid_import running; {s},{x},{n}")
+	scope_valid_common(s, x, n)
+	if len(s) != 2 or 'source' not in s:
+		raise HcpJsonPolicyError(f"{x}: '{n}' must have (only) 'source'")
+	try:
+		valid_path(s['source'])
+	except HcpJsonPathError as e:
+		raise HcpJsonPolicyError(f"{x}: invalid '{n}' source\n{e}")
+def scope_valid_union(s, x, n):
+	log(f"FUNC scope_valid_union running; {s},{x},{n}")
+	scope_valid_common(s, x, n)
+	if len(s) != 3 or 'source1' not in s or 'source2' not in s:
+		raise HcpJsonPolicyError(
+			f"{x}: '{n}' requires (only) 'source1' and 'source2'")
+	try:
+		if s['source1']:
+			valid_path(s['source1'])
+		valid_path(s['source2'])
+	except HcpJsonPathError as e:
+		raise HcpJsonPolicyError(f"{x}: invalid '{n}' source(s)\n{e}")
+def scope_run_set(s, x, n, datanew, dataold):
+	log(f"FUNC scope_run_set starting; {s},{x},{n}")
+	path = s[n]
+	value = s['value']
+	log(f"path={path}, value={value}")
+	res = overwrite_path(datanew, path, value)
+	log(f"FUNC scope_run_set ending; {res}")
+	return res
+def scope_run_delete(s, x, n, datanew, dataold):
+	log(f"FUNC scope_run_delete starting; {s},{x},{n}")
+	path = s[n]
+	log(f"path={path}")
+	res = delete_path(datanew, path)
+	log(f"FUNC scope_run_delete ending; {res}")
+	return res
+def scope_run_import(s, x, n, datanew, dataold):
+	log(f"FUNC scope_run_import starting; {s},{x},{n}")
+	path = s[n]
+	source = s['source']
+	log(f"path={path}, source={source}")
+	ok, value = extract_path(dataold, source)
+	if not ok:
+		raise HcpJsonPolicyError(f"{x}: import: missing '{path}'")
+	res = overwrite_path(datanew, path, value)
+	log(f"FUNC scope_run_import ending; {res}")
+	return res
+def scope_run_union(s, x, n, datanew, dataold):
+	log(f"FUNC scope_run_union starting; {s},{x},{n}")
+	path = s[n]
+	source1 = s['source1']
+	source2 = s['source2']
+	log(f"path={path}, source1={source1}, source2={source2}")
+	ok, value2 = extract_path(datanew, source2)
+	if not ok:
+		raise HcpJsonPolicyError(f"{x}: union: missing '{source2}'")
+	if source1 is not None:
+		ok, value1 = extract_path(datanew, source1)
+		if not ok:
+			raise HcpJsonPolicyError(
+				f"{x}: union: missing '{source1}'")
+		value = union(value1, value2)
+	else:
+		value = value2
+	res = overwrite_path(datanew, path, value)
+	log(f"FUNC scope_run_union ending; {res}")
+	return res
+
+scopemeths = {
+	'set': { 'is_valid': scope_valid_set, 'run': scope_run_set },
+	'delete': { 'is_valid': scope_valid_delete, 'run': scope_run_delete },
+	'import': { 'is_valid': scope_valid_import, 'run': scope_run_import },
+	'union': { 'is_valid': scope_valid_union, 'run': scope_run_union }
+}
+
+# Parse a "scope" attribute in a filter entry whose action is "call".
+def parse_scope(s, x):
+	log("FUNC parse_scope starting; {scope}")
+	# We'll build an output scope and return it. This will be in the general
+	# form.
+	scope = []
+	# If 's' is a simple string, convert it to the general form.
+	if isinstance(s, str):
+		s = [ { "import": ".", "source": s } ]
+	if not isinstance(s, list):
+		raise HcpJsonPolicyError(f"{x}: scope: bad type '{type(s)}'")
+	# Iterate through the list of constructs for this scope
+	for c in s:
+		# Must have exactly one method. Note this logic closely follows
+		# the 'if' handling in parse_filter().
+		m = set(scopemeths.keys()).intersection(c.keys())
+		if len(m) == 0:
+			raise HcpJsonPolicyError(
+				f"{x}: scope: no method in {c}")
+		if len(m) != 1:
+			raise HcpJsonPolicyError(
+				f"{x}: scope: too many methods in {c} ({m})")
+		m = m.pop()
+		log(f"Processing method '{m}'")
+		meth = scopemeths[m]
+		meth['is_valid'](c, x, m)
+		c['meth'] = m
+	log("FUNC parse_scope ending")
+	return s
+
+# Run an already-parsed 'scope' against data, returning the transformed data
+def run_scope(data, scope, x):
+	log(f"FUNC run_scope starting; {x},{scope},{data}")
+	result = {}
+	for c in scope:
+		methkey = c['meth']
+		meth = scopemeths[methkey]
+		result = meth['run'](c, x, methkey, result, data)
+	log(f"FUNC run_scope ending")
+	return result
+
+if __name__ == '__main__':
+    _scope = [
+        { "set": ".tmp1", "value": [ 1, 2, { "a": "b" } ] },
+        { "set": ".tmp2", "value": {
+                "name": "Blank",
+                "group": "Blank" } },
+        { "import": ".tmp3", "source": ".details" },
+        { "union": ".tmp3.headers", "source1": ".tmp3.headers",
+            "source2": ".tmp2" },
+        { "union": ".value", "source1": ".tmp1", "source2": ".tmp3.value" },
+        { "delete": ".tmp3.do_not_care" },
+        { "union": ".final", "source1": None, "source2": ".tmp3" },
+        { "delete": ".tmp1" },
+        { "delete": ".tmp2" },
+        { "delete": ".tmp3" },
+        { "delete": ".final.value" }
+    ]
+    data = {
+        "details": {
+            "care": "something",
+            "do_not_care": "something else",
+            "value": [ 3, 4 ],
+            "headers": {
+                "userid": 4015,
+                "name": "Nosferatu"
+            }
+        },
+        "ignore_me": "ok"
+    }
+    _final = {
+        "final": {
+            "care": "something",
+            "headers": {
+                "userid": 4015,
+                "name": "Blank",
+                "group": "Blank"
+            }
+        },
+        "value": [ 1, 2, { "a": "b" }, 3, 4 ]
+    }
+    print(f"Scope = {_scope}")
+    print(f"Input = {data}")
+    scope = parse_scope(_scope, "test")
+    final = run_scope(data, scope, "test")
+    print(f"Output = {final}")
+    print(f"Expected = {_final}")
