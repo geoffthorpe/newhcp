@@ -3,3 +3,4 @@
 /Dockerfile.t*
 /_testcreds/
 /ctx/heimdal-install.tar.gz
+__pycache__
