@@ -29,9 +29,8 @@ def valid_path_node(node):
 def path_pop_node(path):
 	if len(path) < 1:
 		return None, path
-	if path[0:1] != ".":
-		raise HcpJsonPathError(f"HCP JSON, path nodes must begin with '.': '{path}'")
-	path = path[1:]
+	if path[0:1] == ".":
+		path = path[1:]
 	index = path.find(".")
 	if index == 0:
 		raise HcpJsonPathError(f"HCP JSON, path nodes must be non-empty: '{path}'")
