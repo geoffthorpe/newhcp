@@ -4,7 +4,7 @@
         "services": [ "enrollsvc", "webapi", "reenroller", "purger" ],
         "default_targets": [ "setup-global", "setup-local", "start-services" ],
         "enrollsvc_policyurl": "http://policy.emgmt.hcphacking.xyz:9080",
-        "policysvc_config": "/usecase/emgmt.policy.json",
+        "policysvc_config": "/usecase/config/emgmt.policy.json",
         "reenroller_uid": "emgmtdb",
 	"webapi_app": "/hcp/enrollsvc/mgmt_api.py",
         "webapi_fqdn": "emgmt.hcphacking.xyz",
@@ -20,16 +20,16 @@
     },
 
     "scope": [
-        { "load": ".defaults", "path": "/usecase/proto_defaults.json" },
+        { "load": ".defaults", "path": "/usecase/proto/defaults.json" },
         { "vars": ".defaults" },
         { "import": ".", "source": "." },
         { "vars": ".vars" },
-        { "loadunion": ".", "path": "/usecase/proto_root.json" },
-        { "loadunion": ".enrollsvc", "path": "/usecase/proto_enrollsvc_mgmt.json" },
-        { "load": ".webapi", "path": "/usecase/proto_webapi.json" },
-        { "load": ".reenroller", "path": "/usecase/proto_reenroller.json" },
-        { "loadunion": ".purger", "path": "/usecase/proto_purger.json" },
-        { "load": ".policysvc", "path": "/usecase/proto_policysvc_sidecar.json" }
+        { "loadunion": ".", "path": "/usecase/proto/root.json" },
+        { "loadunion": ".enrollsvc", "path": "/usecase/proto/enrollsvc_mgmt.json" },
+        { "load": ".webapi", "path": "/usecase/proto/webapi.json" },
+        { "load": ".reenroller", "path": "/usecase/proto/reenroller.json" },
+        { "loadunion": ".purger", "path": "/usecase/proto/purger.json" },
+        { "load": ".policysvc", "path": "/usecase/proto/policysvc_sidecar.json" }
     ],
 
     "purger": {

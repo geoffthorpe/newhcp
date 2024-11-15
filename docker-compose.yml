@@ -76,7 +76,7 @@ services:
           - ./_testcreds/enrollclient:/enrollclient:ro
           - ./_testcreds/enrollserver:/enrollserver:ro
         environment:
-          - HCP_CONFIG_FILE=/usecase/emgmt.json
+          - HCP_CONFIG_FILE=/usecase/hosts/emgmt.json
 
     emgmt_pol:
         extends: common_pol
@@ -84,7 +84,7 @@ services:
         networks:
           - emgmt_private
         environment:
-          - HCP_CONFIG_FILE=/usecase/emgmt.json
+          - HCP_CONFIG_FILE=/usecase/hosts/emgmt.json
 
     erepl:
         extends: common
@@ -94,7 +94,7 @@ services:
         volumes:
           - enrolldb:/enrolldb:ro
         environment:
-          - HCP_CONFIG_FILE=/usecase/erepl.json
+          - HCP_CONFIG_FILE=/usecase/hosts/erepl.json
 
     arepl:
         extends: common
@@ -104,7 +104,7 @@ services:
         volumes:
           - attestdb:/attestdb:rw
         environment:
-          - HCP_CONFIG_FILE=/usecase/arepl.json
+          - HCP_CONFIG_FILE=/usecase/hosts/arepl.json
         healthcheck:
             test: test -f /attestdb/initialized && ! test -f /attestdb/hcp/transient-failure
 
@@ -116,7 +116,7 @@ services:
         volumes:
           - attestdb:/attestdb:ro
         environment:
-          - HCP_CONFIG_FILE=/usecase/ahcp.json
+          - HCP_CONFIG_FILE=/usecase/hosts/ahcp.json
 
     orchestrator:
         extends: common
@@ -134,7 +134,7 @@ services:
           - tpm_bigbrother:/tpm_bigbrother
           - tpm_www:/tpm_www
         environment:
-          - HCP_CONFIG_FILE=/usecase/orchestrator.json
+          - HCP_CONFIG_FILE=/usecase/hosts/orchestrator.json
 
     aclient:
         extends: common
@@ -145,7 +145,7 @@ services:
           - tpmsocket_aclient:/tpmsocket_aclient
           - ./_testcreds/enrollverifier:/enrollverifier:ro
         environment:
-          - HCP_CONFIG_FILE=/usecase/aclient.json
+          - HCP_CONFIG_FILE=/usecase/hosts/aclient.json
 
     aclient_tpm:
         extends: common_tpm
@@ -154,7 +154,7 @@ services:
           - tpm_aclient:/tpm_aclient
           - tpmsocket_aclient:/tpmsocket_aclient
         environment:
-          - HCP_CONFIG_FILE=/usecase/aclient.json
+          - HCP_CONFIG_FILE=/usecase/hosts/aclient.json
 
     kdc_primary:
         extends: common
@@ -169,7 +169,7 @@ services:
           - ./_testcreds/enrollclient:/enrollclient:ro
           - ./_testcreds/enrollverifier:/enrollverifier:ro
         environment:
-          - HCP_CONFIG_FILE=/usecase/kdc_primary.json
+          - HCP_CONFIG_FILE=/usecase/hosts/kdc_primary.json
 
     kdc_primary_tpm:
         extends: common_tpm
@@ -178,7 +178,7 @@ services:
           - tpm_kdc_primary:/tpm_primary.kdc
           - tpmsocket_kdc_primary:/tpmsocket_primary.kdc
         environment:
-          - HCP_CONFIG_FILE=/usecase/kdc_primary.json
+          - HCP_CONFIG_FILE=/usecase/hosts/kdc_primary.json
 
     kdc_primary_pol:
         extends: common_pol
@@ -186,7 +186,7 @@ services:
         networks:
           - kdc_primary_private
         environment:
-          - HCP_CONFIG_FILE=/usecase/kdc_primary.json
+          - HCP_CONFIG_FILE=/usecase/hosts/kdc_primary.json
 
     kdc_secondary:
         extends: common
@@ -201,7 +201,7 @@ services:
           - ./_testcreds/enrollclient:/enrollclient:ro
           - ./_testcreds/enrollverifier:/enrollverifier:ro
         environment:
-          - HCP_CONFIG_FILE=/usecase/kdc_secondary.json
+          - HCP_CONFIG_FILE=/usecase/hosts/kdc_secondary.json
 
     kdc_secondary_tpm:
         extends: common_tpm
@@ -210,15 +210,15 @@ services:
           - tpm_kdc_secondary:/tpm_secondary.kdc
           - tpmsocket_kdc_secondary:/tpmsocket_secondary.kdc
         environment:
-          - HCP_CONFIG_FILE=/usecase/kdc_secondary.json
+          - HCP_CONFIG_FILE=/usecase/hosts/kdc_secondary.json
 
     kdc_secondary_pol:
-        extends: common
+        extends: common_pol
         hostname: policy.secondary.kdc.hcphacking.xyz
         networks:
           - kdc_secondary_private
         environment:
-          - HCP_CONFIG_FILE=/usecase/kdc_secondary.json
+          - HCP_CONFIG_FILE=/usecase/hosts/kdc_secondary.json
 
     sherver:
         extends: common
@@ -230,7 +230,7 @@ services:
           - tpmsocket_sherver:/tpmsocket_sherver
           - ./_testcreds/enrollverifier:/enrollverifier:ro
         environment:
-          - HCP_CONFIG_FILE=/usecase/sherver.json
+          - HCP_CONFIG_FILE=/usecase/hosts/sherver.json
 
     sherver_tpm:
         extends: common_tpm
@@ -239,7 +239,7 @@ services:
           - tpm_sherver:/tpm_sherver
           - tpmsocket_sherver:/tpmsocket_sherver
         environment:
-          - HCP_CONFIG_FILE=/usecase/sherver.json
+          - HCP_CONFIG_FILE=/usecase/hosts/sherver.json
 
     workstation1:
         extends: common
@@ -251,7 +251,7 @@ services:
           - ./_testcreds/enrollverifier:/enrollverifier:ro
           - ./_testcreds/enrollcertchecker:/enrollcertchecker:ro
         environment:
-          - HCP_CONFIG_FILE=/usecase/workstation1.json
+          - HCP_CONFIG_FILE=/usecase/hosts/workstation1.json
 
     workstation1_tpm:
         extends: common_tpm
@@ -260,7 +260,7 @@ services:
           - tpm_workstation1:/tpm_workstation1
           - tpmsocket_workstation1:/tpmsocket_workstation1
         environment:
-          - HCP_CONFIG_FILE=/usecase/workstation1.json
+          - HCP_CONFIG_FILE=/usecase/hosts/workstation1.json
 
     bigbrother:
         extends: common
@@ -271,7 +271,7 @@ services:
           - tpm_bigbrother:/tpm_bigbrother
           - ./_testcreds/enrollverifier:/enrollverifier:ro
         environment:
-          - HCP_CONFIG_FILE=/usecase/bigbrother.json
+          - HCP_CONFIG_FILE=/usecase/hosts/bigbrother.json
 
     www:
         extends: common
@@ -286,7 +286,7 @@ services:
           - ./_testcreds/enrollcertchecker:/enrollcertchecker:ro
           - ./_testcreds/enrollclient:/enrollclient:ro
         environment:
-          - HCP_CONFIG_FILE=/usecase/www.json
+          - HCP_CONFIG_FILE=/usecase/hosts/www.json
 
     www_tpm:
         extends: common_tpm
@@ -295,4 +295,4 @@ services:
           - tpm_www:/tpm_www
           - tpmsocket_www:/tpmsocket_www
         environment:
-          - HCP_CONFIG_FILE=/usecase/www.json
+          - HCP_CONFIG_FILE=/usecase/hosts/www.json

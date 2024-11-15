@@ -17,13 +17,13 @@
     },
 
     "scope": [
-        { "load": ".defaults", "path": "/usecase/proto_defaults.json" },
+        { "load": ".defaults", "path": "/usecase/proto/defaults.json" },
         { "vars": ".defaults" },
         { "import": ".", "source": "." },
         { "vars": ".vars" },
-        { "loadunion": ".", "path": "/usecase/proto_root.json" },
-        { "load": ".attestsvc", "path": "/usecase/proto_attestsvc_hcp.json" },
-        { "load": ".webapi", "path": "/usecase/proto_webapi.json" },
+        { "loadunion": ".", "path": "/usecase/proto/root.json" },
+        { "load": ".attestsvc", "path": "/usecase/proto/attestsvc_hcp.json" },
+        { "load": ".webapi", "path": "/usecase/proto/webapi.json" },
         { "delete": ".webapi.https" }
     ]
 }

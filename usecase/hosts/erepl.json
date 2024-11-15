@@ -7,12 +7,12 @@
     },
 
     "scope": [
-        { "load": ".defaults", "path": "/usecase/proto_defaults.json" },
+        { "load": ".defaults", "path": "/usecase/proto/defaults.json" },
         { "vars": ".defaults" },
         { "import": ".", "source": "." },
         { "vars": ".vars" },
-        { "loadunion": ".", "path": "/usecase/proto_root.json" },
-        { "load": ".enrollsvc", "path": "/usecase/proto_enrollsvc_repl.json" },
-        { "load": ".git-daemon", "path": "/usecase/proto_git-daemon.json" }
+        { "loadunion": ".", "path": "/usecase/proto/root.json" },
+        { "load": ".enrollsvc", "path": "/usecase/proto/enrollsvc_repl.json" },
+        { "load": ".git-daemon", "path": "/usecase/proto/git-daemon.json" }
     ]
 }

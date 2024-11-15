@@ -14,15 +14,15 @@
     "args_for": "sshd",
 
     "scope": [
-        { "load": ".defaults", "path": "/usecase/proto_defaults.json" },
+        { "load": ".defaults", "path": "/usecase/proto/defaults.json" },
         { "vars": ".defaults" },
         { "import": ".", "source": "." },
         { "vars": ".vars" },
-        { "loadunion": ".", "path": "/usecase/proto_root.json" },
-        { "unionload": ".attester", "path": "/usecase/proto_attester.json" },
-        { "load": ".client", "path": "/usecase/proto_client.json" },
-        { "load": ".sshd", "path": "/usecase/proto_sshd.json" },
-        { "load": ".swtpm", "path": "/usecase/proto_tpm_cotenant.json" }
+        { "loadunion": ".", "path": "/usecase/proto/root.json" },
+        { "unionload": ".attester", "path": "/usecase/proto/attester.json" },
+        { "load": ".client", "path": "/usecase/proto/client.json" },
+        { "load": ".sshd", "path": "/usecase/proto/sshd.json" },
+        { "load": ".swtpm", "path": "/usecase/proto/tpm_cotenant.json" }
     ],
 
     "env": {

@@ -6,12 +6,12 @@
     },
 
     "scope": [
-        { "load": ".defaults", "path": "/usecase/proto_defaults.json" },
+        { "load": ".defaults", "path": "/usecase/proto/defaults.json" },
         { "vars": ".defaults" },
         { "import": ".", "source": "." },
         { "vars": ".vars" },
-        { "loadunion": ".", "path": "/usecase/proto_root.json" },
-        { "load": ".attestsvc", "path": "/usecase/proto_attestsvc_repl.json" }
+        { "loadunion": ".", "path": "/usecase/proto/root.json" },
+        { "load": ".attestsvc", "path": "/usecase/proto/attestsvc_repl.json" }
     ],
 
     "replication_client": {

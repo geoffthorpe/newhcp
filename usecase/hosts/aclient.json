@@ -7,12 +7,12 @@
     "args_for": "client",
 
     "scope": [
-        { "load": ".defaults", "path": "/usecase/proto_defaults.json" },
+        { "load": ".defaults", "path": "/usecase/proto/defaults.json" },
         { "vars": ".defaults" },
         { "import": ".", "source": "." },
         { "vars": ".vars" },
-        { "loadunion": ".", "path": "/usecase/proto_root.json" },
-        { "load": ".client", "path": "/usecase/proto_client.json" },
-        { "load": ".tpm", "path": "/usecase/proto_tpm_sidecar.json" }
+        { "loadunion": ".", "path": "/usecase/proto/root.json" },
+        { "load": ".client", "path": "/usecase/proto/client.json" },
+        { "load": ".tpm", "path": "/usecase/proto/tpm_sidecar.json" }
     ]
 }

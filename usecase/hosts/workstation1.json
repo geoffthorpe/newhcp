@@ -1,0 +1,19 @@
+{
+    "vars": {
+        "id": "workstation1",
+        "services": [ "attester", "do_nothing" ],
+	"default_targets": [ "start-attester", "start-services" ]
+    },
+
+    "scope": [
+        { "load": ".defaults", "path": "/usecase/proto/defaults.json" },
+        { "vars": ".defaults" },
+        { "import": ".", "source": "." },
+        { "vars": ".vars" },
+        { "load": ".", "path": "/usecase/proto/root.json" },
+        { "load": ".attester", "path": "/usecase/proto/attester.json" },
+        { "load": ".client", "path": "/usecase/proto/client.json" },
+        { "load": ".do_nothing", "path": "/usecase/proto/do_nothing.json" },
+        { "load": ".tpm", "path": "/usecase/proto/tpm_sidecar.json" }
+    ]
+}

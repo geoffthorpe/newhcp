@@ -11,7 +11,7 @@
 	"kdcsvc_TGS_port": "3089",
         "policy_url": "http://policy.primary.kdc.hcphacking.xyz:9180",
         "policysvc_port": 9180,
-        "policysvc_config": "/usecase/kdc_primary.policy.json",
+        "policysvc_config": "/usecase/config/kdc_primary.policy.json",
         "webapi_app": "/hcp/kdcsvc/mgmt_api.py",
         "webapi_fqdn": "primary.kdc.hcphacking.xyz",
         "webapi_port": 9090,
@@ -20,20 +20,20 @@
     "args_for": "kdcsvc_TGS",
 
     "scope": [
-        { "load": ".defaults", "path": "/usecase/proto_defaults.json" },
+        { "load": ".defaults", "path": "/usecase/proto/defaults.json" },
         { "vars": ".defaults" },
         { "import": ".", "source": "." },
         { "vars": ".vars" },
-        { "loadunion": ".", "path": "/usecase/proto_root.json" },
-        { "load": ".attester", "path": "/usecase/proto_attester.json" },
-        { "load": ".client", "path": "/usecase/proto_client.json" },
-        { "load": ".kdcsvc", "path": "/usecase/proto_kdcsvc.json" },
-        { "load": ".kdcsvc_TGS", "path": "/usecase/proto_kdcsvc_TGS.json" },
-        { "load": ".kdcsvc_iprop_primary", "path": "/usecase/proto_kdcsvc_iprop_primary.json" },
-        { "load": ".policysvc", "path": "/usecase/proto_policysvc_sidecar.json" },
-        { "load": ".webapi", "path": "/usecase/proto_webapi.json" },
+        { "loadunion": ".", "path": "/usecase/proto/root.json" },
+        { "load": ".attester", "path": "/usecase/proto/attester.json" },
+        { "load": ".client", "path": "/usecase/proto/client.json" },
+        { "load": ".kdcsvc", "path": "/usecase/proto/kdcsvc.json" },
+        { "load": ".kdcsvc_TGS", "path": "/usecase/proto/kdcsvc_TGS.json" },
+        { "load": ".kdcsvc_iprop_primary", "path": "/usecase/proto/kdcsvc_iprop_primary.json" },
+        { "load": ".policysvc", "path": "/usecase/proto/policysvc_sidecar.json" },
+        { "load": ".webapi", "path": "/usecase/proto/webapi.json" },
         { "delete": ".webapi.https" },
-        { "load": ".tpm", "path": "/usecase/proto_tpm_sidecar.json" }
+        { "load": ".tpm", "path": "/usecase/proto/tpm_sidecar.json" }
     ],
 
     "env": {
