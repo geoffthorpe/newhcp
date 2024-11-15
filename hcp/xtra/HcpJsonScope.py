@@ -190,7 +190,12 @@ def scope_run_loadunion(s, x, n, datanew, dataold, env):
 			varskey = None, fileskey = None)
 	ok, evalue = extract_path(datanew, path)
 	if ok:
-		value = union(value, evalue)
+		if n == 'loadunion':
+			value = union(value, evalue)
+		elif n == 'unionload':
+			value = union(evalue, value)
+		else:
+			raise Exception("BUG")
 	res = overwrite_path(datanew, path, value)
 	log(f"FUNC scope_run_loadunion ending; {res}")
 	return res
@@ -214,6 +219,7 @@ scopemeths = {
 	'union': { 'is_valid': scope_valid_union, 'run': scope_run_union },
 	'load': { 'is_valid': scope_valid_load, 'run': scope_run_load },
 	'loadunion': { 'is_valid': scope_valid_load, 'run': scope_run_loadunion },
+	'unionload': { 'is_valid': scope_valid_load, 'run': scope_run_loadunion },
 	'vars': { 'is_valid': scope_valid_vars, 'run': scope_run_vars }
 }
 
