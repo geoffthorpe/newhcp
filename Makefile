@@ -2,6 +2,9 @@ ifndef V
 	Q := @
 endif
 
+ifndef TOP
+$(warning "Interactive shell should export TOP=$$(pwd) !!")
+endif
 TOP ?= $(shell pwd)
 DEBVERSION ?= trixie
 DEBSUPPORTED := bookworm trixie
