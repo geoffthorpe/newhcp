@@ -58,5 +58,32 @@
         "xtra": [
             "# GSSAPIStoreNonAn2Ln yes"
         ]
+    },
+
+    "tpm": {
+        "id": "tpm.sherver",
+        "default_domain": "hcphacking.xyz",
+        "services": [
+            "swtpm"
+        ],
+        "default_targets": [
+            "setup-global",
+            "start-services"
+        ],
+        "swtpm": {
+            "setup": {
+                "tag": "global",
+                "exec": [
+                    "/hcp/common/wait_touchfile.py",
+                    "/tpm_sherver/tpm/ek.pub"
+                ],
+                "touchfile": "/tpm_sherver/tpm/ek.pub"
+            },
+            "exec": "/hcp/swtpm.py",
+	    "healthcheck": [ "/hcp/swtpm.py", "--healthcheck" ],
+            "state": "/tpm_sherver",
+            "sockdir": "/tpmsocket_sherver",
+            "tag": "services"
+        }
     }
 }
