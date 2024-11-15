@@ -1,0 +1,20 @@
+{
+    "exec": "/hcp/common/purger.py",
+    "nowait": 1,
+    "tag": "{purger_tag}",
+    "dir": "{purger_dir}",
+    "period": 60,
+    "retry": 120,
+    "purgerlogdir": "/purger/logs",
+    "purgerlogfmt": "log-{t.year:04}{t.month:02}{t.day:02}{t.hour:02}",
+    "purgerlogjson": [
+        {
+            "glob": "/purger/logs/log-*",
+            "hours": 5
+        },
+        {
+            "glob": "/root/debug-*",
+            "hours": 2
+        }
+    ]
+}

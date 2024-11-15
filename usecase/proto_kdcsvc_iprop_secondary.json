@@ -1,0 +1,21 @@
+{
+    "setup": {
+        "touchfile": "/etc/hcp/{id}/touch-kdcsvc-local-setup"
+    },
+    "exec": [
+        "/hcp/common/restarter.py", "-t", "5",
+        "kinit",
+        "-C",
+        "FILE:/etc/hcp/{id}/pkinit/iprop-key.pem",
+        "iprop/{id}.hcphacking.xyz@HCPHACKING.XYZ",
+        "/install-heimdal/libexec/ipropd-slave"
+    ],
+    "args": [
+        "--config-file={kdcsvc_dir}/etc/kdc.conf",
+        "--no-keytab",
+        "--verbose",
+        "{kdcsvc_primary}"
+    ],
+    "__TODO_healthcheck": null,
+    "tag": "{kdcsvc_tag}"
+}

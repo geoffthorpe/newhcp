@@ -1,109 +1,34 @@
 {
-    "_": " vim: set expandtab shiftwidth=4 softtabstop=4: ",
-
-    "id": "www",
-    "default_domain": "hcphacking.xyz",
-
-    "services": [
-        "attester",
-        "webapi",
-        "webapi2",
-        "do_nothing"
-    ],
-    "default_targets": [
-        "start-attester",
-        "start-services"
-    ],
-
-    "attester": {
-        "exec": "/hcp/common/attester.py",
-        "until": "/etc/hcp/www/touch-attested",
-        "nowait": 1,
-        "tag": "attester",
-        "period": 120,
-        "retry": 5,
-        "env": {
-            "unset": {
-                "HCP_NOTRACEFILE": null
-            }
-        }
+    "vars": {
+        "id": "www",
+        "services": [ "attester", "webapi", "webapi2" ],
+        "default_targets": [ "start-attester", "start-services" ],
+        "webapi_app": "/hcp/tools/flask_dummy.py"
     },
-    "client": {
-        "exec": "/hcp/tools/run_client.sh",
-        "touchfile": "/etc/hcp/www/touch-attested",
-        "env": {
-            "unset": { "HCP_NOTRACEFILE": null }
-        },
-        "attest_url": "http://ahcp.hcphacking.xyz:8080",
-        "tcti": "swtpm:path=/tpmsocket_www/tpm",
-        "enroll_CA": "/enrollverifier/key.pem",
-        "callbacks": [ "/hcp/tools/attest_callback_common.py" ],
-        "global": true
+    "vars_webapi": {
+        "webapi_fqdn": "www.hcphacking.xyz",
+        "webapi_port": 8443,
+        "webapi_https_authentication": "kerberos"
+    },
+    "vars_webapi2": {
+    	"webapi_name": "webapi2",
+        "webapi_fqdn": "www2.hcphacking.xyz",
+        "webapi_port": 8444,
+        "webapi_https_authentication": "clientcert"
     },
 
-    "webapi": {
-        "setup": { "touchfile": "/etc/https-server/www.hcphacking.xyz.pem" },
-        "exec": "/hcp/webapi.py",
-        "tag": "services",
-        "servername": "www.hcphacking.xyz",
-        "port": 8443,
-        "https": {
-            "certificate": "/etc/https-server/www.hcphacking.xyz-key.pem",
-            "authentication": "kerberos",
-            "client_CA": "/enrollcertchecker/CA.cert"
-        },
-        "app": "/hcp/tools/flask_dummy.py",
-        "uwsgi_uid": "www-data",
-        "uwsgi_gid": "www-data"
-    },
-
-    "webapi2": {
-        "setup": { "touchfile": "/etc/https-server/www2.hcphacking.xyz.pem" },
-        "exec": [ "/hcp/webapi.py", "--config-section", "webapi2" ],
-        "healthcheck": [ "/hcp/webapi.py", "--config-section", "webapi2", "--healthcheck" ],
-        "tag": "services",
-        "servername": "www2.hcphacking.xyz",
-        "port": 8444,
-        "https": {
-            "certificate": "/etc/https-server/www2.hcphacking.xyz-key.pem",
-            "authentication": "clientcert",
-            "client_CA": "/enrollcertchecker/CA.cert",
-            "healthclient": "/enrollclient/client.pem"
-        },
-        "app": "/hcp/tools/flask_dummy.py",
-        "uwsgi_uid": "www-data",
-        "uwsgi_gid": "www-data"
-    },
-
-    "do_nothing": {
-        "exec": "/hcp/common/do_nothing.sh",
-        "tag": "services"
-    },
-
-    "tpm": {
-        "id": "tpm.www",
-        "default_domain": "hcphacking.xyz",
-        "services": [
-            "swtpm"
-        ],
-        "default_targets": [
-            "setup-global",
-            "start-services"
-        ],
-        "swtpm": {
-            "setup": {
-                "tag": "global",
-                "exec": [
-                    "/hcp/common/wait_touchfile.py",
-                    "/tpm_www/tpm/ek.pub"
-                ],
-                "touchfile": "/tpm_www/tpm/ek.pub"
-            },
-            "exec": "/hcp/swtpm.py",
-	    "healthcheck": [ "/hcp/swtpm.py", "--healthcheck" ],
-            "state": "/tpm_www",
-            "sockdir": "/tpmsocket_www",
-            "tag": "services"
-        }
-    }
+    "scope": [
+        { "load": ".defaults", "path": "/usecase/proto_defaults.json" },
+        { "vars": ".defaults" },
+        { "import": ".", "source": "." },
+        { "vars": ".vars" },
+        { "loadunion": ".", "path": "/usecase/proto_root.json" },
+        { "load": ".attester", "path": "/usecase/proto_attester.json" },
+        { "load": ".client", "path": "/usecase/proto_client.json" },
+        { "vars": ".vars_webapi" },
+        { "load": ".webapi", "path": "/usecase/proto_webapi.json" },
+        { "vars": ".vars_webapi2" },
+        { "load": ".webapi2", "path": "/usecase/proto_webapi.json" },
+        { "load": ".tpm", "path": "/usecase/proto_tpm_sidecar.json" }
+    ]
 }

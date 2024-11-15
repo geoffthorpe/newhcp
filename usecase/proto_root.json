@@ -1,0 +1,6 @@
+{
+    "id": "{id}",
+    "default_domain": "{default_domain}",
+    "services": "{services}",
+    "default_targets": "{default_targets}"
+}

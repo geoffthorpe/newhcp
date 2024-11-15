@@ -1,204 +1,42 @@
 {
-    "_": " vim: set expandtab shiftwidth=4 softtabstop=4: ",
+    "vars": {
+        "id": "primary.kdc",
+        "services": [ "attester", "kdcsvc", "webapi", "kdcsvc_TGS",
+                        "kdcsvc_iprop_primary" ],
+        "default_targets": [ "start-attester", "setup-global", "setup-local",
+                            "start-services" ],
+        "client_global": false,
+	"kdcsvc_policyurl": "http://policy.primary.kdc.hcphacking.xyz:9180",
+        "kdcsvc_secondaries": [ "secondary.kdc.hcphacking.xyz" ],
+	"kdcsvc_TGS_port": "3089",
+        "policy_url": "http://policy.primary.kdc.hcphacking.xyz:9180",
+        "policysvc_port": 9180,
+        "policysvc_config": "/usecase/kdc_primary.policy.json",
+        "webapi_app": "/hcp/kdcsvc/mgmt_api.py",
+        "webapi_fqdn": "primary.kdc.hcphacking.xyz",
+        "webapi_port": 9090,
+        "webapi_setup": { "touchfile": "/etc/hcp/primary.kdc/touch-kdcsvc-local-setup" }
+    },
+    "args_for": "kdcsvc_TGS",
 
-    "id": "primary.kdc",
-    "default_domain": "hcphacking.xyz",
+    "scope": [
+        { "load": ".defaults", "path": "/usecase/proto_defaults.json" },
+        { "vars": ".defaults" },
+        { "import": ".", "source": "." },
+        { "vars": ".vars" },
+        { "loadunion": ".", "path": "/usecase/proto_root.json" },
+        { "load": ".attester", "path": "/usecase/proto_attester.json" },
+        { "load": ".client", "path": "/usecase/proto_client.json" },
+        { "load": ".kdcsvc", "path": "/usecase/proto_kdcsvc.json" },
+        { "load": ".kdcsvc_TGS", "path": "/usecase/proto_kdcsvc_TGS.json" },
+        { "load": ".kdcsvc_iprop_primary", "path": "/usecase/proto_kdcsvc_iprop_primary.json" },
+        { "load": ".policysvc", "path": "/usecase/proto_policysvc_sidecar.json" },
+        { "load": ".webapi", "path": "/usecase/proto_webapi.json" },
+        { "delete": ".webapi.https" },
+        { "load": ".tpm", "path": "/usecase/proto_tpm_sidecar.json" }
+    ],
 
     "env": {
         "set": { "KRB5_CONFIG": "/etc/hcp/primary.kdc/krb5.conf" }
-    },
-
-    "services": [
-        "attester",
-        "kdcsvc",
-        "webapi",
-        "kdcsvc_TGS",
-        "kdcsvc_iprop_primary"
-    ],
-    "default_targets": [
-        "start-attester",
-        "setup-global",
-        "setup-local",
-        "start-services"
-    ],
-    "args_for": "kdcsvc_TGS",
-
-    "attester": {
-        "_": [
-            "We set 'retry' to 5 for devel purposes, so that unsynchronized",
-            "startup doesn't take too long. For prod, you'd probably want to",
-            "dial this down - otherwise any downtime of the attestation",
-            "could be followed by a DoS against efforts to bring it back up."
-        ],
-        "exec": "/hcp/common/attester.py",
-        "until": "/etc/hcp/primary.kdc/touch-attested",
-        "nowait": 1,
-        "tag": "attester",
-        "env": {
-            "unset": {
-                "HCP_NOTRACEFILE": null
-            }
-        },
-        "period": 120,
-        "retry": 5
-    },
-    "client": {
-        "exec": "/hcp/tools/run_client.sh",
-        "touchfile": "/etc/hcp/primary.kdc/touch-attested",
-        "env": {
-            "unset": { "HCP_NOTRACEFILE": null }
-        },
-        "attest_url": "http://ahcp.hcphacking.xyz:8080",
-        "tcti": "swtpm:path=/tpmsocket_primary.kdc/tpm",
-        "enroll_CA": "/enrollverifier/key.pem",
-        "callbacks": [ "/hcp/tools/attest_callback_common.py" ]
-    },
-
-    "kdcsvc": {
-        "setup": [ {
-                "tag": "global",
-                "exec": "/hcp/kdcsvc/setup_global.sh",
-                "touchfile": "/kdc_primary/initialized"
-            }, {
-                "tag": "local",
-                "exec": "/hcp/kdcsvc/setup_local.sh",
-                "touchfile": "/etc/hcp/primary.kdc/touch-kdcsvc-local-setup"
-            } ],
-        "state": "/kdc_primary",
-        "mode": "primary",
-        "secondaries": [ "secondary.kdc.hcphacking.xyz" ],
-        "realm": "HCPHACKING.XYZ",
-        "namespace": "hcphacking.xyz",
-        "policy_url": "http://policy.primary.kdc.hcphacking.xyz:9180",
-        "kadmin": {
-            "preclient": {
-                "_": [
-                    "Putting REALM in preclient allows the user to override it, so",
-                    "limitations (if any) can be enforced in the policysvc lookup.",
-                    "Alternatively, you can force the setting in postclient." ],
-                "__env": {
-                    "KDC_REALM": "HCPHACKING.XYZ",
-                    "KDC_DOMAIN": "hcphacking.xyz"
-                },
-                "<common>": {
-                    "realm": "{KDC_REALM}"
-                }
-            },
-            "postclient": {
-                "_": [
-                    "TODO: put settings in here and honor them.",
-                    "add: use-defaults, random-key",
-                    "add_ns: key-rotation-{epoch,period}, max-{ticket,renewable}-life,",
-                    "        and attributes" ],
-                "add": {
-                },
-                "add_ns": {
-                }
-            }
-        }
-    },
-
-    "webapi": {
-        "setup": { "touchfile": "/etc/hcp/primary.kdc/touch-kdcsvc-local-setup" },
-        "exec": "/hcp/webapi.py",
-	"healthcheck": [ "/hcp/webapi.py", "--healthcheck" ],
-        "tag": "services",
-        "servername": "primary.kdc.hcphacking.xyz",
-        "port": 9090,
-        "app": "/hcp/kdcsvc/mgmt_api.py",
-        "uwsgi_env": {
-            "HCP_TRACEFILE": "/tmp"
-        },
-        "uwsgi_uid": "www-data",
-        "uwsgi_gid": "www-data"
-    },
-
-    "kdcsvc_TGS": {
-        "_": [
-            "NB: for kicks, we listen on port 89 instead of port 88, so as to",
-            "support the 'monolith' use-case (where everything runs co-tenant",
-            "in one container), which requires there be no overlapping ports.",
-            "This use-case intends for the primary KDC to only be used",
-            "(directly) by the secondary KDC to kinit and authenticate to the",
-            "primary's 'ipropd-master'. Once replication is running, it could",
-            "get these from itself, but ... chicken-and-egg. Other than that,",
-            "the primary's TGS shouldn't be needed at all, so we give it the",
-            "non-standard port, make everyone else's krb5.conf point to the",
-            "secondary, but point the secondary to the primary and specify",
-            "this non-standard port." ],
-        "setup": { "touchfile": "/etc/hcp/primary.kdc/touch-kdcsvc-local-setup" },
-        "exec": "/install-heimdal/libexec/kdc",
-	"__TODO_healthcheck": null,
-        "args": [ "--config-file=/kdc_primary/etc/kdc.conf", "--ports=3089" ],
-        "tag": "services"
-    },
-
-    "kdcsvc_iprop_primary": {
-        "setup": { "touchfile": "/etc/hcp/primary.kdc/touch-kdcsvc-local-setup" },
-        "exec": [
-            "/hcp/common/restarter.py", "-t", "5",
-            "/install-heimdal/libexec/ipropd-master"
-        ],
-        "args": [
-            "--config-file=/kdc_primary/etc/kdc.conf",
-            "--keytab=HDBGET:",
-            "--hostname=primary.kdc.hcphacking.xyz",
-            "--verbose"
-        ],
-	"__TODO_healthcheck": null,
-        "tag": "services"
-    },
-
-    "tpm": {
-        "id": "tpm.primary.kdc",
-        "default_domain": "hcphacking.xyz",
-        "services": [
-            "swtpm"
-        ],
-        "default_targets": [
-            "setup-global",
-            "start-services"
-        ],
-        "swtpm": {
-            "setup": {
-                "tag": "global",
-                "exec": [
-                    "/hcp/common/wait_touchfile.py",
-                    "/tpm_primary.kdc/tpm/ek.pub"
-                ],
-                "touchfile": "/tpm_primary.kdc/tpm/ek.pub"
-            },
-            "exec": "/hcp/swtpm.py",
-	    "healthcheck": [ "/hcp/swtpm.py", "--healthcheck" ],
-            "state": "/tpm_primary.kdc",
-            "sockdir": "/tpmsocket_primary.kdc",
-            "tag": "services"
-        }
-    },
-
-    "policysvc": {
-        "id": "policy.primary.kdc",
-        "default_domain": "hcphacking.xyz",
-        "services": [
-            "webapi"
-        ],
-        "default_targets": [
-            "start-services"
-        ],
-        "webapi": {
-            "exec": "/hcp/webapi.py",
-	    "healthcheck": [ "/hcp/webapi.py", "--healthcheck" ],
-            "tag": "services",
-            "servername": "policy.primary.kdc.hcphacking.xyz",
-            "port": 9180,
-            "app": "/hcp/policysvc/policy_api.py",
-            "config": "/usecase/kdc_primary.policy.json",
-            "uwsgi_env": {
-                "HCP_TRACEFILE": "/tmp",
-                "uncomment_to_enable_HCP_POLICYSVC_DEBUG": "1"
-            },
-            "uwsgi_uid": "www-data",
-            "uwsgi_gid": "www-data"
-        }
     }
 }

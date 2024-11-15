@@ -1,0 +1,20 @@
+{
+    "_": [
+        "We set tags to 'swtpm' because a cotenant TPM needs to be set up and",
+        "running before other kinds of setup, so it needs its own tag."
+    ],
+    "setup": [ {
+        "tag": "swtpm",
+        "exec": [ "/hcp/common/wait_touchfile.py", "/tpm_{id}/tpm/ek.pub" ],
+        "touchfile": "/tpm_{id}/tpm/ek.pub"
+    }, {
+        "tag": "swtpm",
+        "exec": [ "mkdir", "-p", "/tpmsocket_{id}" ],
+        "touchdir": "/tpmsocket_{id}"
+    } ],
+    "exec": "/hcp/swtpm.py",
+    "healthcheck": [ "/hcp/swtpm.py", "--healthcheck" ],
+    "state": "/tpm_{id}",
+    "sockdir": "/tpmsocket_{id}",
+    "tag": "swtpm"
+}

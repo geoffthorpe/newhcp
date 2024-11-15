@@ -1,0 +1,34 @@
+{
+    "setup": [ {
+            "tag": "global",
+            "exec": "/hcp/kdcsvc/setup_global.sh",
+            "touchfile": "{kdcsvc_dir}/initialized"
+        }, {
+            "tag": "local",
+            "exec": "/hcp/kdcsvc/setup_local.sh",
+            "touchfile": "/etc/hcp/{id}/touch-kdcsvc-local-setup"
+        } ],
+    "state": "{kdcsvc_dir}",
+    "mode": "{kdcsvc_mode}",
+    "secondaries": "{kdcsvc_secondaries}",
+    "realm": "{kdcsvc_realm}",
+    "namespace": "{kdcsvc_namespace}",
+    "policy_url": "{kdcsvc_policyurl}",
+    "kadmin": {
+        "preclient": {
+            "__env": {
+                "KDC_REALM": "{kdcsvc_realm}",
+                "KDC_DOMAIN": "{kdcsvc_namespace}"
+            },
+            "<common>": {
+                "realm": "{KDC_REALM}"
+            }
+        },
+        "postclient": {
+            "add": {
+            },
+            "add_ns": {
+            }
+        }
+    }
+}

@@ -11,6 +11,7 @@ from datetime import datetime, timezone, timedelta
 
 sys.path.insert(1, '/hcp/xtra')
 import HcpJsonPath
+from HcpJsonScope import parse_scope, run_scope
 
 # Equivalent for the 'touch' command
 def touch(p, *, makedirs = True):
@@ -94,6 +95,16 @@ def bail(s, exitcode = 1):
 	hlog(0, f"FAIL: {s}")
 	sys.exit(exitcode)
 
+# We use this hook to handle replace all calls to json.load(open(...)) in order
+# to detect and automatically process any ".scope" stanza.
+def jsonload(p):
+	j = json.load(open(p, 'r'))
+	if isinstance(j, dict) and 'scope' in j:
+		rb = j.pop('scope')
+		parse_scope(rb, 'null')
+		j = run_scope(j, rb, 'null')
+	return j
+
 # - HCP_CONFIG_FILE is the path to the JSON config file.
 # - HCP_CONFIG_SCOPE is where we are currently 'nested' within that JSON.
 # - hcp_config_extract() pulls fields from the JSON, at the given path, and
@@ -123,14 +134,14 @@ else:
 			hlog(2, f"- from: {curpath}")
 			hlog(2, f"-   to: {newpath}")
 			os.makedirs(workloadpath, exist_ok = True, mode = 0o755)
-			world = json.load(open(curpath, 'r'))
+			world = jsonload(curpath)
 			with open(newpath, 'w') as f:
 				json.dump(world, f)
 			os.environ['HCP_CONFIG_FILE'] = newpath
 def hcp_config_scope_set(path):
 	if 'HCP_CONFIG_FILE' not in os.environ:
 		raise Exception("!HCP_CONFIG_FILE")
-	world = json.load(open(os.environ['HCP_CONFIG_FILE'], 'r'))
+	world = jsonload(os.environ['HCP_CONFIG_FILE'])
 	if not path.startswith('.'):
 		path = f".{path}"
 	hlog(2, f"hcp_config_scope_set: {path}")
@@ -216,7 +227,8 @@ def hcp_config_extract(path, **kwargs):
 		full_path = path
 	elif path != '.':
 		full_path = f"{full_path}{path}"
-	world = json.load(open(os.environ['HCP_CONFIG_FILE'], 'r'))
+	hlog(2,f"hcp_config_extract({path}), HCP_CONFIG_FILE={os.environ['HCP_CONFIG_FILE']}, full_path={full_path}")
+	world = jsonload(os.environ['HCP_CONFIG_FILE'])
 	return HcpJsonPath.extract_path(world, full_path, **kwargs)
 
 def env_get(k):

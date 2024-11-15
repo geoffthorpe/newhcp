@@ -1,47 +1,18 @@
 {
-    "_": " vim: set expandtab shiftwidth=4 softtabstop=4: ",
-
-    "id": "erepl",
-    "default_domain": "hcphacking.xyz",
-
-    "services": [
-        "enrollsvc",
-        "git-daemon"
-    ],
-    "default_targets": [
-        "setup-global",
-        "setup-local",
-        "start-services"
-    ],
-
-    "enrollsvc": {
-        "setup": [ {
-                "tag": "global",
-                "exec": [
-                    "/hcp/common/wait_touchfile.py",
-                    "/enrolldb/initialized"
-                ],
-                "touchfile": "/enrolldb/initialized"
-            }, {
-                "tag": "local",
-                "exec": "/hcp/enrollsvc/setup_local.sh",
-                "touchfile": "/etc/hcp/erepl/touch-enrollsvc-local-setup"
-            } ],
-        "state": "/enrolldb",
-        "realm": "HCPHACKING.XYZ"
+    "vars": {
+        "id": "erepl",
+        "services": [ "enrollsvc", "git-daemon" ],
+        "default_targets": [ "setup-global", "setup-local", "start-services" ],
+        "git-daemon_uid": "emgmtdb"
     },
 
-    "git-daemon": {
-        "setup": { "touchfile": "/etc/hcp/erepl/touch-enrollsvc-local-setup" },
-        "exec": "/usr/lib/git-core/git-daemon",
-        "args": [
-            "--reuseaddr",
-            "--listen=0.0.0.0",
-            "--port=9418",
-            "--base-path=/enrolldb/db"
-        ],
-	"healthcheck": [ "/hcp/enrollsvc/repl_healthcheck.sh" ],
-        "tag": "services",
-        "uid": "emgmtdb"
-    }
+    "scope": [
+        { "load": ".defaults", "path": "/usecase/proto_defaults.json" },
+        { "vars": ".defaults" },
+        { "import": ".", "source": "." },
+        { "vars": ".vars" },
+        { "loadunion": ".", "path": "/usecase/proto_root.json" },
+        { "load": ".enrollsvc", "path": "/usecase/proto_enrollsvc_repl.json" },
+        { "load": ".git-daemon", "path": "/usecase/proto_git-daemon.json" }
+    ]
 }

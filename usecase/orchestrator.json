@@ -1,20 +1,17 @@
 {
-    "_": " vim: set expandtab shiftwidth=4 softtabstop=4: ",
-
-    "id": "orchestrator",
-    "default_domain": "hcphacking.xyz",
-
-    "services": [
-        "orchestrator"
-    ],
-    "default_targets": [
-        "start-orchestrator"
-    ],
+    "vars": {
+        "id": "orchestrator",
+        "services": [ "orchestrator" ],
+        "default_targets": [ "start-orchestrator" ]
+    },
     "args_for": "orchestrator",
 
-    "orchestrator": {
-        "exec": "/hcp/tools/run_orchestrator.sh",
-        "tag": "orchestrator",
-        "fleet": "/usecase/fleet.json"
-    }
+    "scope": [
+        { "load": ".defaults", "path": "/usecase/proto_defaults.json" },
+        { "vars": ".defaults" },
+        { "import": ".", "source": "." },
+        { "vars": ".vars" },
+        { "loadunion": ".", "path": "/usecase/proto_root.json" },
+        { "load": ".orchestrator", "path": "/usecase/proto_orchestrator.json" }
+    ]
 }

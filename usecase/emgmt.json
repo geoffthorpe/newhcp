@@ -1,76 +1,52 @@
 {
-    "_": [
-        " vim: set expandtab shiftwidth=4 softtabstop=4: ",
-        "",
-        "So this is the 'emgmt' definition, the authoritative/read-write",
-        "half of 'enrollsvc'. It's probably the most elaborate definition",
-        "in HCP, so deserves some explanation.",
-        "* 'enrollsvc', this is actually to perform setup. It sets up",
-        "  privilege separation and bakes some trusted config into the",
-        "  rootfs (so that non-root processes can load it without trusting",
-        "  their callers). The actual service is provied by 'webapi', it's",
-        "  a flask app.",
-        "* 'webapi', the flask app that provides the 'emgmt' service. This",
-        "  is mostly stateless - actual work is passed through a curated",
-        "  sudo rule to 'enrollsvc' functions running as a different user,",
-        "  that get their config from the 'enrollsvc' data, not 'webapi'.",
-        "* 'reenroller', this periodically looks for enrollments that due",
-        "  to be reenrolled and reenrolls them.",
-        "* 'purger', this periodically looks for debug files that are old",
-        "  enough and 'purges' them."
+    "vars": {
+        "id": "emgmt",
+        "services": [ "enrollsvc", "webapi", "reenroller", "purger" ],
+        "default_targets": [ "setup-global", "setup-local", "start-services" ],
+        "enrollsvc_policyurl": "http://policy.emgmt.hcphacking.xyz:9080",
+        "policysvc_config": "/usecase/emgmt.policy.json",
+        "reenroller_uid": "emgmtdb",
+	"webapi_app": "/hcp/enrollsvc/mgmt_api.py",
+        "webapi_fqdn": "emgmt.hcphacking.xyz",
+        "webapi_port": 8443,
+        "webapi_https_authentication": "clientcert",
+	"webapi_https_certificate": "/enrollserver/server.pem",
+	"webapi_setup": { "touchfile": "/etc/hcp/{id}/touch-enrollsvc-local-setup" },
+        "webapi_uwsgi_env": {
+            "HOME": "/home/emgmtflask",
+            "HCP_TRACEFILE": "/home/emgmtflask"
+        },
+        "webapi_uwsgi_uid": "emgmtflask"
+    },
+
+    "scope": [
+        { "load": ".defaults", "path": "/usecase/proto_defaults.json" },
+        { "vars": ".defaults" },
+        { "import": ".", "source": "." },
+        { "vars": ".vars" },
+        { "loadunion": ".", "path": "/usecase/proto_root.json" },
+        { "loadunion": ".enrollsvc", "path": "/usecase/proto_enrollsvc_mgmt.json" },
+        { "load": ".webapi", "path": "/usecase/proto_webapi.json" },
+        { "load": ".reenroller", "path": "/usecase/proto_reenroller.json" },
+        { "loadunion": ".purger", "path": "/usecase/proto_purger.json" },
+        { "load": ".policysvc", "path": "/usecase/proto_policysvc_sidecar.json" }
     ],
 
-    "id": "emgmt",
-    "default_domain": "hcphacking.xyz",
-
-    "services": [
-        "enrollsvc",
-        "webapi",
-        "reenroller",
-        "purger"
-    ],
-    "default_targets": [
-        "setup-global",
-        "setup-local",
-        "start-services"
-    ],
+    "purger": {
+        "purgerlogjson": [
+            {
+                "glob": "/home/emgmtdb/debug-*",
+                "hours": 2
+            },
+            {
+                "glob": "/home/emgmtflask/debug-*",
+                "hours": 2
+            }
+        ]
+    },
 
     "enrollsvc": {
-        "_": [
-            "This is a setup-only 'service', its settings get consumed by",
-            "setup hooks, and when services start up, there is nothing here to",
-            "start (webapi.py, reenroller, and purger are self-sufficient at",
-            "that point). That said, it will create the users that non-root",
-            "tasks start as, and it will write this JSON structure into those",
-            "home directories, so for example sudo'd handlers invoked by the",
-            "webapi will get this JSON struct as their context, which is why",
-            "the 'db_add' section is in here.",
-            "Regarding 'setup' and the 'tag' values. The idea is that setup",
-            "of persistent data requires launcher running with 'setup-global'.",
-            "Even if the container then closes, global setup is done. OTOH, if",
-            "you run 'setup-local' and allow the container to exit, its",
-            "effects are lost. So you run launcher with 'setup-local start' to",
-            "lanch services that depend on local setup." ],
-        "setup": [ {
-                "tag": "global",
-                "exec": "/hcp/enrollsvc/setup_global.sh",
-                "touchfile": "/enrolldb/initialized"
-            }, {
-                "tag": "local",
-                "exec": "/hcp/enrollsvc/setup_local.sh",
-                "touchfile": "/etc/hcp/emgmt/touch-enrollsvc-local-setup"
-            } ],
-        "state": "/enrolldb",
-        "realm": "HCPHACKING.XYZ",
-        "policy_url": "http://policy.emgmt.hcphacking.xyz:9080",
-        "tpm_vendors": "/vendors",
         "db_add": {
-            "_": [
-                "Settings specific to the enrollment 'add' operation.",
-                " - preclient: template enrollment profile. The (possibly empty)",
-                "       profile in the client's request gets overlaid.",
-                " - postclient: last-word enrollment profile. This gets overlaid",
-                "       after the profile from the client's request." ],
             "preclient": {
                 "__env": {
                     "ENROLL_ISSUERCERT": "/usr/share/ca-certificates/{ENROLL_ID}/certissuer.pem",
@@ -174,97 +150,6 @@
                     "dest": "certissuer.pem"
                 }
             }
-        }
-    },
-
-    "webapi": {
-        "setup": { "touchfile": "/etc/hcp/emgmt/touch-enrollsvc-local-setup" },
-        "exec": "/hcp/webapi.py",
-        "healthcheck": [ "/hcp/webapi.py", "--healthcheck" ],
-        "tag": "services",
-        "servername": "emgmt.hcphacking.xyz",
-        "port": 8443,
-        "https": {
-            "certificate": "/enrollserver/server.pem",
-            "authentication": "clientcert",
-            "client_CA": "/enrollcertchecker/CA.cert",
-            "healthclient": "/enrollclient/client.pem"
-        },
-        "app": "/hcp/enrollsvc/mgmt_api.py",
-        "uwsgi_env": {
-            "HOME": "/home/emgmtflask",
-            "HCP_TRACEFILE": "/home/emgmtflask"
-        },
-        "uwsgi_uid": "emgmtflask",
-        "uwsgi_gid": "www-data"
-    },
-
-    "reenroller": {
-        "setup": { "touchfile": "/etc/hcp/emgmt/touch-enrollsvc-local-setup" },
-        "exec": "/hcp/enrollsvc/reenroller.sh",
-        "nowait": 1,
-        "tag": "services",
-        "uid": "emgmtdb",
-        "period": {
-            "seconds": 30
-        },
-        "retry": {
-            "minutes": 5
-        }
-    },
-
-    "purger": {
-        "exec": "/hcp/common/purger.py",
-        "nowait": 1,
-        "tag": "services",
-        "dir": "/purger",
-        "period": 60,
-        "retry": 120,
-        "purgerlogdir": "/purger/logs",
-        "purgerlogfmt": "log-{t.year:04}{t.month:02}{t.day:02}{t.hour:02}",
-        "purgerlogjson": [
-            {
-                "glob": "/purger/logs/log-*",
-                "hours": 5
-            },
-            {
-                "glob": "/home/emgmtdb/debug-*",
-                "hours": 2
-            },
-            {
-                "glob": "/home/emgmtflask/debug-*",
-                "hours": 2
-            },
-            {
-                "glob": "/root/debug-*",
-                "hours": 2
-            }
-        ]
-    },
-
-    "policysvc": {
-        "id": "policy.emgmt",
-        "default_domain": "hcphacking.xyz",
-        "services": [
-            "webapi"
-        ],
-        "default_targets": [
-            "start-services"
-        ],
-        "webapi": {
-            "exec": "/hcp/webapi.py",
-	    "healthcheck": [ "/hcp/webapi.py", "--healthcheck" ],
-            "tag": "services",
-            "servername": "policy.emgmt.hcphacking.xyz",
-            "port": 9080,
-            "app": "/hcp/policysvc/policy_api.py",
-            "config": "/usecase/emgmt.policy.json",
-            "uwsgi_env": {
-                "HCP_TRACEFILE": "/tmp",
-                "__uncomment_HCP_POLICYSVC_DEBUG": "1"
-            },
-            "uwsgi_uid": "www-data",
-            "uwsgi_gid": "www-data"
         }
     }
 }

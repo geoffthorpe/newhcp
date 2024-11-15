@@ -1,0 +1,26 @@
+{
+    "id": "tpm.{id}",
+    "default_domain": "{default_domain}",
+    "services": [
+        "swtpm"
+    ],
+    "default_targets": [
+        "setup-global",
+        "start-services"
+    ],
+    "swtpm": {
+        "setup": {
+            "tag": "global",
+            "exec": [
+                "/hcp/common/wait_touchfile.py",
+                "/tpm_{id}/tpm/ek.pub"
+            ],
+            "touchfile": "/tpm_{id}/tpm/ek.pub"
+        },
+        "exec": "/hcp/swtpm.py",
+        "healthcheck": [ "/hcp/swtpm.py", "--healthcheck" ],
+        "state": "/tpm_{id}",
+        "sockdir": "/tpmsocket_{id}",
+        "tag": "services"
+    }
+}

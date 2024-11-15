@@ -1,72 +1,42 @@
 {
-    "_": " vim: set expandtab shiftwidth=4 softtabstop=4: ",
-
-    "id": "bigbrother",
-    "default_domain": "hcphacking.xyz",
-
-    "services": [
-        "swtpm",
-        "attester",
-        "sshd"
+    "_": [
+        "The trick with this one is to setup and run the cotenant swtpm before",
+        "running attester, which is itself required before services..."
     ],
-    "default_targets": [
-        "setup-swtpm",
-        "start-swtpm",
-        "start-attester",
-        "start-services"
+    "vars": {
+        "id": "bigbrother",
+        "services": [ "swtpm", "attester", "sshd" ],
+        "default_targets": [ "setup-swtpm", "start-swtpm", "start-attester",
+                            "start-services" ],
+        "sshd_fqdn": "bigbrother.hcphacking.xyz",
+        "sshd_port": 22
+    },
+    "args_for": "sshd",
+
+    "scope": [
+        { "load": ".defaults", "path": "/usecase/proto_defaults.json" },
+        { "vars": ".defaults" },
+        { "import": ".", "source": "." },
+        { "vars": ".vars" },
+        { "loadunion": ".", "path": "/usecase/proto_root.json" },
+        { "unionload": ".attester", "path": "/usecase/proto_attester.json" },
+        { "load": ".client", "path": "/usecase/proto_client.json" },
+        { "load": ".sshd", "path": "/usecase/proto_sshd.json" },
+        { "load": ".swtpm", "path": "/usecase/proto_tpm_cotenant.json" }
     ],
 
-    "swtpm": {
-        "setup": [ {
-            "tag": "swtpm",
-            "exec": [
-                "/hcp/common/wait_touchfile.py",
-                "/tpm_bigbrother/tpm/ek.pub"
-            ],
-            "touchfile": "/tpm_bigbrother/tpm/ek.pub"
-        }, {
-            "tag": "swtpm",
-            "exec": [ "mkdir", "/tpmsocket_bigbrother" ],
-            "touchdir": "/tpmsocket_bigbrother"
-        } ],
-        "exec": "/hcp/swtpm.py",
-	"healthcheck": [ "/hcp/swtpm.py", "--healthcheck" ],
-        "state": "/tpm_bigbrother",
-        "sockdir": "/tpmsocket_bigbrother",
-        "tag": "swtpm"
+    "env": {
+        "set": {
+            "KRB5_KTNAME": "/etc/hcp/sherver/krb5.keytab",
+            "KRB5_CONFIG": "/etc/hcp/sherver/krb5.conf"
+        }
     },
 
     "attester": {
-        "exec": "/hcp/common/attester.py",
-	"__TODO_healthcheck": null,
-        "until": "/etc/hcp/bigbrother/touch-attested",
-        "nowait": 1,
-        "tag": "attester",
-        "period": 120,
-        "retry": 5,
         "env": {
-            "unset": {
-                "HCP_NOTRACEFILE": null
+            "set": {
+                "HCP_ATTESTCLIENT_HOOK_KRB5KEYTAB": "/hcp/sshd.py --hup"
             }
         }
-    },
-    "client": {
-        "exec": "/hcp/tools/run_client.sh",
-        "touchfile": "/etc/hcp/bigbrother/touch-attested",
-        "env": {
-            "unset": { "HCP_NOTRACEFILE": null }
-        },
-        "attest_url": "http://ahcp.hcphacking.xyz:8080",
-        "tcti": "swtpm:path=/tpmsocket_bigbrother/tpm",
-        "enroll_CA": "/enrollverifier/key.pem",
-        "callbacks": [ "/hcp/tools/attest_callback_common.py" ],
-        "global": true
-    },
-
-    "sshd": {
-        "exec": "/hcp/sshd.py",
-	"healthcheck": [ "/hcp/sshd.py", "--healthcheck" ],
-        "tag": "services",
-        "port": 22
     }
 }

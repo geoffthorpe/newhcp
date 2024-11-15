@@ -1,0 +1,22 @@
+{
+    "id": "policy.{id}",
+    "default_domain": "{default_domain}",
+    "services": [
+        "webapi"
+    ],
+    "default_targets": [
+        "start-services"
+    ],
+    "webapi": {
+        "exec": "/hcp/webapi.py",
+	    "healthcheck": [ "/hcp/webapi.py", "--healthcheck" ],
+        "tag": "services",
+        "servername": "policy.{id}.{default_domain}",
+        "port": "{policysvc_port}",
+        "app": "/hcp/policysvc/policy_api.py",
+        "config": "{policysvc_config}",
+        "uwsgi_env": "{policysvc_uwsgi_env}",
+        "uwsgi_uid": "{policysvc_uwsgi_uid}",
+        "uwsgi_gid": "{policysvc_uwsgi_gid}"
+    }
+}

@@ -1,75 +1,19 @@
 {
-    "_": " vim: set expandtab shiftwidth=4 softtabstop=4: ",
-
-    "id": "workstation1",
-    "default_domain": "hcphacking.xyz",
-
-    "services": [
-        "attester",
-        "do_nothing"
-    ],
-    "default_targets": [
-        "start-attester",
-        "start-services"
-    ],
-
-    "attester": {
-        "exec": "/hcp/common/attester.py",
-	"__TODO_healthcheck": null,
-        "until": "/etc/hcp/workstation1/touch-attested",
-        "nowait": 1,
-        "tag": "attester",
-        "period": 120,
-        "retry": 5,
-        "env": {
-            "unset": {
-                "HCP_NOTRACEFILE": null
-            }
-        }
-    },
-    "client": {
-        "exec": "/hcp/tools/run_client.sh",
-        "touchfile": "/etc/hcp/workstation1/touch-attested",
-        "env": {
-            "unset": { "HCP_NOTRACEFILE": null }
-        },
-        "attest_url": "http://ahcp.hcphacking.xyz:8080",
-        "tcti": "swtpm:path=/tpmsocket_workstation1/tpm",
-        "enroll_CA": "/enrollverifier/key.pem",
-        "callbacks": [ "/hcp/tools/attest_callback_common.py" ],
-        "global": true
+    "vars": {
+        "id": "workstation1",
+        "services": [ "attester", "do_nothing" ],
+	"default_targets": [ "start-attester", "start-services" ]
     },
 
-    "do_nothing": {
-        "exec": "/hcp/common/do_nothing.sh",
-	"healthcheck": "/hcp/attested.py",
-        "tag": "services"
-    },
-
-    "tpm": {
-        "id": "tpm.workstation1",
-        "default_domain": "hcphacking.xyz",
-        "services": [
-            "swtpm"
-        ],
-        "default_targets": [
-            "setup-global",
-            "start-services"
-        ],
-        "swtpm": {
-            "setup": {
-                "tag": "global",
-                "exec": [
-                    "/hcp/common/wait_touchfile.py",
-                    "/tpm_workstation1/tpm/ek.pub"
-                ],
-                "touchfile": "/tpm_workstation1/tpm/ek.pub"
-            },
-            "exec": "/hcp/swtpm.py",
-	    "healthcheck": [ "/hcp/swtpm.py", "--healthcheck" ],
-            "state": "/tpm_workstation1",
-            "sockdir": "/tpmsocket_workstation1",
-            "tag": "services"
-        }
-    }
+    "scope": [
+        { "load": ".defaults", "path": "/usecase/proto_defaults.json" },
+        { "vars": ".defaults" },
+        { "import": ".", "source": "." },
+        { "vars": ".vars" },
+        { "load": ".", "path": "/usecase/proto_root.json" },
+        { "load": ".attester", "path": "/usecase/proto_attester.json" },
+        { "load": ".client", "path": "/usecase/proto_client.json" },
+        { "load": ".do_nothing", "path": "/usecase/proto_do_nothing.json" },
+        { "load": ".tpm", "path": "/usecase/proto_tpm_sidecar.json" }
+    ]
 }

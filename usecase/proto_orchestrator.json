@@ -1,0 +1,5 @@
+{
+    "exec": "/hcp/tools/run_orchestrator.sh",
+    "tag": "orchestrator",
+    "fleet": "/usecase/fleet.json"
+}

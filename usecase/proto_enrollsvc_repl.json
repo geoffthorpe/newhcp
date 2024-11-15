@@ -1,0 +1,16 @@
+{
+    "setup": [ {
+            "tag": "global",
+            "exec": [
+                "/hcp/common/wait_touchfile.py",
+                "{enrollsvc_db}/initialized"
+            ],
+            "touchfile": "{enrollsvc_db}/initialized"
+        }, {
+            "tag": "local",
+            "exec": "/hcp/enrollsvc/setup_local.sh",
+            "touchfile": "/etc/hcp/{id}/touch-enrollsvc-local-setup"
+        } ],
+    "state": "{enrollsvc_db}",
+    "realm": "{enrollsvc_realm}"
+}

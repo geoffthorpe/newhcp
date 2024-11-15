@@ -1,0 +1,15 @@
+{
+    "setup": { "touchfile": "/etc/hcp/{id}/touch-kdcsvc-local-setup" },
+    "exec": [
+        "/hcp/common/restarter.py", "-t", "5",
+        "/install-heimdal/libexec/ipropd-master"
+    ],
+    "args": [
+        "--config-file={kdcsvc_dir}/etc/kdc.conf",
+        "--keytab=HDBGET:",
+        "--hostname={id}.{default_domain}",
+        "--verbose"
+    ],
+    "__TODO_healthcheck": null,
+    "tag": "{kdcsvc_tag}"
+}

@@ -1,53 +1,18 @@
 {
-    "_": " vim: set expandtab shiftwidth=4 softtabstop=4: ",
-
-    "id": "aclient",
-    "default_domain": "hcphacking.xyz",
-
-    "services": [
-        "client"
-    ],
-    "default_targets": [
-        "start-client"
-    ],
+    "vars": {
+        "id": "aclient",
+        "services": [ "client" ],
+        "default_targets": [ "start-client" ]
+    },
     "args_for": "client",
 
-    "client": {
-        "exec": "/hcp/tools/run_client.sh",
-        "tag": "client",
-        "env": {
-            "unset": { "HCP_NOTRACEFILE": null }
-        },
-        "attest_url": "http://ahcp.hcphacking.xyz:8080",
-        "tcti": "swtpm:path=/tpm_socket_aclient/tpm",
-        "enroll_CA": "/enrollverifier/key.pem",
-        "callbacks": [ "/hcp/tools/attest_callback_common.py" ]
-    },
-
-    "tpm": {
-        "id": "tpm.aclient",
-        "default_domain": "hcphacking.xyz",
-        "services": [
-            "swtpm"
-        ],
-        "default_targets": [
-            "setup-global",
-            "start-services"
-        ],
-        "swtpm": {
-            "setup": {
-                "tag": "global",
-                "exec": [
-                    "/hcp/common/wait_touchfile.py",
-                    "/tpm_aclient/tpm/ek.pub"
-                ],
-                "touchfile": "/tpm_aclient/tpm/ek.pub"
-            },
-            "exec": "/hcp/swtpm.py",
-            "healthcheck": [ "/hcp/swtpm.py", "--healthcheck" ],
-            "state": "/tpm_aclient",
-            "sockdir": "/tpm_socket_aclient",
-            "tag": "services"
-        }
-    }
+    "scope": [
+        { "load": ".defaults", "path": "/usecase/proto_defaults.json" },
+        { "vars": ".defaults" },
+        { "import": ".", "source": "." },
+        { "vars": ".vars" },
+        { "loadunion": ".", "path": "/usecase/proto_root.json" },
+        { "load": ".client", "path": "/usecase/proto_client.json" },
+        { "load": ".tpm", "path": "/usecase/proto_tpm_sidecar.json" }
+    ]
 }

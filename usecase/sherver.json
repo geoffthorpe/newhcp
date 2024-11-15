@@ -1,8 +1,25 @@
 {
-    "_": " vim: set expandtab shiftwidth=4 softtabstop=4: ",
+    "vars": {
+        "id": "sherver",
+        "services": [ "attester", "sshd" ],
+	"default_targets": [ "start-attester", "start-services" ],
+        "client_global": false,
+	"sshd_fqdn": "sherver.hcphacking.xyz",
+	"sshd_port": 2222
+    },
+    "args_for": "sshd",
 
-    "id": "sherver",
-    "default_domain": "hcphacking.xyz",
+    "scope": [
+        { "load": ".defaults", "path": "/usecase/proto_defaults.json" },
+        { "vars": ".defaults" },
+        { "import": ".", "source": "." },
+        { "vars": ".vars" },
+        { "loadunion": ".", "path": "/usecase/proto_root.json" },
+        { "unionload": ".attester", "path": "/usecase/proto_attester.json" },
+        { "load": ".client", "path": "/usecase/proto_client.json" },
+        { "load": ".sshd", "path": "/usecase/proto_sshd.json" },
+        { "load": ".tpm", "path": "/usecase/proto_tpm_sidecar.json" }
+    ],
 
     "env": {
         "set": {
@@ -11,79 +28,11 @@
         }
     },
 
-    "services": [
-        "attester",
-        "sshd"
-    ],
-    "default_targets": [
-        "start-attester",
-        "start-services"
-    ],
-    "args_for": "sshd",
-
     "attester": {
-        "exec": "/hcp/common/attester.py",
-        "until": "/etc/hcp/sherver/touch-attested",
-        "nowait": 1,
-        "tag": "attester",
         "env": {
-            "unset": {
-                "HCP_NOTRACEFILE": null
-            },
             "set": {
                 "HCP_ATTESTCLIENT_HOOK_KRB5KEYTAB": "/hcp/sshd.py --hup"
             }
-        },
-        "period": 120,
-        "retry": 5
-    },
-    "client": {
-        "exec": "/hcp/tools/run_client.sh",
-        "touchfile": "/etc/hcp/sherver/touch-attested",
-        "env": {
-            "unset": { "HCP_NOTRACEFILE": null }
-        },
-        "attest_url": "http://ahcp.hcphacking.xyz:8080",
-        "tcti": "swtpm:path=/tpmsocket_sherver/tpm",
-        "enroll_CA": "/enrollverifier/key.pem",
-        "callbacks": [ "/hcp/tools/attest_callback_common.py" ]
-    },
-
-    "sshd": {
-        "exec": "/hcp/sshd.py",
-	"healthcheck": [ "/hcp/sshd.py", "--healthcheck" ],
-        "tag": "services",
-        "port": 2222,
-	"hostname": "sherver.hcphacking.xyz",
-        "xtra": [
-            "# GSSAPIStoreNonAn2Ln yes"
-        ]
-    },
-
-    "tpm": {
-        "id": "tpm.sherver",
-        "default_domain": "hcphacking.xyz",
-        "services": [
-            "swtpm"
-        ],
-        "default_targets": [
-            "setup-global",
-            "start-services"
-        ],
-        "swtpm": {
-            "setup": {
-                "tag": "global",
-                "exec": [
-                    "/hcp/common/wait_touchfile.py",
-                    "/tpm_sherver/tpm/ek.pub"
-                ],
-                "touchfile": "/tpm_sherver/tpm/ek.pub"
-            },
-            "exec": "/hcp/swtpm.py",
-	    "healthcheck": [ "/hcp/swtpm.py", "--healthcheck" ],
-            "state": "/tpm_sherver",
-            "sockdir": "/tpmsocket_sherver",
-            "tag": "services"
         }
     }
 }

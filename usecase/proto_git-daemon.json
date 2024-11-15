@@ -1,0 +1,13 @@
+{
+    "setup": { "touchfile": "/etc/hcp/{id}/touch-enrollsvc-local-setup" },
+    "exec": "/usr/lib/git-core/git-daemon",
+    "args": [
+        "--reuseaddr",
+        "--listen=0.0.0.0",
+        "--port={git-daemon_port}",
+        "--base-path={enrollsvc_db}/db"
+    ],
+	"healthcheck": [ "/hcp/enrollsvc/repl_healthcheck.sh" ],
+    "tag": "{git-daemon_tag}",
+    "uid": "{git-daemon_uid}"
+}

@@ -1,0 +1,9 @@
+{
+    "setup": { "touchfile": "/etc/hcp/{id}/touch-enrollsvc-local-setup" },
+    "exec": "/hcp/enrollsvc/reenroller.sh",
+    "nowait": 1,
+    "tag": "{reenroller_tag}",
+    "uid": "{reenroller_uid}",
+    "period": "{reenroller_period}",
+    "retry": "{reenroller_retry}"
+}
