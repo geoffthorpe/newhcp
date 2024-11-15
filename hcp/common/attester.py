@@ -10,6 +10,7 @@ from hcp_common import log, bail, current_tracefile, hcp_config_extract
 
 _period = hcp_config_extract('.attester.period', must_exist = True)
 _retry = hcp_config_extract('.attester.retry', or_default = True, default = _period)
+_until = hcp_config_extract('.attester.until', or_default = True)
 try:
 	period = int(_period)
 	retry = int(_retry)
@@ -35,6 +36,8 @@ while True:
 		res = -1
 	log(f"Command exited with code={res}")
 	if res == 0:
+		if _until:
+			open(_until, 'w')
 		time.sleep(period)
 	else:
 		time.sleep(retry)
