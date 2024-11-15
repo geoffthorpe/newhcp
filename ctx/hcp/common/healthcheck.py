@@ -103,6 +103,7 @@ services = hcp_config_extract('services', or_default = True, default = [])
 if not isinstance(services, list):
     bail(f"'services' field should be a list (not a {type(services)})")
 
+num_healthchecks = 0
 for name in services:
     if not isinstance(name, str):
         bail(f"services fields should be str (not {type(service)})")
@@ -122,5 +123,8 @@ for name in services:
     post_subprocess(service)
     if p.returncode != 0:
         bail(f"'{name}:healthcheck' failed, code: {p.returncode}")
+    num_healthchecks += 1
 
+if not num_healthchecks:
+    bail("no healthchecks")
 hlog(2, "HCP healthcheck: done")
