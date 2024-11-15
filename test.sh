@@ -49,8 +49,6 @@ do_run "Create and enroll TPMs for aclient, kdc_primary, kdc_secondary" \
 	run "orchestrator /hcp/tools/run_orchestrator.sh -c -e aclient kdc_primary kdc_secondary"
 do_run "Successful attestation" \
 	run "aclient /hcp/tools/run_client.sh -R 10 -P 1"
-do_run "Starting primary and secondary KDCs" \
-	up "kdc_primary kdc_secondary"
 do_run "Wait for secondary KDC to have realm replicated" \
 	exec "kdc_secondary /hcp/kdcsvc/realm_healthcheck.py -R 10 -P 1"
 do_run "Create and enroll remaining TPMs" \
@@ -64,6 +62,8 @@ sso_cmd="$sso_cmd ssh -l luser -p 2222 sherver.hcphacking.xyz echo"
 sso_cmd="$sso_cmd \"This output indicates successful SSO+ssh\""
 do_run "Do SSO login from workstation1 to sherver as 'luser'" \
 	exec "workstation1 $sso_cmd"
+do_run "Wait for bigbrother to be ready" \
+	exec "bigbrother /hcp/attested.py -R 10 -P 1"
 sso_cmd="/install-heimdal/bin/kinit -C FILE:/root/.hcp/pkinit/user-root-key.pem root"
 sso_cmd="$sso_cmd ssh -l root -p 2222 sherver.hcphacking.xyz echo"
 sso_cmd="$sso_cmd \"If root==\$(whoami) then success\""
