@@ -24,7 +24,7 @@ echo "   NAMESPACE: $HCP_KDCSVC_NAMESPACE"
 echo "   POLICYURL: $HCP_KDCSVC_POLICYURL"
 
 if [[ ! -d $HCP_KDCSVC_STATE ]]; then
-	echo "Error, enrollsvc::state isn't a directory: $HCP_KDCSVC_STATE" >&2
+	echo "Error, kdcsvc::state isn't a directory: $HCP_KDCSVC_STATE" >&2
 	exit 1
 fi
 

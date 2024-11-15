@@ -28,5 +28,6 @@ if ! ln -s "$HCP_KDCSVC_STATE/etc/sudoers" "$BORKBORK" > /dev/null 2>&1 && \
 fi
 
 # Done!
+mkdir -p $(dirname $HCP_KDCSVC_LOCAL_INIT)
 touch "$HCP_KDCSVC_LOCAL_INIT"
 echo "Local state now initialized"
