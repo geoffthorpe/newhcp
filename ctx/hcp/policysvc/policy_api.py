@@ -19,9 +19,11 @@ import HcpJsonPolicy
 app = flask.Flask(__name__)
 app.config["DEBUG"] = False
 
-# The policysvc is implemented via 'webapi', where the '.webapi.app' property
-# (ie. the flask app) is /hcp/policysvc/policy_api.py. In that case, we pull
-# the policy JSON path from '.webapi.config'.
+# webapi will have copied our scope to a new /etc file, so if we let the SCOPE
+# env-var live any longer, we will be trying to apply it to the already-scoped
+# file.
+os.environ.pop('HCP_CONFIG_SCOPE', None)
+
 policyjsonpath = hcp_config_extract('.webapi.config', must_exist = True)
 policyjson = open(policyjsonpath, "r").read()
 

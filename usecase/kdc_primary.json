@@ -174,5 +174,31 @@
             "sockdir": "/tpm_socket_kdc_primary",
             "tag": "services"
         }
+    },
+
+    "policysvc": {
+        "id": "policy.primary.kdc",
+        "default_domain": "hcphacking.xyz",
+        "services": [
+            "webapi"
+        ],
+        "default_targets": [
+            "start-services"
+        ],
+        "webapi": {
+            "exec": "/hcp/webapi.py",
+	    "healthcheck": [ "/hcp/webapi.py", "--healthcheck" ],
+            "tag": "services",
+            "servername": "policy.primary.kdc.hcphacking.xyz",
+            "port": 9180,
+            "app": "/hcp/policysvc/policy_api.py",
+            "config": "/usecase/kdc_primary.policy.json",
+            "uwsgi_env": {
+                "HCP_TRACEFILE": "/tmp",
+                "uncomment_to_enable_HCP_POLICYSVC_DEBUG": "1"
+            },
+            "uwsgi_uid": "www-data",
+            "uwsgi_gid": "www-data"
+        }
     }
 }

@@ -240,5 +240,31 @@
                 "hours": 2
             }
         ]
+    },
+
+    "policysvc": {
+        "id": "policy.emgmt",
+        "default_domain": "hcphacking.xyz",
+        "services": [
+            "webapi"
+        ],
+        "default_targets": [
+            "start-services"
+        ],
+        "webapi": {
+            "exec": "/hcp/webapi.py",
+	    "healthcheck": [ "/hcp/webapi.py", "--healthcheck" ],
+            "tag": "services",
+            "servername": "policy.emgmt.hcphacking.xyz",
+            "port": 9080,
+            "app": "/hcp/policysvc/policy_api.py",
+            "config": "/usecase/emgmt.policy.json",
+            "uwsgi_env": {
+                "HCP_TRACEFILE": "/tmp",
+                "__uncomment_HCP_POLICYSVC_DEBUG": "1"
+            },
+            "uwsgi_uid": "www-data",
+            "uwsgi_gid": "www-data"
+        }
     }
 }
