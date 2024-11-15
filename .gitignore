@@ -4,3 +4,4 @@
 /_testcreds/
 /ctx/heimdal-install.tar.gz
 __pycache__
+/ctx/safeboot/enroll.conf

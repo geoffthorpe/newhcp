@@ -30,6 +30,9 @@ make
 ### Run the example workflow (test)
 
 ```
+# The docker-compose stuff depends on TOP being set
+export TOP=$(pwd)
+
 # Run the test, which will clean up after itself, with quiet output
 Q=1 ./test.sh
 
