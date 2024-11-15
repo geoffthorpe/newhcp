@@ -62,6 +62,7 @@ import os
 from HcpJsonPath import valid_path, extract_path, overwrite_path, delete_path, \
 		HcpJsonPathError
 from HcpRecursiveUnion import union
+import HcpJsonExpander as he
 
 import sys
 def log(s):
@@ -110,13 +111,19 @@ def scope_valid_union(s, x, n):
 	except HcpJsonPathError as e:
 		raise HcpJsonScopeError(f"{x}: invalid '{n}' source(s)\n{e}")
 def scope_valid_load(s, x, n):
-	log(f"FUNC scope_valid_union running; {s},{x},{n}")
+	log(f"FUNC scope_valid_load running; {s},{x},{n}")
 	scope_valid_common(s, x, n)
 	if len(s) < 2 or 'path' not in s:
 		raise HcpJsonScopeError(f"{x}: '{n}' must have (only) 'path'")
 	if not os.path.isfile(s['path']):
 		raise HcpJsonScopeError(f"{x}: invalid '{n}' path\n")
-def scope_run_set(s, x, n, datanew, dataold):
+def scope_valid_vars(s, x, n):
+	log(f"FUNC scope_valid_vars running; {s},{x},{n}")
+	scope_valid_common(s, x, n)
+	if len(s) != 1:
+		raise HcpJsonScopeError(f"{x}: '{n}' has no parameters")
+	# TODO: add path check to vars path
+def scope_run_set(s, x, n, datanew, dataold, env):
 	log(f"FUNC scope_run_set starting; {s},{x},{n}")
 	path = s[n]
 	value = s['value']
@@ -124,14 +131,14 @@ def scope_run_set(s, x, n, datanew, dataold):
 	res = overwrite_path(datanew, path, value)
 	log(f"FUNC scope_run_set ending; {res}")
 	return res
-def scope_run_delete(s, x, n, datanew, dataold):
+def scope_run_delete(s, x, n, datanew, dataold, env):
 	log(f"FUNC scope_run_delete starting; {s},{x},{n}")
 	path = s[n]
 	log(f"path={path}")
 	res = delete_path(datanew, path)
 	log(f"FUNC scope_run_delete ending; {res}")
 	return res
-def scope_run_import(s, x, n, datanew, dataold):
+def scope_run_import(s, x, n, datanew, dataold, env):
 	log(f"FUNC scope_run_import starting; {s},{x},{n}")
 	path = s[n]
 	source = s['source']
@@ -142,7 +149,7 @@ def scope_run_import(s, x, n, datanew, dataold):
 	res = overwrite_path(datanew, path, value)
 	log(f"FUNC scope_run_import ending; {res}")
 	return res
-def scope_run_union(s, x, n, datanew, dataold):
+def scope_run_union(s, x, n, datanew, dataold, env):
 	log(f"FUNC scope_run_union starting; {s},{x},{n}")
 	path = s[n]
 	source1 = s['source1']
@@ -162,22 +169,52 @@ def scope_run_union(s, x, n, datanew, dataold):
 	res = overwrite_path(datanew, path, value)
 	log(f"FUNC scope_run_union ending; {res}")
 	return res
-def scope_run_load(s, x, n, datanew, dataold):
+def scope_run_load(s, x, n, datanew, dataold, env):
 	log(f"FUNC scope_run_load starting; {s},{x},{n}")
 	path = s[n]
 	fpath = s['path']
 	log(f"path={path}, fpath={fpath}")
 	value = json.load(open(fpath, 'r'))
+	value = he.process_obj(env, value, currentpath = path,
+			varskey = None, fileskey = None)
 	res = overwrite_path(datanew, path, value)
 	log(f"FUNC scope_run_load ending; {res}")
 	return res
+def scope_run_loadunion(s, x, n, datanew, dataold, env):
+	log(f"FUNC scope_run_loadunion starting; {s},{x},{n}")
+	path = s[n]
+	fpath = s['path']
+	log(f"path={path}, fpath={fpath}")
+	value = json.load(open(fpath, 'r'))
+	value = he.process_obj(env, value, currentpath = path,
+			varskey = None, fileskey = None)
+	ok, evalue = extract_path(datanew, path)
+	if ok:
+		value = union(value, evalue)
+	res = overwrite_path(datanew, path, value)
+	log(f"FUNC scope_run_loadunion ending; {res}")
+	return res
+def scope_run_vars(s, x, n, datanew, dataold, env):
+	log(f"FUNC scope_run_vars starting; {s},{x},{n}")
+	path = s[n]
+	ok, value = extract_path(datanew, path)
+	if not ok:
+		raise HcpJsonScopeError(f"{x}: vars: missing '{path}'")
+	if isinstance(value, dict):
+		for k in value:
+			env[k] = value[k]
+		delete_path(datanew, path)
+	log(f"FUNC scope_run_vars ending")
+	return datanew
 
 scopemeths = {
 	'set': { 'is_valid': scope_valid_set, 'run': scope_run_set },
 	'delete': { 'is_valid': scope_valid_delete, 'run': scope_run_delete },
 	'import': { 'is_valid': scope_valid_import, 'run': scope_run_import },
 	'union': { 'is_valid': scope_valid_union, 'run': scope_run_union },
-	'load': { 'is_valid': scope_valid_load, 'run': scope_run_load }
+	'load': { 'is_valid': scope_valid_load, 'run': scope_run_load },
+	'loadunion': { 'is_valid': scope_valid_load, 'run': scope_run_loadunion },
+	'vars': { 'is_valid': scope_valid_vars, 'run': scope_run_vars }
 }
 
 # Parse a "scope" list
@@ -211,10 +248,11 @@ def parse_scope(s, x):
 def run_scope(data, scope, x, scopemeths = scopemeths):
 	log(f"FUNC run_scope starting; {x},{scope},{data}")
 	result = {}
+	env = {}
 	for c in scope:
 		methkey = c['meth']
 		meth = scopemeths[methkey]
-		result = meth['run'](c, x, methkey, result, data)
+		result = meth['run'](c, x, methkey, result, data, env)
 	log(f"FUNC run_scope ending")
 	return result
 
@@ -225,8 +263,8 @@ if __name__ == '__main__':
 		fp = open(sys.argv[1], 'r')
 
 	j = json.load(fp)
-	if isinstance(j, dict) and 'rebuild' in j:
-		rb = j.pop('rebuild')
+	if isinstance(j, dict) and 'scope' in j:
+		rb = j.pop('scope')
 		parse_scope(rb, 'null')
 		j = run_scope(j, rb, 'null')
 	json.dump(j, sys.stdout)
