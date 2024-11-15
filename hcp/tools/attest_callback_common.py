@@ -502,6 +502,7 @@ for c in classes:
 				if x['is_changed']:
 					print(f" - install: {x['name']},{x['mode']:o}")
 					print(f"      dest: {x['dest']}")
+					lazy_makedirs(os.path.dirname(x['dest']))
 					shutil.copyfile(x['name'], x['dest'])
 					os.chmod(x['dest'], x['mode'])
 					uid = x['uid']
