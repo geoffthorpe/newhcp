@@ -42,7 +42,7 @@
 
     "do_nothing": {
         "exec": "/hcp/common/do_nothing.sh",
-	"__TODO_healthcheck": null,
+	"healthcheck": "/hcp/attested.py",
         "tag": "services"
     },
 
