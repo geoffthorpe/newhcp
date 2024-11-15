@@ -61,7 +61,7 @@
 		},
 		{
 			"name": "kdc_primary",
-			"tpm_path": "/tpm_kdc_primary",
+			"tpm_path": "/tpm_primary.kdc",
 			"enroll_hostname": "primary.kdc.hcphacking.xyz",
 			"enroll_profile": {
 				"__env": {
@@ -80,7 +80,7 @@
 		},
 		{
 			"name": "kdc_secondary",
-			"tpm_path": "/tpm_kdc_secondary",
+			"tpm_path": "/tpm_secondary.kdc",
 			"enroll_hostname": "secondary.kdc.hcphacking.xyz",
 			"enroll_profile": {
 				"__env": {

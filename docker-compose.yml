@@ -127,8 +127,8 @@ services:
           - ./_testcreds/enrollcertchecker:/enrollcertchecker:ro
           - ./_testcreds/enrollclient:/enrollclient:ro
           - tpm_aclient:/tpm_aclient
-          - tpm_kdc_primary:/tpm_kdc_primary
-          - tpm_kdc_secondary:/tpm_kdc_secondary
+          - tpm_kdc_primary:/tpm_primary.kdc
+          - tpm_kdc_secondary:/tpm_secondary.kdc
           - tpm_sherver:/tpm_sherver
           - tpm_workstation1:/tpm_workstation1
           - tpm_bigbrother:/tpm_bigbrother
@@ -142,7 +142,7 @@ services:
         networks:
           - hcpnetwork
         volumes:
-          - tpmsocket_aclient:/tpm_socket_aclient
+          - tpmsocket_aclient:/tpmsocket_aclient
           - ./_testcreds/enrollverifier:/enrollverifier:ro
         environment:
           - HCP_CONFIG_FILE=/usecase/aclient.json
@@ -152,7 +152,7 @@ services:
         hostname: aclient_tpm.hcphacking.xyz
         volumes:
           - tpm_aclient:/tpm_aclient
-          - tpmsocket_aclient:/tpm_socket_aclient
+          - tpmsocket_aclient:/tpmsocket_aclient
         environment:
           - HCP_CONFIG_FILE=/usecase/aclient.json
 
@@ -164,7 +164,7 @@ services:
           - kdc_primary_private
         volumes:
           - kdc_primary:/kdc_primary
-          - tpmsocket_kdc_primary:/tpmsocket_kdc_primary
+          - tpmsocket_kdc_primary:/tpmsocket_primary.kdc
           - ./_testcreds/enrollcertchecker:/enrollcertchecker:ro
           - ./_testcreds/enrollclient:/enrollclient:ro
           - ./_testcreds/enrollverifier:/enrollverifier:ro
@@ -175,8 +175,8 @@ services:
         extends: common_tpm
         hostname: kdc_primary_tpm.hcphacking.xyz
         volumes:
-          - tpm_kdc_primary:/tpm_kdc_primary
-          - tpmsocket_kdc_primary:/tpm_socket_kdc_primary
+          - tpm_kdc_primary:/tpm_primary.kdc
+          - tpmsocket_kdc_primary:/tpmsocket_primary.kdc
         environment:
           - HCP_CONFIG_FILE=/usecase/kdc_primary.json
 
@@ -196,7 +196,7 @@ services:
           - kdc_secondary_private
         volumes:
           - kdc_secondary:/kdc_secondary
-          - tpmsocket_kdc_secondary:/tpmsocket_kdc_secondary
+          - tpmsocket_kdc_secondary:/tpmsocket_secondary.kdc
           - ./_testcreds/enrollcertchecker:/enrollcertchecker:ro
           - ./_testcreds/enrollclient:/enrollclient:ro
           - ./_testcreds/enrollverifier:/enrollverifier:ro
@@ -207,8 +207,8 @@ services:
         extends: common_tpm
         hostname: kdc_secondary_tpm.hcphacking.xyz
         volumes:
-          - tpm_kdc_secondary:/tpm_kdc_secondary
-          - tpmsocket_kdc_secondary:/tpm_socket_kdc_secondary
+          - tpm_kdc_secondary:/tpm_secondary.kdc
+          - tpmsocket_kdc_secondary:/tpmsocket_secondary.kdc
         environment:
           - HCP_CONFIG_FILE=/usecase/kdc_secondary.json
 

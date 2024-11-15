@@ -49,7 +49,7 @@
             "unset": { "HCP_NOTRACEFILE": null }
         },
         "attest_url": "http://ahcp.hcphacking.xyz:8080",
-        "tcti": "swtpm:path=/tpmsocket_kdc_primary/tpm",
+        "tcti": "swtpm:path=/tpmsocket_primary.kdc/tpm",
         "enroll_CA": "/enrollverifier/key.pem",
         "callbacks": [ "/hcp/tools/attest_callback_common.py" ]
     },
@@ -164,14 +164,14 @@
                 "tag": "global",
                 "exec": [
                     "/hcp/common/wait_touchfile.py",
-                    "/tpm_kdc_primary/tpm/ek.pub"
+                    "/tpm_primary.kdc/tpm/ek.pub"
                 ],
-                "touchfile": "/tpm_kdc_primary/tpm/ek.pub"
+                "touchfile": "/tpm_primary.kdc/tpm/ek.pub"
             },
             "exec": "/hcp/swtpm.py",
 	    "healthcheck": [ "/hcp/swtpm.py", "--healthcheck" ],
-            "state": "/tpm_kdc_primary",
-            "sockdir": "/tpm_socket_kdc_primary",
+            "state": "/tpm_primary.kdc",
+            "sockdir": "/tpmsocket_primary.kdc",
             "tag": "services"
         }
     },
