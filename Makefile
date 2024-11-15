@@ -45,9 +45,9 @@ include Makefile.macros
 define cb_hcp_caboodle
 $(eval D := $(strip $1))
 $(eval _CTX := $(strip $2))
-$($D_SYNC): $(shell find ./ctx/hcp) $(shell find ./ctx/safeboot ! -type l)
+$($D_SYNC): $(shell find ./hcp) $(shell find ./safeboot ! -type l)
 $($D_SYNC): ./ctx/ssh_config ./heimdal/$(HEIMDAL_OUT) ./nginx/$(NGINX_OUT)
-	$Qrsync -a ./ctx/hcp ./ctx/safeboot ./ctx/ssh_config \
+	$Qrsync -a ./hcp ./safeboot ./ctx/ssh_config \
 		./heimdal/$(HEIMDAL_OUT) ./nginx/$(NGINX_OUT) $(_CTX)/
 	$Qtouch $$@
 endef

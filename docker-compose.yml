@@ -38,8 +38,8 @@ services:
         image: hcp_caboodle:trixie
         init: true
         volumes:
-          - ${TOP}/ctx/hcp:/hcp:ro
-          - ${TOP}/ctx/safeboot:/install-safeboot
+          - ${TOP}/hcp:/hcp:ro
+          - ${TOP}/safeboot:/install-safeboot
           - ./usecase:/usecase:ro
         environment:
           - HCP_LAUNCHER_TGTS=${HCP_LAUNCHER_TGTS:-}
