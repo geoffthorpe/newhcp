@@ -1,13 +1,11 @@
-# Host Cryptographic Provisioning (HCP)
+# NewHCP
 
 There's a lot to unpack, as people may be coming to this project for multiple
 different reasons and I need to structure things so that each of them can find
 what they're looking for.
 
 * **[Quick reference](#quick-reference)** for building and running
-* **[What](doc/HCP-what-it-is.md)** it is and what it does
-* **[Why](doc/HCP-why-it-exists.md)** it exists and works the way it does
-* **[How](doc/HCP-how-it-works.md)** it works
+* **[What](#what-it-is-and-what-it-does)** it is and what it does
 
 ---
 
@@ -77,3 +75,50 @@ luser@sherver:~$
 ```
 docker-compose down -v
 ```
+
+---
+
+## What it is and what it does
+
+### **[HCP (Host Cryptographic Provisioning)](doc/hcp.md)**
+
+Reference implementation of a TPM-enrollment-based attestation framework for provisioning hosts with secret and non-secret assets.
+
+* Step by step through an HCP infrastructure
+* Enrollment service (`emgmt`, `erepl`)
+* Attestation service (`arepl`, `ahcp`)
+* Enrollment client (`orchestrator`)
+* Attestation client (`aclient`)
+
+Here is a diagram overview of HCP's reference usecase;
+![HCP overview diagram](doc/hcp-overview.svg)
+
+### Software TPM service
+
+Consumes TPM state created by the `orchestrator` tool. Can be instantiated as a side-car container (using a shared-mount for host communication - no networking) or as a cotenant service within the host container.
+
+### **[Stateless KDC (Kerberos Domain Controller) service](doc/stateless-kdc.md)**
+
+Demonstrates how PKI-based identity can underpin a Kerberos network, because none of the service or client (role/user) identities in the reference usecase are registered with the KDC, instead their Kerberos credentials are obtained from X509v3 certificates containing their authorized identity. Think of it as "stateless, certificate-based Kerberos".
+
+* namespace principals (service credentials)
+* synthetic principals (client credentials)
+* `kdcsvc` (kadmin API, replication, ...)
+
+### Stateless SSH (sshd) service
+
+A cotenant service that allows a host's user accounts to become ssh-accessible using Kerberos (GSS-API) authentication. Together with the Stateless KDC service, this shows an end-to-end SSO solution running on top of an HCP-bootstrapped network.
+
+### Policy service
+
+A policy-enforcement service in which a JSON configuration document defines all the policy rules (iptables-like) for examining input payloads (which are also JSON) and then returns success or failure. The https-based APIs for the TPM enrollment service and the KDC both implement hooks on the back-end to support using the policy service, and the example workflow shows them in use. Ie. the service represents its client's request as a JSON document and submits that to its associated policy service for approval/rejection. This allows for an architecture to have some separation between what it enables (the application service) and what constraints it imposes (codified in the policy service).
+
+### WebAPI service
+
+A web-API-hosting service (based on uwsgi) for representing Flask applications and, if enabled, providing a HTTPS reverse-proxy (based on nginx) using TLS certificates obtained from TPM enrollment. This service runs co-tenant inside all the other serviecs that provide web APIs (dog-food).
+
+### **[Tooling](doc/tooling.md)**
+
+* Workload launcher, for defining and running workloads, consisting of services and dependencies. This consumes a basic JSON description of what has to be setup and started and runs like a container init daemon.
+* JSON manipulations, for parameter expansion (HcpJsonExpander), policy evaluation (HcpJsonPolicy), programmatic manipulation (HcpJsonScope), etc.
+* Extensible workflow, for building and running.
