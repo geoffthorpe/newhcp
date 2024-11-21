@@ -82,15 +82,8 @@ docker-compose down -v
 
 ### **[HCP (Host Cryptographic Provisioning)](doc/hcp.md)**
 
-Reference implementation of a TPM-enrollment-based attestation framework for provisioning hosts with secret and non-secret assets.
+Reference implementation of a TPM-enrollment-based attestation framework for provisioning hosts with secret and non-secret assets.[Click here for more detail.](doc/hcp.md) Here is a diagram overview of HCP's reference usecase;
 
-* Step by step through an HCP infrastructure
-* Enrollment service (`emgmt`, `erepl`)
-* Attestation service (`arepl`, `ahcp`)
-* Enrollment client (`orchestrator`)
-* Attestation client (`aclient`)
-
-Here is a diagram overview of HCP's reference usecase;
 ![HCP overview diagram](doc/hcp-overview.svg)
 
 ### Software TPM service
