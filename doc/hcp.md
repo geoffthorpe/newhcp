@@ -37,7 +37,6 @@ Processing entry: aclient (doesn't exist)
     create: TPM created successfully
     enroll: TPM enrolled successfully
 $ docker-compose run orchestrator
-Creating newhcp_orchestrator_run ... done
 Processing entry: aclient (exists, enrolled)
 Processing entry: kdc_primary (doesn't exist)
 Processing entry: kdc_secondary (doesn't exist)
@@ -49,11 +48,11 @@ Processing entry: www (doesn't exist)
 
 2. The host+TPM enrollment is created within the Enrollment service's database and is periodically refreshed to ensure that enrolled credentials are fresh (unexpired).
 
-3. The Attestation service instance (of which there may be many) replicates the enrollment database from the Enrollment service (the replication continues over time).
+3. The Attestation service instance (of which there may be many) replicates the enrollment database from the Enrollment service. The replication continues over time and survives network glitches, outages, etc.
 
 4. The host contacts the Attestation service and uses its TPM to attest to its current state. If the TPM is recognized in the Attestation service's (replicated clone of the) enrollment data, and the state it attests to is accepted, then the corresponding set of assets is wrapped and returned to the host.
 
-5. If the attestation was successful and assets have been returned, the canonical attestation callback (overridable) is called to examine the returned assets, unseal any sealed (secret) assets, and perform any necessary post-processing. I.e. install assets into the appropriate directories, signal any dependent apps ("HUP") to reload assets that might be expiring, etc. The following trace shows the reference usecase's `aclient` performing this sequence;
+5. If the attestation was successful and assets have been returned, any sealed (secret) assets are unsealed, then the canonical attestation callback (overridable) is called to examine the returned assets and perform any necessary post-processing. I.e. install assets into the appropriate directories, signal any dependent apps ("HUP") to reload assets that might be expiring, etc. The following trace shows the reference usecase's `aclient` performing this sequence;
 ```
 $ docker-compose run aclient
 Creating newhcp_aclient_run ... done

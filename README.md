@@ -1,8 +1,6 @@
 # NewHCP
 
-There's a lot to unpack, as people may be coming to this project for multiple
-different reasons and I need to structure things so that each of them can find
-what they're looking for.
+The structure of this README is as follows;
 
 * **[Quick reference](#quick-reference)** for building and running
 * **[What](#what-it-is-and-what-it-does)** it is and what it does
@@ -82,7 +80,7 @@ docker-compose down -v
 
 ### **[HCP (Host Cryptographic Provisioning)](doc/hcp.md)**
 
-Reference implementation of a TPM-enrollment-based attestation framework for provisioning hosts with secret and non-secret assets.[Click here for more detail.](doc/hcp.md) Here is a diagram overview of HCP's reference usecase;
+Reference implementation of a TPM-enrollment-based attestation framework for provisioning hosts with secret and non-secret assets. [Click here for more detail.](doc/hcp.md) Here is a diagram overview of HCP's reference usecase;
 
 ![HCP overview diagram](doc/hcp-overview.svg)
 
