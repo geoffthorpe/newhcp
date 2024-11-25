@@ -90,7 +90,7 @@ Consumes TPM state created by the `orchestrator` tool. Can be instantiated as a 
 
 ### **[Stateless KDC (Kerberos Domain Controller) service](doc/stateless-kdc.md)**
 
-Demonstrates how PKI-based identity can underpin a Kerberos network, because none of the service or client (role/user) identities in the reference usecase are registered with the KDC, instead their Kerberos credentials are obtained from X509v3 certificates containing their authorized identity. Think of it as "stateless, certificate-based Kerberos".
+Demonstrates how PKI-based identity can underpin a Kerberos network, because none of the service or client (role/user) identities in the reference usecase are registered with the KDC, instead their Kerberos credentials are obtained from X509v3 certificates containing their authorized identity. Think of it as "stateless, certificate-based Kerberos". [Click here for more detail.](doc/stateless-kdc.md)
 
 * namespace principals (service credentials)
 * synthetic principals (client credentials)
