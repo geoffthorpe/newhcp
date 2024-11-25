@@ -251,6 +251,33 @@ def kdc_del_ns(args):
     debug(f" - jr: {jr}")
     return True, jr
 
+def kdc_ext_keytab(args):
+    form_data = { 'principals': (None, json.dumps(args.principals)) }
+    if args.profile is not None:
+        form_data['profile'] = (None, args.profile)
+    debug("'add' handler about to call API")
+    debug(f" - url: {args.api + '/v1/ext_keytab'}")
+    debug(f" - files: {form_data}")
+    myrequest = lambda: requests.post(args.api + '/v1/ext_keytab',
+                             files=form_data,
+                             auth=auth,
+                             verify=args.requests_verify,
+                             cert=args.requests_cert,
+                             timeout=args.timeout)
+    response = requester_loop(args, myrequest)
+    debug(f" - response: {response}")
+    debug(f" - response.content: {response.content}")
+    if response.status_code != 200:
+        err(f"Error, 'add' response status code was {response.status_code}")
+        return False, None
+    try:
+        jr = json.loads(response.content)
+    except Exception as e:
+        err(f"Error, JSON decoding of 'add' response failed: {e}")
+        return False, None
+    debug(f" - jr: {jr}")
+    return True, jr
+
 
 if __name__ == '__main__':
 
@@ -375,6 +402,18 @@ if __name__ == '__main__':
     parser_a.add_argument('principals', help=del_ns_help_principals, nargs='*')
     parser_a.set_defaults(func=kdc_del_ns)
 
+    ext_keytab_help = 'Extract keytab with service principals from the KDC'
+    ext_keytab_epilog = """
+    The 'ext_keytab' subcommand invokes the '/v1/ext_keytab' handler of the KDC Service's
+    management API, to extract a current keytab for the given service
+    principals.
+    Control over the extraction is passed as a JSON string via the --profile
+    argument.
+    """
+    ext_keytab_help_principals = 'namespace principals to be removed from the KDC'
+    parser_a = subparsers.add_parser('ext_keytab', help=ext_keytab_help, epilog=ext_keytab_epilog)
+    parser_a.add_argument('principals', help=ext_keytab_help_principals, nargs='*')
+    parser_a.set_defaults(func=kdc_ext_keytab)
 
     # Process the command-line
     args = parser.parse_args()
