@@ -2,6 +2,8 @@
 
 set -e
 
+[[ -z $TOP ]] && echo "Fail: must export TOP=\$(pwd)!" && exit 1 || true
+
 echo "Running basic sanity test"
 
 [[ -n $V ]] && OUT=/dev/stdout || OUT=/dev/null
