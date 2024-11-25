@@ -33,7 +33,7 @@ include Makefile.macros
 #             |               |
 #             |       heimdal-install.tar.gz
 #             |               |
-#             |     hcp_builder_nginx:bookworm
+#             |     hcp_builder_nginx:trixie
 #             |               |
 #             |        nginx-install.tar.gz
 #             |               |
@@ -78,8 +78,8 @@ heimdal/$(HEIMDAL_OUT): | $(hcp_builder_heimdal_bookworm)
 	$Q$(DRUN) -v $(TOP)/heimdal:/heimdal $(hcp_builder_heimdal_bookworm_DNAME) bash -c \
 		"cd /heimdal && ./autogen.sh && MAKEINFO=true ./configure --disable-texinfo --prefix=/install-heimdal && MAKEINFO=true make && MAKEINFO=true make install && tar zcf heimdal-install.tar.gz /install-heimdal"
 
-nginx/$(NGINX_OUT): | $(hcp_builder_nginx_bookworm)
-	$Q$(DRUN) -v $(TOP)/nginx:/nginx -v$(TOP)/spnego-http-auth-nginx-module:/nginx/spnego-http-auth-nginx-module $(hcp_builder_nginx_bookworm_DNAME) bash -c \
+nginx/$(NGINX_OUT): | $(hcp_builder_nginx_trixie)
+	$Q$(DRUN) -v $(TOP)/nginx:/nginx -v$(TOP)/spnego-http-auth-nginx-module:/nginx/spnego-http-auth-nginx-module $(hcp_builder_nginx_trixie_DNAME) bash -c \
 		"cd /nginx && perl -pi.bak -e 's/-lgssapi_krb5/-lgssapi/' spnego-http-auth-nginx-module/config && auto/configure --prefix=/install-nginx --with-http_ssl_module --add-module=spnego-http-auth-nginx-module --with-cc-opt='-I /install-heimdal/include' --with-ld-opt='-L /install-heimdal/lib' && make install && tar zcf nginx-install.tar.gz /install-nginx"
 
 clean:
