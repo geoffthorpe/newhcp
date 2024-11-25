@@ -114,13 +114,13 @@ Nov 25 19:48:25 2024  Nov 25 19:53:25 2024  krbtgt/HCPHACKING.XYZ@HCPHACKING.XYZ
 
 ## `kdcsvc`
 
-### The kdcsvc API, and `/hcp/tools/kdc\_api.py`
+### The kdcsvc API, and `/hcp/tools/kdc_api.py`
 
 The KDC Service runs a `webapi` instance whose interface is derived from the command-line interface of the kadmin tool. It supports the following actions on the KDC database; `add`, `add_ns`, `get`, `del`, and `del_ns`, and `ext_keytab`. These allow it to (respectively) add new regular principals, add new namespace principals, query principals, delete regular principals, delete namespace principals, and extract keytabs for service principals. As with all webapi-hosted apps, it supports optional HTTPS with various client-authentication options, but the reference usecase runs the interface over unencrypted HTTP. (Yes, this would be a bad idea in production.)
 
 Note, in the HCP workflow and the reference usecase, the presence of the KDC service is to show how it can operate statelessly, where _all_ principals are derived on-the-fly based on certificates. In this mode of operation, there should be no need to manipulate the KDC database, but the ability to do so supports hybrid scenarios and/or helps when migrating a legacy database over to stateless usage. The KDC's database can register and use (and replicate) conventional principals, even if the reference usecase only makes use of the new, dynamically-generated kinds of principals.
 
-To help with the use of the KDC web API, the `/hcp/tools/kdc\_api.py` library and tool can be used. The earlier section on namespace principals shows an example usage - one can get further usage information about how to invoke the tool by adding a `--help` argument. (For importing it into other python code, the easiest reference is to read the code itself.)
+To help with the use of the KDC web API, the `/hcp/tools/kdc_api.py` library and tool can be used. The earlier section on namespace principals shows an example usage - one can get further usage information about how to invoke the tool by adding a `--help` argument. (For importing it into other python code, the easiest reference is to read the code itself.)
 
 ### kdcsvc replication
 
