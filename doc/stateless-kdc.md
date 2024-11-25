@@ -34,7 +34,41 @@ $ jq . foo.json
 
 The last two principals have the `WELLKNOWN/HOSTBASED-NAMESPACE` prefix - they are the namespace principals. The first of the two has an underscore as the service identifier, which acts as a wild-card. The latter of the two has the `host` service identifier, as used for SSH services, and that namespace principal is configured to allow delegation. Service principals that match the network address `<something>.hcphacking.xyz` and the realm `HCPHACKING.XYZ` but do not have the `host` service identifier will match on (and be derived from) the underscored namespace principal, which is configured not to allow delegation.
 
-Note, there are two ways for services to obtain (and update) their service principals. In the reference usecase, the enrollment (and periodic reenrollment) of the service host causes a keytab to be generated as a secret (sealed) asset, so the `sherver` SSH host (for example) gets its kerberos keytab via attestation. However, the service host could obtain its keytab directly from the KDC in precisely the same way that the Enrollment service does in the reference usecase.
+Note, there are two ways for services to obtain (and update) their service principals. In the reference usecase, the enrollment (and periodic reenrollment) of the service host causes a keytab to be generated as a secret (sealed) asset, so the `sherver` SSH host (for example) gets its kerberos keytab via attestation. However, the service host could obtain its keytab directly from the KDC in precisely the same way that the Enrollment service does in the reference usecase. NB: this would require the KDC service to use HTTPS and client authentication, unlike the development configuration using HTTP that you see here.
+
+```
+$ docker-compose exec kdc_primary /hcp/tools/kdc_api.py \
+    --api http://primary.kdc.hcphacking.xyz:9090 \
+    ext_keytab HTTP/newserver.hcphacking.xyz > foo.json
+$ jq . foo.json
+{
+  "cmd": "ext_keytab",
+  "realm": "HCPHACKING.XYZ",
+  "requested": [
+    "HTTP/newserver.hcphacking.xyz"
+  ],
+  "stdout": "BQIAAABXAAIADkhDUEhBQ0tJTkcuWFlaAARIVFRQABhuZXdzZXJ2ZXIuaGNwaGFja2luZy54eXoAAAABZ0Pe6xsAEQAQ48nGvfVjwt/7GBqCo7+BdgAAABsAAAAAAAAAVwACAA5IQ1BIQUNLSU5HLlhZWgAESFRUUAAYbmV3c2VydmVyLmhjcGhhY2tpbmcueHl6AAAAAWdD3usaABEAEF5okbCKpSK+FKhm5VdIt/4AAAAaAAAAAA=="
+}
+$ jq -r .stdout foo.json | base64 -d > kt
+$ ktutil --keytab=kt list
+kt:
+
+Vno  Type                     Principal                                     Aliases
+ 27  aes128-cts-hmac-sha1-96  HTTP/newserver.hcphacking.xyz@HCPHACKING.XYZ
+ 26  aes128-cts-hmac-sha1-96  HTTP/newserver.hcphacking.xyz@HCPHACKING.XYZ
+$ # Sleep 1 hour, the default rotation period for namespace principals
+$ sleep 3600
+$ docker-compose exec kdc_primary /hcp/tools/kdc_api.py \
+    --api http://primary.kdc.hcphacking.xyz:9090 \
+    ext_keytab HTTP/newserver.hcphacking.xyz > foo.json
+$ jq -r .stdout foo.json | base64 -d > kt
+$ ktutil --keytab=kt list
+kt:
+
+Vno  Type                     Principal                                     Aliases
+ 28  aes128-cts-hmac-sha1-96  HTTP/newserver.hcphacking.xyz@HCPHACKING.XYZ
+ 27  aes128-cts-hmac-sha1-96  HTTP/newserver.hcphacking.xyz@HCPHACKING.XYZ
+```
 
 ## Synthetic principals
 
@@ -56,6 +90,26 @@ $ docker-compose exec kdc_primary cat /kdc_primary/etc/kdc.conf
 	synthetic_clients_forwardable = true
 
    [...]
+```
+
+The following illustrates how a TGT for a synthetic principal can be obtained by using an X509v3 certificate with the desired principal encoded within it.
+
+```
+$ docker-compose exec workstation1 ls -l /home/luser/.hcp/pkinit
+total 12
+-rw------- 1 luser root 4314 Nov 25 19:39 user-luser-key.pem
+-rw-r--r-- 1 luser root 2644 Nov 25 19:39 user-luser.pem
+$ docker-compose exec workstation1 /install-heimdal/bin/hxtool print --content \
+    /home/luser/.hcp/pkinit/user-luser.pem | grep Kerberos
+	otherName: 1.3.6.1.5.2.2 KerberosPrincipalName luser@HCPHACKING.XYZ
+$ docker-compose exec workstation1 /install-heimdal/bin/kinit -C \
+    FILE:/home/luser/.hcp/pkinit/user-luser-key.pem luser \
+    /install-heimdal/bin/klist
+Credentials cache: FILE:/tmp/krb5cc_n6pEWh
+        Principal: luser@HCPHACKING.XYZ
+
+  Issued                Expires               Principal
+Nov 25 19:48:25 2024  Nov 25 19:53:25 2024  krbtgt/HCPHACKING.XYZ@HCPHACKING.XYZ
 ```
 
 ## `kdcsvc`
