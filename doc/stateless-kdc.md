@@ -17,17 +17,17 @@ $ jq . foo.json
   "realm": "HCPHACKING.XYZ",
   "requested": [],
   "principals": [
-    " default@HCPHACKING.XYZ",
-    " kadmin/admin@HCPHACKING.XYZ",
-    " kadmin/hprop@HCPHACKING.XYZ",
-    " kadmin/changepw@HCPHACKING.XYZ",
-    " changepw/kerberos@HCPHACKING.XYZ",
-    " WELLKNOWN/ANONYMOUS@HCPHACKING.XYZ",
-    " WELLKNOWN/FEDERATED@HCPHACKING.XYZ",
-    " krbtgt/HCPHACKING.XYZ@HCPHACKING.XYZ",
-    " WELLKNOWN/org.h5l.fast-cookie@WELLKNOWN:ORG.H5L",
-    " WELLKNOWN/HOSTBASED-NAMESPACE/_/hcphacking.xyz@HCPHACKING.XYZ",
-    " WELLKNOWN/HOSTBASED-NAMESPACE/host/hcphacking.xyz@HCPHACKING.XYZ"
+    "default@HCPHACKING.XYZ",
+    "kadmin/admin@HCPHACKING.XYZ",
+    "kadmin/hprop@HCPHACKING.XYZ",
+    "kadmin/changepw@HCPHACKING.XYZ",
+    "changepw/kerberos@HCPHACKING.XYZ",
+    "WELLKNOWN/ANONYMOUS@HCPHACKING.XYZ",
+    "WELLKNOWN/FEDERATED@HCPHACKING.XYZ",
+    "krbtgt/HCPHACKING.XYZ@HCPHACKING.XYZ",
+    "WELLKNOWN/org.h5l.fast-cookie@WELLKNOWN:ORG.H5L",
+    "WELLKNOWN/HOSTBASED-NAMESPACE/_/hcphacking.xyz@HCPHACKING.XYZ",
+    "WELLKNOWN/HOSTBASED-NAMESPACE/host/hcphacking.xyz@HCPHACKING.XYZ"
   ]
 }
 ```

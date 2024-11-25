@@ -220,7 +220,7 @@ elif cmd == "get":
 		if len(parts) != 2:
 			mylog(f"FAIL, non-empty line doesn't split\n{i}")
 		a = parts[0].strip()
-		v = parts[1]
+		v = parts[1].strip()
 		if len(current_princ) == 0:
 			# The first attribute must be the "Principal"
 			if a != "Principal":
