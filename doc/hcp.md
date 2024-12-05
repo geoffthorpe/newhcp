@@ -248,7 +248,7 @@ The Enrollment service API has a corresponding python library+tool called [enrol
 The `orchestrator` container;
 
 * uses the aforementioned `enroll_api.py` to interact with the Enrollment service to enroll and unenroll fleet hosts and their TPMs,
-* uses a [fleet.json](../usecase/configs/fleet.json) configuration file that defines all such fleet hosts (and the requested set of enrolled assets for each), and
+* uses a [fleet.json](../usecase/config/fleet.json) configuration file that defines all such fleet hosts (and the requested set of enrolled assets for each), and
 * is able to create and delete software TPM state for those hosts that use them (and that are mounted).
 
 ### Managing software TPMs with `orchestrator`
