@@ -55,6 +55,7 @@
                 "value": [
                     "default-pkinit-kdc",
                     "default-pkinit-iprop",
+                    "default-pkinit-https",
                     "default-https-server",
                     "default-https-server2",
                     "default-https-hostclient",
@@ -106,6 +107,15 @@
                     { "union": ".default-pkinit-iprop",
                         "source1": ".<common>",
                         "source2": ".default-pkinit-iprop" } ] },
+            { "action": "call", "if": [
+                    { "contains": ".list", "value": "default-pkinit-https" },
+                    { "exist": ".default-pkinit-https" } ],
+                "call": "hxtool-default-pkinit-https",
+                "scope": [
+                    { "import": ".", "source": "." },
+                    { "union": ".default-pkinit-https",
+                        "source1": ".<common>",
+                        "source2": ".default-pkinit-https" } ] },
             { "action": "call", "if": [
                     { "contains": ".list", "value": "user-https-client" },
                     { "exist": ".user-https-client" } ],
@@ -221,6 +231,16 @@
                 "if": { "not-equal": ".__env.ENROLL_HOSTNAME",
                     "value": "secondary.kdc.{ENROLL_DOMAIN}" },
                 "name": "enrollsvc::asset_check::default-pkinit-iprop - legit secondary",
+                "action": "reject" },
+            { "action": "return" } ],
+
+        "hxtool-default-pkinit-https": [
+            { "_": "Anything goes",
+                "action": "accept" },
+            { "_": "Only issue certs to the KDC secondary",
+                "if": { "not-equal": ".__env.ENROLL_HOSTNAME",
+                    "value": "secondary.kdc.{ENROLL_DOMAIN}" },
+                "name": "enrollsvc::asset_check::default-pkinit-https - legit secondary",
                 "action": "reject" },
             { "action": "return" } ],
 
