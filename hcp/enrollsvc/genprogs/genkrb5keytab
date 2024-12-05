@@ -67,25 +67,30 @@ if 'principal' in config:
 		bail(f"'principal' not a list or string ({type(newprincipal)})")
 	principals += newprincipal
 
-req_data = { 'principals': (None, json.dumps(principals)) }
-req_cert = None
-if clientcred:
-	req_cert = clientcred
-response = requests.post(f"{kdcsvc}/v1/ext_keytab", files = req_data,
-		verify = True, cert = req_cert)
-if response.status_code != 200:
-	bail(f"Request to KDC failed with code {response.status_code}")
-try:
-	res = json.loads(response.content)
-except Exception as e:
-	bail(f"Error, JSON decoding of kdc::ext_keytab failed: {e}")
+for p in principals:
 
-keytab64 = res['stdout']
-keytab = base64.b64decode(keytab64)
-with open('krb5.keytab', 'wb') as f:
-	f.write(keytab)
-log("keytab data written to krb5.keytab")
+	req_data = { 'principals': (None, json.dumps([p])) }
+	req_cert = None
+	if clientcred:
+		req_cert = clientcred
+	response = requests.post(f"{kdcsvc}/v1/ext_keytab", files = req_data,
+			verify = True, cert = req_cert)
+	if response.status_code != 200:
+		bail(f"Request to KDC failed with code {response.status_code}")
+	try:
+		res = json.loads(response.content)
+	except Exception as e:
+		bail(f"Error, JSON decoding of kdc::ext_keytab failed: {e}")
 
-# The end-result, we tell attest-enroll (via a line of stdout) that there's a
-# sensitive asset to seal for the enrolled host
-print("sensitive krb5.keytab")
+	keytab64 = res['stdout']
+	keytab = base64.b64decode(keytab64)
+	f = p.find('/')
+	s = p[:f] + '.' + p[f+1:] if f >= 0 else p
+	s = f"krb5.{s}.keytab"
+	with open(s, 'wb') as f:
+		f.write(keytab)
+	log(f"keytab data written to {s}")
+
+	# The end-result, we tell attest-enroll (via a line of stdout) that there's a
+	# sensitive asset to seal for the enrolled host
+	print(f"sensitive {s}")

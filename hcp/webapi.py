@@ -88,12 +88,18 @@ if not myport:
         myport = 80
 myURL = f"{myservername}:{myport}/healthcheck"
 mycurlargs = '-f -g --connect-timeout 2'
+mykinit = []
 if myhttps:
     myURL = f"https://{myURL}"
     if myauthentication == 'clientcert':
         mycurlargs = f"{mycurlargs} --cacert {myCA} --cert {myhealthclient}"
     elif myauthentication == 'kerberos':
         mycurlargs = f"{mycurlargs} --negotiate -u :"
+        mykinit += [
+            'kinit',
+            '-C',
+            'FILE:/etc/creds/unknown/healthcheck/pkinit/user-healthcheck-key.pem',
+            'healthcheck' ]
 else:
     myURL = f"http://{myURL}"
 if not args.curl_args:
@@ -121,7 +127,7 @@ os.environ['VERBOSE'] = f"{verbosity}"
 if args.healthcheck:
     h.hlog(1, f"Running: curl {args.curl_args} {args.url}")
     while True:
-        c = subprocess.run(f"curl {args.curl_args} {args.url}".split(),
+        c = subprocess.run(mykinit + f"curl {args.curl_args} {args.url}".split(),
             capture_output = True)
         if c.returncode == 0:
             break
@@ -165,6 +171,12 @@ if myhttps:
                     "{authgss}",
                     'on' if myauthentication == 'kerberos' else 'off')) > 0:
                 pass
+    if myauthentication == 'kerberos':
+        keytab = f"/etc/krb5.HTTP.{myservername}.keytab"
+        if not os.path.exists(keytab):
+            h.bail(f"FAIL: keytab ({keytab}) doesn't exist")
+        subprocess.run([ 'chgrp', 'www-data', keytab])
+        subprocess.run([ 'chmod', '0640', keytab])
     # Create log directory
     h.hlog(1, f"Creating nginx log dir: {lognginx}")
     os.makedirs(lognginx, exist_ok = True)

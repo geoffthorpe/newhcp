@@ -180,7 +180,7 @@ def method_keytab(filematch):
 		args = [ 'ktutil', 'copy', a['dest'], k ]
 		log(f"running subprocess: {args}")
 		c = subprocess.run(args)
-		# purge keys older than 1 day (TODO: configurable!)
+		# purge old keys (TODO: configurable!)
 		args = [ 'ktutil', f"--keytab={k}", 'purge', '--age=3d' ]
 		log(f"running subprocess: {args}")
 		c = subprocess.run(args)
@@ -451,7 +451,7 @@ classes = [
 	}, {
 		'_': 'Covers the assets produced by genkrb5keytab',
 		'name': 'genkrb5keytab',
-		'glob': 'krb5.keytab',
+		'glob': 'krb5.*.keytab',
 		'method': method_keytab('HCP_ATTESTCLIENT_HOOK_KRB5KEYTAB')
 	}
 ]

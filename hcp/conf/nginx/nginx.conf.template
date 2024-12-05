@@ -2,7 +2,7 @@ user www-data;
 worker_processes auto;
 worker_cpu_affinity auto;
 pid {varrunpid};
-error_log {varlogdir}/error.log;
+error_log {varlogdir}/error.log warn;
 
 events {
 	worker_connections 768;
@@ -69,8 +69,7 @@ http {
 			uwsgi_read_timeout	20;
 			uwsgi_send_timeout	20;
 			auth_gss		{authgss};
-			#auth_gss_keytab		/etc/krb5.keytab;
-			#auth_gss_service_name	HTTP/{servername}@HCPHACKING.XYZ;
+			auth_gss_keytab		/etc/krb5.HTTP.{servername}.keytab;
 			auth_gss_allow_basic_fallback off;
 			uwsgi_pass		unix:{uwsgisock};
 		}

@@ -23,7 +23,7 @@
 
     "env": {
         "set": {
-            "KRB5_KTNAME": "/etc/hcp/sherver/krb5.keytab",
+            "KRB5_KTNAME": "/etc/hcp/sherver/krb5.host.sherver.hcphacking.xyz.keytab",
             "KRB5_CONFIG": "/etc/hcp/sherver/krb5.conf"
         }
     },
