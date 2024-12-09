@@ -5,7 +5,6 @@ import re
 import json
 import time
 
-sys.path.insert(1, '/hcp/common')
 from HcpCommon import log, bail, env_get, env_get_or_none, http2exit, \
 	hcp_config_extract
 

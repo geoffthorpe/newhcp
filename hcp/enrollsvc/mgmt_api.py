@@ -11,8 +11,6 @@ import tempfile
 import requests
 
 from HcpRecursiveUnion import union
-
-sys.path.insert(1, '/hcp/common')
 from HcpCommon import log, exit2http, current_tracefile
 
 sys.path.insert(1, '/hcp/enrollsvc')

@@ -7,7 +7,6 @@ import json
 import re
 import subprocess
 
-sys.path.insert(1, '/hcp/common')
 from HcpCommon import log, bail, datetime2hint, exit2http
 
 sys.path.insert(1, '/hcp/enrollsvc')

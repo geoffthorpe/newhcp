@@ -7,7 +7,6 @@ import subprocess
 import base64
 import requests
 
-sys.path.insert(1, '/hcp/common')
 import HcpCommon
 log = HcpCommon.log
 bail = HcpCommon.bail

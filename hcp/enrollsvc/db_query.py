@@ -5,7 +5,6 @@ import json
 import glob
 import shutil
 
-sys.path.insert(1, '/hcp/common')
 import HcpCommon
 log = HcpCommon.log
 http2exit = HcpCommon.http2exit

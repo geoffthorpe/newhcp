@@ -3,7 +3,6 @@ import flask
 from flask import request, abort, send_file, jsonify
 import sys
 
-sys.path.insert(1, '/hcp/common')
 from HcpCommon import log, bail, hcp_config_extract
 
 app = flask.Flask(__name__)

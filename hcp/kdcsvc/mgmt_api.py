@@ -13,7 +13,6 @@ import requests
 from HcpRecursiveUnion import union
 from HcpPemHelper import get_email_address
 
-sys.path.insert(1, '/hcp/common')
 from HcpCommon import log, current_tracefile, http2exit, exit2http
 
 app = flask.Flask(__name__)

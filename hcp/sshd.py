@@ -7,7 +7,6 @@ import argparse
 import time
 import shutil
 
-sys.path.insert(1, '/hcp/common')
 import HcpCommon as h
 
 myinstance = h.hcp_config_extract(".id", must_exist = True)

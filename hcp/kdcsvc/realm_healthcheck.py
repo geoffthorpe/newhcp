@@ -8,7 +8,6 @@ import time
 import shutil
 import json
 
-sys.path.insert(1, '/hcp/common')
 import HcpCommon as h
 
 try:

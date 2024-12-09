@@ -5,7 +5,6 @@ import os
 import subprocess
 import time
 
-sys.path.insert(1, '/hcp/common')
 from HcpCommon import log, bail, current_tracefile, hcp_config_extract
 
 _period = hcp_config_extract('.attester.period', must_exist = True)

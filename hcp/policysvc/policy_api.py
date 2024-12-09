@@ -12,7 +12,6 @@ import requests
 
 import HcpJsonPolicy
 
-sys.path.insert(1, '/hcp/common')
 from HcpCommon import log, bail, hcp_config_extract
 
 app = flask.Flask(__name__)

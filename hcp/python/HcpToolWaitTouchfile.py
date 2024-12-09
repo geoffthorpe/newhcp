@@ -5,7 +5,6 @@ import os
 import sys
 import time
 
-sys.path.insert(1, '/hcp/common')
 from HcpCommon import bail, log, hlog
 
 if len(sys.argv) < 2:

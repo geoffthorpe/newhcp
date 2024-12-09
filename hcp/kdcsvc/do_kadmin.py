@@ -8,7 +8,6 @@ import tempfile
 import requests
 from uuid import uuid4
 
-sys.path.insert(1, '/hcp/common')
 from HcpCommon import log, bail, current_tracefile, \
 		http2exit, exit2http, hcp_config_extract
 

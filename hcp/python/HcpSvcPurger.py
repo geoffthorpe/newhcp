@@ -87,7 +87,6 @@ from datetime import datetime, timezone, timedelta
 import glob
 import json
 
-sys.path.insert(1, '/hcp/common')
 from HcpCommon import bail, dict_timedelta, dict_val_or, hcp_config_extract
 
 print("Running purger task")

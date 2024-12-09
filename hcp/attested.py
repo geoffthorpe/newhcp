@@ -7,7 +7,6 @@ import argparse
 import time
 import shutil
 
-sys.path.insert(1, '/hcp/common')
 import HcpCommon as h
 
 mytouchfile = h.hcp_config_extract(".attester.until", must_exist = True)

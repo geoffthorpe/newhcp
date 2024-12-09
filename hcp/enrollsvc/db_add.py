@@ -13,8 +13,6 @@ from HcpHostname import valid_hostname, dc_hostname, pop_hostname, pop_domain
 from HcpRecursiveUnion import union
 import HcpJsonExpander
 
-sys.path.insert(1, '/hcp/common')
-
 from HcpCommon import log, current_tracefile, http2exit, \
 	env_get_dir, env_get_file, hcp_config_extract
 

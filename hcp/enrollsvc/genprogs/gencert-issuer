@@ -6,7 +6,6 @@ import sys
 import json
 from pathlib import Path
 
-sys.path.insert(1, '/hcp/common')
 from HcpCommon import log, bail, current_tracefile, dict_val_or, env_get
 
 # attest-enroll sends us 3 arguments (+1 for the program name, so
