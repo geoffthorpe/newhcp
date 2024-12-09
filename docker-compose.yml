@@ -26,12 +26,6 @@ volumes:
 networks:
     hcpnetwork:
         # internal: true
-    emgmt_private:
-        internal: true
-    kdc_primary_private:
-        internal: true
-    kdc_secondary_private:
-        internal: true
 
 services:
     common:
@@ -41,8 +35,6 @@ services:
           - ${TOP}/hcp:/hcp:ro
           - ${TOP}/safeboot:/install-safeboot
           - ./usecase:/usecase:ro
-          - ./_testcreds/enrollcertchecker:/enrollcertchecker:ro
-          - ./_testcreds/enrollhealthclient:/enrollhealthclient:ro
         environment:
           - HCP_LAUNCHER_TGTS=${HCP_LAUNCHER_TGTS:-}
           - HCP_NOTRACEFILE=1
@@ -59,20 +51,23 @@ services:
         environment:
           - HCP_CONFIG_SCOPE=.tpm
 
-    policy:
+    common_nontpm:
         extends: common
-        hostname: policy.hcphacking.xyz
         networks:
           - hcpnetwork
+        volumes:
+          - ./_testcreds/enrollcertchecker:/enrollcertchecker:ro
+          - ./_testcreds/enrollhealthclient:/enrollhealthclient:ro
+
+    policy:
+        extends: common_nontpm
+        hostname: policy.hcphacking.xyz
         environment:
           - HCP_CONFIG_FILE=/usecase/hosts/policy.json
 
     emgmt:
-        extends: common
+        extends: common_nontpm
         hostname: emgmt.hcphacking.xyz
-        networks:
-          - hcpnetwork
-          - emgmt_private
         volumes:
           - enrolldb:/enrolldb:rw
           - ./_testcreds/enrollsigner:/enrollsigner:ro
@@ -84,20 +79,16 @@ services:
           - HCP_CONFIG_FILE=/usecase/hosts/emgmt.json
 
     erepl:
-        extends: common
+        extends: common_nontpm
         hostname: erepl.hcphacking.xyz
-        networks:
-          - hcpnetwork
         volumes:
           - enrolldb:/enrolldb:ro
         environment:
           - HCP_CONFIG_FILE=/usecase/hosts/erepl.json
 
     arepl:
-        extends: common
+        extends: common_nontpm
         hostname: arepl.hcphacking.xyz
-        networks:
-          - hcpnetwork
         volumes:
           - attestdb:/attestdb:rw
         environment:
@@ -106,20 +97,16 @@ services:
             test: test -f /attestdb/initialized && ! test -f /attestdb/hcp/transient-failure
 
     ahcp:
-        extends: common
+        extends: common_nontpm
         hostname: ahcp.hcphacking.xyz
-        networks:
-          - hcpnetwork
         volumes:
           - attestdb:/attestdb:ro
         environment:
           - HCP_CONFIG_FILE=/usecase/hosts/ahcp.json
 
     orchestrator:
-        extends: common
+        extends: common_nontpm
         hostname: orchestrator.hcphacking.xyz
-        networks:
-          - hcpnetwork
         volumes:
           - ./_testcreds/enrollcertchecker:/enrollcertchecker:ro
           - ./_testcreds/enrollclient:/enrollclient:ro
@@ -134,10 +121,8 @@ services:
           - HCP_CONFIG_FILE=/usecase/hosts/orchestrator.json
 
     aclient:
-        extends: common
+        extends: common_nontpm
         hostname: aclient.hcphacking.xyz
-        networks:
-          - hcpnetwork
         volumes:
           - tpmsocket_aclient:/tpmsocket_aclient
           - ./_testcreds/enrollverifier:/enrollverifier:ro
@@ -154,11 +139,8 @@ services:
           - HCP_CONFIG_FILE=/usecase/hosts/aclient.json
 
     kdc_primary:
-        extends: common
+        extends: common_nontpm
         hostname: primary.kdc.hcphacking.xyz
-        networks:
-          - hcpnetwork
-          - kdc_primary_private
         volumes:
           - kdc_primary:/kdc_primary
           - tpmsocket_kdc_primary:/tpmsocket_primary.kdc
@@ -177,11 +159,8 @@ services:
           - HCP_CONFIG_FILE=/usecase/hosts/kdc_primary.json
 
     kdc_secondary:
-        extends: common
+        extends: common_nontpm
         hostname: secondary.kdc.hcphacking.xyz
-        networks:
-          - hcpnetwork
-          - kdc_secondary_private
         volumes:
           - kdc_secondary:/kdc_secondary
           - tpmsocket_kdc_secondary:/tpmsocket_secondary.kdc
@@ -200,10 +179,8 @@ services:
           - HCP_CONFIG_FILE=/usecase/hosts/kdc_secondary.json
 
     ssherver:
-        extends: common
+        extends: common_nontpm
         hostname: ssherver.hcphacking.xyz
-        networks:
-          - hcpnetwork
         volumes:
           - ssherver:/ssherver
           - tpmsocket_ssherver:/tpmsocket_ssherver
@@ -221,10 +198,8 @@ services:
           - HCP_CONFIG_FILE=/usecase/hosts/ssherver.json
 
     workstation1:
-        extends: common
+        extends: common_nontpm
         hostname: workstation1.hcphacking.xyz
-        networks:
-          - hcpnetwork
         volumes:
           - tpmsocket_workstation1:/tpmsocket_workstation1
           - ./_testcreds/enrollverifier:/enrollverifier:ro
@@ -242,10 +217,8 @@ services:
           - HCP_CONFIG_FILE=/usecase/hosts/workstation1.json
 
     bigbrother:
-        extends: common
+        extends: common_nontpm
         hostname: bigbrother.hcphacking.xyz
-        networks:
-          - hcpnetwork
         volumes:
           - tpm_bigbrother:/tpm_bigbrother
           - ./_testcreds/enrollverifier:/enrollverifier:ro
@@ -253,7 +226,7 @@ services:
           - HCP_CONFIG_FILE=/usecase/hosts/bigbrother.json
 
     www:
-        extends: common
+        extends: common_nontpm
         hostname: www.hcphacking.xyz
         networks:
           hcpnetwork:
