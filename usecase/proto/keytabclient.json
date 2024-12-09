@@ -1,0 +1,7 @@
+{
+    "exec": "/hcp/tools/run_keytabclient.sh",
+    "tag": "{keytabclient_tag}",
+    "url": "{keytabclient_url}",
+    "callbacks": [],
+    "global": "{keytabclient_global}"
+}
