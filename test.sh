@@ -37,7 +37,7 @@ do_exit() {
 
 [[ -n $NOTRAP ]] || trap do_exit EXIT
 
-STARTSERVICES="policy emgmt erepl arepl ahcp aclient_tpm"
+STARTSERVICES="policy emgmt erepl arepl ahcp attestclient_tpm"
 STARTSERVICES="$STARTSERVICES kdc_primary kdc_secondary kdc_keytab"
 STARTSERVICES="$STARTSERVICES kdc_primary_tpm kdc_secondary_tpm kdc_keytab_tpm"
 STARTSERVICES="$STARTSERVICES ssherver1 workstation1 bigbrother www"
@@ -45,11 +45,11 @@ STARTSERVICES="$STARTSERVICES ssherver1_tpm workstation1_tpm www_tpm"
 do_run "Starting basic services" \
 	up "$STARTSERVICES"
 do_run "Fail a premature attestation" \
-	run "aclient /hcp/tools/run_client.sh -w"
-do_run "Create and enroll TPMs for aclient, kdc_primary, kdc_secondary" \
-	run "orchestrator /hcp/tools/run_orchestrator.sh -c -e aclient kdc_primary kdc_secondary"
+	run "attestclient /hcp/tools/run_attestclient.sh -w"
+do_run "Create and enroll TPMs for attestclient, kdc_primary, kdc_secondary" \
+	run "orchestrator /hcp/tools/run_orchestrator.sh -c -e attestclient kdc_primary kdc_secondary"
 do_run "Successful attestation" \
-	run "aclient /hcp/tools/run_client.sh -R 10 -P 1"
+	run "attestclient /hcp/tools/run_attestclient.sh -R 10 -P 1"
 do_run "Wait for secondary KDC to have realm replicated" \
 	exec "kdc_secondary /hcp/kdcsvc/realm_healthcheck.py -R 10 -P 1"
 do_run "Create and enroll remaining TPMs" \

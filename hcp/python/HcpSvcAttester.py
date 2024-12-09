@@ -17,7 +17,7 @@ except ValueError as e:
 	log(f"ERROR: .attester.{period,retry} ({_period},{_retry}) must be numbers")
 	log(f"{e}")
 	sys.exit(1)
-cmd_args = [ '/hcp/tools/run_client.sh' ]
+cmd_args = [ '/hcp/tools/run_attestclient.sh' ]
 
 log(f"Starting attester")
 log(f" - period={period}")

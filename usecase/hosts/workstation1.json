@@ -12,7 +12,7 @@
         { "vars": ".vars" },
         { "load": ".", "path": "/usecase/proto/root.json" },
         { "load": ".attester", "path": "/usecase/proto/attester.json" },
-        { "load": ".client", "path": "/usecase/proto/client.json" },
+        { "load": ".attestclient", "path": "/usecase/proto/attestclient.json" },
         { "load": ".do_nothing", "path": "/usecase/proto/do_nothing.json" },
         { "load": ".tpm", "path": "/usecase/proto/tpm_sidecar.json" }
     ]

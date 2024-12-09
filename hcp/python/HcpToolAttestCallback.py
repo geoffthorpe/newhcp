@@ -34,9 +34,9 @@ else:
 log("Starting attest_callback_common")
 
 myid = hcp_config_extract('id', or_default = True, default = 'unknown_id')
-myglobal = hcp_config_extract('client.global', or_default = True, default = False)
+myglobal = hcp_config_extract('attestclient.global', or_default = True, default = False)
 if not isinstance(myglobal, bool):
-	bail(f"'client.global' must be bool (not {type(myglobal)})")
+	bail(f"'attestclient.global' must be bool (not {type(myglobal)})")
 if myglobal:
 	etc = '/etc'
 else:
@@ -69,9 +69,9 @@ else:
 # immediately map that to the user 'joe467' and forget about 'foo'. So the
 # rules about ownership of the cred and where (or if) it gets installed will be
 # entirely based on 'joe467' in that case.
-_usermap = hcp_config_extract("client.usermap", or_default = True, default = {})
+_usermap = hcp_config_extract("attestclient.usermap", or_default = True, default = {})
 if not isinstance(_usermap, dict):
-	bail(f"'client.usermap' must be 'dict' (not {type(_usermap)})")
+	bail(f"'attestclient.usermap' must be 'dict' (not {type(_usermap)})")
 for k in _usermap:
 	v = _usermap[k]
 	# TODO: perhaps k and v should undergo more stringent checks,

@@ -38,9 +38,9 @@
 	},
 	"fleet": [
 		{
-			"name": "aclient",
-			"tpm_path": "/tpm_aclient",
-			"enroll_hostname": "aclient.hcphacking.xyz",
+			"name": "attestclient",
+			"tpm_path": "/tpm_attestclient",
+			"enroll_hostname": "attestclient.hcphacking.xyz",
 			"enroll_profile": {
 				"__env": {
 					"ENROLL_PKINIT_USER_PRINC": "alicia",

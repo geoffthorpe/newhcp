@@ -3,9 +3,9 @@
 source /hcp/common/hcp.sh
 
 ID=$(hcp_config_extract ".id")
-URL=$(hcp_config_extract ".client.attest_url")
-TCTI=$(hcp_config_extract ".client.tcti")
-ANCHOR=$(hcp_config_extract ".client.enroll_CA")
+URL=$(hcp_config_extract ".attestclient.attest_url")
+TCTI=$(hcp_config_extract ".attestclient.tcti")
+ANCHOR=$(hcp_config_extract ".attestclient.enroll_CA")
 # So longs as we're bash, parsing a JSON list will always be a
 # whitespace-handling whack-a-mole. For now, we assume that the list of
 # callbacks simply mustn't have spaces. If you want spaces, convert this script
@@ -14,8 +14,8 @@ function set_callbacks {
 	JSON_CALLBACKS=$1
 	CALLBACKS=($(jq -r '.[]' <<< "$JSON_CALLBACKS"))
 }
-set_callbacks "$(hcp_config_extract_or '.client.callbacks' '[]')"
-TFILE=$(hcp_config_extract ".client.touchfile" "")
+set_callbacks "$(hcp_config_extract_or '.attestclient.callbacks' '[]')"
+TFILE=$(hcp_config_extract ".attestclient.touchfile" "")
 
 retries=0
 pause=1

@@ -1,10 +1,10 @@
 {
     "vars": {
-        "id": "aclient",
-        "services": [ "client" ],
-        "default_targets": [ "start-client" ]
+        "id": "attestclient",
+        "services": [ "attestclient" ],
+        "default_targets": [ "start-attestclient" ]
     },
-    "args_for": "client",
+    "args_for": "attestclient",
 
     "scope": [
         { "load": ".defaults", "path": "/usecase/proto/defaults.json" },
@@ -12,7 +12,7 @@
         { "import": ".", "source": "." },
         { "vars": ".vars" },
         { "loadunion": ".", "path": "/usecase/proto/root.json" },
-        { "load": ".client", "path": "/usecase/proto/client.json" },
+        { "load": ".attestclient", "path": "/usecase/proto/attestclient.json" },
         { "load": ".tpm", "path": "/usecase/proto/tpm_sidecar.json" }
     ]
 }

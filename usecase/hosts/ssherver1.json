@@ -3,7 +3,7 @@
         "id": "ssherver1",
         "services": [ "attester", "sshd" ],
 	"default_targets": [ "start-attester", "start-services" ],
-        "client_global": false,
+        "attestclient_global": false,
 	"sshd_fqdn": "ssherver1.hcphacking.xyz",
 	"sshd_port": 22
     },
@@ -16,7 +16,7 @@
         { "vars": ".vars" },
         { "loadunion": ".", "path": "/usecase/proto/root.json" },
         { "unionload": ".attester", "path": "/usecase/proto/attester.json" },
-        { "load": ".client", "path": "/usecase/proto/client.json" },
+        { "load": ".attestclient", "path": "/usecase/proto/attestclient.json" },
         { "load": ".sshd", "path": "/usecase/proto/sshd.json" },
         { "load": ".tpm", "path": "/usecase/proto/tpm_sidecar.json" }
     ],

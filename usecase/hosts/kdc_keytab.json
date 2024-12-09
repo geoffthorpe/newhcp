@@ -23,7 +23,7 @@
         { "vars": ".vars" },
         { "loadunion": ".", "path": "/usecase/proto/root.json" },
         { "load": ".attester", "path": "/usecase/proto/attester.json" },
-        { "load": ".client", "path": "/usecase/proto/client.json" },
+        { "load": ".attestclient", "path": "/usecase/proto/attestclient.json" },
         { "load": ".webapi", "path": "/usecase/proto/webapi.json" },
         { "load": ".tpm", "path": "/usecase/proto/tpm_sidecar.json" }
     ]

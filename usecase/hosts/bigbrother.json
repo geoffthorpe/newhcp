@@ -20,7 +20,7 @@
         { "vars": ".vars" },
         { "loadunion": ".", "path": "/usecase/proto/root.json" },
         { "unionload": ".attester", "path": "/usecase/proto/attester.json" },
-        { "load": ".client", "path": "/usecase/proto/client.json" },
+        { "load": ".attestclient", "path": "/usecase/proto/attestclient.json" },
         { "load": ".sshd", "path": "/usecase/proto/sshd.json" },
         { "load": ".swtpm", "path": "/usecase/proto/tpm_cotenant.json" }
     ],

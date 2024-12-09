@@ -1,9 +1,0 @@
-{
-    "exec": "/hcp/tools/run_client.sh",
-    "tag": "{client_tag}",
-    "attest_url": "{client_url}",
-    "tcti": "swtpm:path=/tpmsocket_{id}/tpm",
-    "enroll_CA": "{client_CA}",
-    "callbacks": [ "/hcp/python/HcpToolAttestCallback.py" ],
-    "global": "{client_global}"
-}

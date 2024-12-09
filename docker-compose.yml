@@ -8,8 +8,8 @@ volumes:
     attestdb:
     kdc_primary:
     kdc_secondary:
-    tpm_aclient:
-    tpmsocket_aclient:
+    tpm_attestclient:
+    tpmsocket_attestclient:
     tpm_kdc_primary:
     tpmsocket_kdc_primary:
     tpm_kdc_secondary:
@@ -111,7 +111,7 @@ services:
         volumes:
           - ./_testcreds/enrollcertchecker:/enrollcertchecker:ro
           - ./_testcreds/enrollclient:/enrollclient:ro
-          - tpm_aclient:/tpm_aclient
+          - tpm_attestclient:/tpm_attestclient
           - tpm_kdc_primary:/tpm_primary.kdc
           - tpm_kdc_secondary:/tpm_secondary.kdc
           - tpm_kdc_keytab:/tpm_keytab.kdc
@@ -122,22 +122,22 @@ services:
         environment:
           - HCP_CONFIG_FILE=/usecase/hosts/orchestrator.json
 
-    aclient:
+    attestclient:
         extends: common_nontpm
-        hostname: aclient.hcphacking.xyz
+        hostname: attestclient.hcphacking.xyz
         volumes:
-          - tpmsocket_aclient:/tpmsocket_aclient
+          - tpmsocket_attestclient:/tpmsocket_attestclient
         environment:
-          - HCP_CONFIG_FILE=/usecase/hosts/aclient.json
+          - HCP_CONFIG_FILE=/usecase/hosts/attestclient.json
 
-    aclient_tpm:
+    attestclient_tpm:
         extends: common_tpm
-        hostname: aclient_tpm.hcphacking.xyz
+        hostname: attestclient_tpm.hcphacking.xyz
         volumes:
-          - tpm_aclient:/tpm_aclient
-          - tpmsocket_aclient:/tpmsocket_aclient
+          - tpm_attestclient:/tpm_attestclient
+          - tpmsocket_attestclient:/tpmsocket_attestclient
         environment:
-          - HCP_CONFIG_FILE=/usecase/hosts/aclient.json
+          - HCP_CONFIG_FILE=/usecase/hosts/attestclient.json
 
     kdc_primary:
         extends: common_nontpm
