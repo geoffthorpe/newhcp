@@ -2,7 +2,7 @@
     "vars": {
         "id": "arepl",
         "services": [ "attestsvc", "replication_client" ],
-        "default_targets": [ "setup-global", "setup-local", "start-services" ]
+        "default_targets": [ "setup-global", "start-services" ]
     },
 
     "scope": [
@@ -15,7 +15,6 @@
     ],
 
     "replication_client": {
-        "setup": { "touchfile": "/etc/hcp/arepl/touch-attestsvc-local-setup" },
         "exec": "/hcp/attestsvc/updater_loop.sh",
         "tag": "services",
         "uid": "auser",

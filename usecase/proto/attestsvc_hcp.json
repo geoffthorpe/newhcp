@@ -6,10 +6,6 @@
                     "{attestsvc_db}/initialized"
                 ],
                 "touchfile": "{attestsvc_db}/initialized"
-            }, {
-                "tag": "local",
-                "exec": "/hcp/attestsvc/setup_local.sh",
-                "touchfile": "/etc/hcp/{id}/touch-attestsvc-local-setup"
             } ],
         "state": "{attestsvc_db}",
         "enrollsvc": "{attestsvc_ereplurl}"
