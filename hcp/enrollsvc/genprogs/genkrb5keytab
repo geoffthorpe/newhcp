@@ -8,9 +8,9 @@ import base64
 import requests
 
 sys.path.insert(1, '/hcp/common')
-import hcp_common
-log = hcp_common.log
-bail = hcp_common.bail
+import HcpCommon
+log = HcpCommon.log
+bail = HcpCommon.bail
 
 log("Starting genkrb5keytab")
 

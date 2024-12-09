@@ -9,7 +9,7 @@ import shutil
 import json
 
 sys.path.insert(1, '/hcp/common')
-import hcp_common as h
+import HcpCommon as h
 
 try:
 	verbosity = int(os.environ['VERBOSE'])
@@ -48,7 +48,7 @@ if args.healthcheck:
 			capture_output = True)
 		# do_kadmin.py is designed as a web-serving helper, and returns
 		# http status codes "compressed" into the range of exit codes
-		# via hcp_common::http2exit(). An exit code of 20 corresponds to an http
+		# via HcpCommon::http2exit(). An exit code of 20 corresponds to an http
 		# status code of 200, which is success.
 		if c.returncode == 20:
 			c.returncode = 0

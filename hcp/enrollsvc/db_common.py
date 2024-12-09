@@ -6,7 +6,7 @@ import json
 import time
 
 sys.path.insert(1, '/hcp/common')
-from hcp_common import log, bail, env_get, env_get_or_none, http2exit, \
+from HcpCommon import log, bail, env_get, env_get_or_none, http2exit, \
 	hcp_config_extract
 
 enrollsvc_ctx = hcp_config_extract('.enrollsvc', must_exist = True)

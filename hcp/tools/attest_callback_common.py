@@ -11,7 +11,7 @@ import json
 import pwd
 
 sys.path.insert(1, '/hcp/common')
-from hcp_common import log, bail, hcp_config_extract
+from HcpCommon import log, bail, hcp_config_extract
 
 if 'VERBOSE' in os.environ:
 	def verbose(s):

@@ -8,7 +8,7 @@ import re
 import subprocess
 
 sys.path.insert(1, '/hcp/common')
-from hcp_common import log, bail, datetime2hint, exit2http
+from HcpCommon import log, bail, datetime2hint, exit2http
 
 sys.path.insert(1, '/hcp/enrollsvc')
 import db_common
@@ -83,7 +83,7 @@ for entry in matches:
 	# API handler, the stdout from the operation provides the return data
 	# (JSON) and the exit code from the process provides the http status
 	# code! (Relative to the http2exit/exit2http stuff defined in
-	# common/hcp.sh and common/hcp_common.py. That's why we're checking for
+	# common/hcp.sh and common/HcpCommon.py. That's why we're checking for
 	# '201' below, rather than the conventional posix '0'.)
 	#
 	# So _that's_ why the python operation is launched as a process, rather

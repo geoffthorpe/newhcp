@@ -4,9 +4,9 @@ import json
 import glob
 
 sys.path.insert(1, '/hcp/common')
-import hcp_common
-log = hcp_common.log
-http2exit = hcp_common.http2exit
+import HcpCommon
+log = HcpCommon.log
+http2exit = HcpCommon.http2exit
 
 sys.path.insert(1, '/hcp/enrollsvc')
 import db_common

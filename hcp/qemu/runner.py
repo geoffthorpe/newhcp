@@ -35,7 +35,7 @@ import tempfile
 import socket
 
 sys.path.insert(1, '/hcp/common')
-import hcp_common as h
+import HcpCommon as h
 
 # Process cmd-line
 workload = None

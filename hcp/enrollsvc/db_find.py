@@ -3,7 +3,7 @@ import os
 import json
 
 sys.path.insert(1, '/hcp/common')
-from hcp_common import log
+from HcpCommon import log
 
 sys.path.insert(1, '/hcp/enrollsvc')
 import db_common

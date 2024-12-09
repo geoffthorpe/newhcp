@@ -20,7 +20,7 @@ os.chdir('/')
 os.environ['PYTHONUNBUFFERED']='yes'
 
 sys.path.insert(1, '/hcp/common')
-from hcp_common import bail, log, hlog, \
+from HcpCommon import bail, log, hlog, \
     hcp_config_extract, hcp_config_scope_get, hcp_config_scope_set, \
     hcp_config_scope_shrink
 

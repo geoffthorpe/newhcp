@@ -8,7 +8,7 @@ import time
 import shutil
 
 sys.path.insert(1, '/hcp/common')
-import hcp_common as h
+import HcpCommon as h
 
 myinstance = h.hcp_config_extract(".id", must_exist = True)
 myport = h.hcp_config_extract('.sshd.port', or_default = True, default = 22)

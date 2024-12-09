@@ -6,7 +6,7 @@ import sys
 import time
 
 sys.path.insert(1, '/hcp/common')
-from hcp_common import bail, log, hlog
+from HcpCommon import bail, log, hlog
 
 if len(sys.argv) < 2:
 	bail("'wait_touchfile' expects a path argument")

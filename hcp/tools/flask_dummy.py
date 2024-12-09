@@ -4,7 +4,7 @@ from flask import request, abort, send_file, jsonify
 import sys
 
 sys.path.insert(1, '/hcp/common')
-from hcp_common import log, bail, hcp_config_extract
+from HcpCommon import log, bail, hcp_config_extract
 
 app = flask.Flask(__name__)
 app.config["DEBUG"] = False

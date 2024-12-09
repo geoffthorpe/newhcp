@@ -48,6 +48,7 @@ cat > $HCP_KDCSVC_STATE/etc/sudoers.env << EOF
 export HCP_CONFIG_FILE=$HCP_CONFIG_FILE
 export HCP_CONFIG_SCOPE=$HCP_CONFIG_SCOPE
 export KRB5_CONFIG=$KRB5_CONFIG
+export PYTHONPATH=/hcp/python
 EOF
 # Note, we need instance-specific content because our sudoers file gets linked
 # into /etc/sudoers.d/ like any/all other cotenant services that use sudo. We

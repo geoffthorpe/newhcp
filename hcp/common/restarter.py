@@ -10,7 +10,7 @@ import subprocess
 import time
 
 sys.path.insert(1, '/hcp/common')
-from hcp_common import log
+from HcpCommon import log
 
 log(f"Inside restarter.py")
 

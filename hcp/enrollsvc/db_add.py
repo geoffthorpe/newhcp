@@ -15,7 +15,7 @@ import HcpJsonExpander
 
 sys.path.insert(1, '/hcp/common')
 
-from hcp_common import log, current_tracefile, http2exit, \
+from HcpCommon import log, current_tracefile, http2exit, \
 	env_get_dir, env_get_file, hcp_config_extract
 
 sys.path.insert(1, '/hcp/enrollsvc')

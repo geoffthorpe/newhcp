@@ -10,7 +10,7 @@ from pathlib import Path
 from HcpRecursiveUnion import union
 
 sys.path.insert(1, '/hcp/common')
-from hcp_common import log, bail, current_tracefile, \
+from HcpCommon import log, bail, current_tracefile, \
 		dict_val_or, dict_pop_or, env_get, env_get_or_none
 
 class HcpErrorGencertHxtool(Exception):

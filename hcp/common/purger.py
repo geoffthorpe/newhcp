@@ -88,7 +88,7 @@ import glob
 import json
 
 sys.path.insert(1, '/hcp/common')
-from hcp_common import bail, dict_timedelta, dict_val_or, hcp_config_extract
+from HcpCommon import bail, dict_timedelta, dict_val_or, hcp_config_extract
 
 print("Running purger task")
 

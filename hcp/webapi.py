@@ -10,7 +10,7 @@ import shutil
 import json
 
 sys.path.insert(1, '/hcp/common')
-import hcp_common as h
+import HcpCommon as h
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--healthcheck", action = "store_true",

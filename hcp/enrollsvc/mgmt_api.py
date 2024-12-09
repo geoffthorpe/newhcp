@@ -13,7 +13,7 @@ import requests
 from HcpRecursiveUnion import union
 
 sys.path.insert(1, '/hcp/common')
-from hcp_common import log, exit2http, current_tracefile
+from HcpCommon import log, exit2http, current_tracefile
 
 sys.path.insert(1, '/hcp/enrollsvc')
 import db_common
