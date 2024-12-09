@@ -35,6 +35,8 @@ mylog("\n" +
 
 defdomain = hcp_config_extract('.kdcsvc.namespace', must_exist = True)
 
+adminemail = hcp_config_extract('.kdcsvc.admin_email', or_default = True)
+
 # Load the server's config and extract the "preclient" and "postclient"
 # profiles. Let exceptions do our error-checking.
 serverprofile = hcp_config_extract('.kdcsvc.kadmin', must_exist = True)
@@ -83,6 +85,11 @@ mylog(f"principals_list={principals_list}")
 # The JSON profile is fully curated. Before acting on it, (a) check whether
 # _we_ allow the command to be contemplated at all, and if so (b) send it to
 # the policy checker to see if it is OK with this.
+if adminemail and cmd != 'realm_healthcheck':
+	if 'auth' not in resultprofile or 'email' not in resultprofile['auth'] or \
+			adminemail != resultprofile['auth']['email']:
+		mylog(f"user didn't authenticate as {adminemail}")
+		sys.exit(http2exit(403))
 if 'allowed' in resultprofile:
 	if cmd not in resultprofile['allowed']:
 		mylog(f"command {cmd} is not in the profile's 'allowed' list")

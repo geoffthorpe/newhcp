@@ -48,6 +48,15 @@ if 'clientcred' in config:
 	if not os.path.exists(clientcred):
 		bail(f"'clientcred' file missing: ({clientcred})")
 
+cacert = True
+if 'cacert' in config:
+	cacert = config['cacert']
+	log(f"cacert={cacert}")
+	if not isinstance(cacert, str):
+		bail(f"'cacert' not a string ({type(cacert)})")
+	if not os.path.exists(cacert):
+		bail(f"'cacert' file missing: ({cacert})")
+
 if 'principal' not in config and 'principals' not in config:
 	bail("Config does not contain 'principal' or 'principals'")
 principals=[]
@@ -73,7 +82,7 @@ for p in principals:
 	if clientcred:
 		req_cert = clientcred
 	response = requests.post(f"{kdcsvc}/v1/ext_keytab", files = req_data,
-			verify = True, cert = req_cert)
+			verify = cacert, cert = req_cert)
 	if response.status_code != 200:
 		bail(f"Request to KDC failed with code {response.status_code}")
 	try:

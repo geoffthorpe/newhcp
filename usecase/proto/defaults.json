@@ -24,6 +24,7 @@
     "kdcsvc_secondaries": [],
     "kdcsvc_realm": "HCPHACKING.XYZ",
     "kdcsvc_namespace": "hcphacking.xyz",
+    "kdcsvc_admin_email": "orchestrator@hcphacking.xyz",
     "NODEFAULT_kdcsvc_policyurl": "none",
     "kdcsvc_TGS_tag": "services",
     "NODEFAULT_kdcsvc_TGS_port": -1,

@@ -29,23 +29,18 @@ app.config["DEBUG"] = False
 #    pass through.
 def get_request_data(uri):
     log(f"get_request_data({uri})")
+    auth = {}
     request_data = {
+        'auth': auth,
         'uri': uri
     }
-    # Curate a copy of the request environment that only contains non-empty,
-    # string-valued variables.
-    e = { x: request.environ[x] for x in request.environ if
-             type(request.environ[x]) is str and len(request.environ[x]) > 0 }
-    if 'SSL_CLIENT_CERT' in e:
-        s = e['SSL_CLIENT_CERT']
-        log(f"SSL_CLIENT_CERT={s}")
-        email = get_email_address(s)
-        log(f"email={email}")
-        auth = {}
-        auth['client_cert'] = s
-        if email:
-            auth['email'] = email
-        request_data['auth'] = auth
+    if 'SSL_CLIENT_CERT' in request.environ:
+        s = request.environ['SSL_CLIENT_CERT']
+        if isinstance(s, str) and len(s) > 0:
+            auth['client_cert'] = s
+            email = get_email_address(s)
+            if email:
+                auth['email'] = email
     return request_data
 
 @app.route('/', methods=['GET'])

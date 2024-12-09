@@ -14,6 +14,7 @@
     "realm": "{kdcsvc_realm}",
     "namespace": "{kdcsvc_namespace}",
     "policy_url": "{kdcsvc_policyurl}",
+    "admin_email": "{kdcsvc_admin_email}",
     "kadmin": {
         "preclient": {
             "__env": {

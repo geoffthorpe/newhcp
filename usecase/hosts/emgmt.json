@@ -93,7 +93,9 @@
                     }
                 },
                 "genkrb5keytab": {
-                    "kdcsvc": "http://primary.kdc.hcphacking.xyz",
+                    "kdcsvc": "https://secondary.kdc.hcphacking.xyz",
+                    "clientcred": "/enrollclient/client.pem",
+                    "cacert": "/enrollcertchecker/CA.cert",
                     "principals": [ "host/{ENROLL_HOSTNAME}" ]
                 },
                 "genconf-krb5": {
