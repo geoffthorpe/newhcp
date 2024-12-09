@@ -8,7 +8,6 @@ volumes:
     attestdb:
     kdc_primary:
     kdc_secondary:
-    ssherver:
     tpm_aclient:
     tpmsocket_aclient:
     tpm_kdc_primary:
@@ -200,7 +199,6 @@ services:
         extends: common_nontpm
         hostname: ssherver.hcphacking.xyz
         volumes:
-          - ssherver:/ssherver
           - tpmsocket_ssherver:/tpmsocket_ssherver
         environment:
           - HCP_CONFIG_FILE=/usecase/hosts/ssherver.json
