@@ -1,0 +1,30 @@
+{
+    "vars": {
+        "id": "ssherver2",
+        "services": [ "attester", "keytabber", "sshd" ],
+        "default_targets": [ "start-attester", "start-keytabber", "start-services" ],
+        "sshd_fqdn": "ssherver2.hcphacking.xyz",
+        "sshd_port": 22
+    },
+    "args_for": "sshd",
+
+    "scope": [
+        { "load": ".defaults", "path": "/usecase/proto/defaults.json" },
+        { "vars": ".defaults" },
+        { "import": ".", "source": "." },
+        { "vars": ".vars" },
+        { "loadunion": ".", "path": "/usecase/proto/root.json" },
+        { "unionload": ".attester", "path": "/usecase/proto/attester.json" },
+        { "load": ".attestclient", "path": "/usecase/proto/attestclient.json" },
+        { "unionload": ".keytabber", "path": "/usecase/proto/keytabber.json" },
+        { "load": ".keytabclient", "path": "/usecase/proto/keytabclient.json" },
+        { "load": ".sshd", "path": "/usecase/proto/sshd.json" },
+        { "load": ".tpm", "path": "/usecase/proto/tpm_sidecar.json" }
+    ],
+
+    "env": {
+        "set": {
+            "KRB5_KTNAME": "/etc/krb5.host.ssherver2.hcphacking.xyz.keytab"
+        }
+    }
+}

@@ -78,6 +78,11 @@
 			"pk-init-principal": "HTTP/{ENROLL_HOSTNAME}@{ENROLL_REALM}",
 			"subject": "CN=https,{ENROLL_HOSTNAME2DC}"
 		    },
+		    "default-pkinit-sshd": {
+		        "type": "pkinit-client",
+			"pk-init-principal": "host/{ENROLL_HOSTNAME}@{ENROLL_REALM}",
+			"subject": "CN=sshd,{ENROLL_HOSTNAME2DC}"
+		    },
 		    "default-pkinit-healthclient": {
 		        "type": "pkinit-client",
 			"pk-init-principal": "healthclient.{ENROLL_HOSTNAME}@{ENROLL_REALM}",

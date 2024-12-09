@@ -146,6 +146,24 @@
 			}
 		},
 		{
+			"name": "ssherver2",
+			"tpm_path": "/tpm_ssherver2",
+			"enroll_hostname": "ssherver2.hcphacking.xyz",
+			"enroll_profile": {
+				"__env": {
+					"ENROLL_PKINIT_USER_PRINC": "user1"
+				},
+				"genprogs": "genconf-krb5 gencert-hxtool",
+				"gencert-hxtool": {
+					"list": [
+						"default-https-server",
+						"default-pkinit-sshd",
+						"user-pkinit-user"
+					]
+				}
+			}
+		},
+		{
 			"name": "bigbrother",
 			"tpm_path": "/tpm_bigbrother",
 			"enroll_hostname": "bigbrother.hcphacking.xyz",

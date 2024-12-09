@@ -40,8 +40,8 @@ do_exit() {
 STARTSERVICES="policy emgmt erepl arepl ahcp attestclient_tpm"
 STARTSERVICES="$STARTSERVICES kdc_primary kdc_secondary kdc_keytab"
 STARTSERVICES="$STARTSERVICES kdc_primary_tpm kdc_secondary_tpm kdc_keytab_tpm"
-STARTSERVICES="$STARTSERVICES ssherver1 workstation1 bigbrother www"
-STARTSERVICES="$STARTSERVICES ssherver1_tpm workstation1_tpm www_tpm"
+STARTSERVICES="$STARTSERVICES ssherver1 ssherver2 workstation1 bigbrother www"
+STARTSERVICES="$STARTSERVICES ssherver1_tpm ssherver2_tpm workstation1_tpm www_tpm"
 do_run "Starting basic services" \
 	up "$STARTSERVICES"
 do_run "Fail a premature attestation" \
@@ -70,3 +70,10 @@ sso_cmd="$sso_cmd ssh -l root ssherver1.hcphacking.xyz echo"
 sso_cmd="$sso_cmd \"If root==\$(whoami) then success\""
 do_run "Do SSO login from bigbrother to ssherver1 as 'root'" \
 	exec "bigbrother $sso_cmd"
+do_run "Wait for ssherver2 to be ready" \
+	exec "ssherver2 /hcp/sshd.py --healthcheck -R 20 -P 2"
+sso_cmd="/install-heimdal/bin/kinit -C FILE:/home/luser/.hcp/pkinit/user-luser-key.pem luser"
+sso_cmd="$sso_cmd ssh -l luser ssherver2.hcphacking.xyz echo"
+sso_cmd="$sso_cmd \"This output indicates successful SSO+ssh\""
+do_run "Do SSO login from workstation1 to ssherver2 as 'luser'" \
+	exec "workstation1 $sso_cmd"
