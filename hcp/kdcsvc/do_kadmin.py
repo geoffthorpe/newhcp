@@ -92,6 +92,7 @@ if policy_url and cmd != 'realm_healthcheck':
 	uuid = uuid4().urn
 	os.environ['HCP_REQUEST_UID'] = uuid
 	form_data = {
+		'hookname': (None, f"kdcsvc::{cmd}"),
 		'request_uid': (None, uuid),
 		'params': (None, json.dumps(resultprofile))
 	}
