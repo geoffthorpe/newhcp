@@ -6,7 +6,7 @@
         "default_targets": [ "start-attester", "setup-global", "setup-local",
                             "start-services" ],
         "client_global": false,
-	"TODO_kdcsvc_policyurl": "http://policy.primary.kdc.hcphacking.xyz:9180",
+	"kdcsvc_policyurl": "http://policy.hcphacking.xyz:8080",
         "kdcsvc_secondaries": [ "secondary.kdc.hcphacking.xyz" ],
 	"kdcsvc_TGS_port": "3089",
         "webapi_app": "/hcp/kdcsvc/mgmt_api.py",

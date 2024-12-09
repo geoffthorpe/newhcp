@@ -3,7 +3,7 @@
         "id": "emgmt",
         "services": [ "enrollsvc", "webapi", "reenroller", "purger" ],
         "default_targets": [ "setup-global", "setup-local", "start-services" ],
-        "TODO_enrollsvc_policyurl": "http://policy.emgmt.hcphacking.xyz:9080",
+        "enrollsvc_policyurl": "http://policy.hcphacking.xyz:8080",
         "reenroller_uid": "emgmtdb",
 	"webapi_app": "/hcp/enrollsvc/mgmt_api.py",
         "webapi_fqdn": "emgmt.hcphacking.xyz",

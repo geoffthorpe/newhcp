@@ -8,7 +8,7 @@
         "client_global": false,
         "kdcsvc_dir": "/kdc_secondary",
         "kdcsvc_mode": "secondary",
-	"TODO_kdcsvc_policyurl": "http://policy.secondary.kdc.hcphacking.xyz:9280",
+	"kdcsvc_policyurl": "http://policy.hcphacking.xyz:8080",
         "kdcsvc_primary": "primary.kdc.hcphacking.xyz",
 	"kdcsvc_TGS_port": "3088",
         "webapi_app": "/hcp/kdcsvc/mgmt_api.py",

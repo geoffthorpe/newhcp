@@ -10,6 +10,6 @@
         } ],
     "state": "{enrollsvc_db}",
     "realm": "{enrollsvc_realm}",
-    "TODO_policy_url": "{enrollsvc_policyurl}",
+    "policy_url": "{enrollsvc_policyurl}",
     "tpm_vendors": "/vendors"
 }
