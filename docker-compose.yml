@@ -15,6 +15,8 @@ volumes:
     tpmsocket_kdc_primary:
     tpm_kdc_secondary:
     tpmsocket_kdc_secondary:
+    tpm_kdc_keytab:
+    tpmsocket_kdc_keytab:
     tpm_ssherver:
     tpmsocket_ssherver:
     tpm_workstation1:
@@ -113,6 +115,7 @@ services:
           - tpm_aclient:/tpm_aclient
           - tpm_kdc_primary:/tpm_primary.kdc
           - tpm_kdc_secondary:/tpm_secondary.kdc
+          - tpm_kdc_keytab:/tpm_keytab.kdc
           - tpm_ssherver:/tpm_ssherver
           - tpm_workstation1:/tpm_workstation1
           - tpm_bigbrother:/tpm_bigbrother
@@ -174,6 +177,24 @@ services:
           - tpmsocket_kdc_secondary:/tpmsocket_secondary.kdc
         environment:
           - HCP_CONFIG_FILE=/usecase/hosts/kdc_secondary.json
+
+    kdc_keytab:
+        extends: common_nontpm
+        hostname: keytab.kdc.hcphacking.xyz
+        volumes:
+          - tpmsocket_kdc_keytab:/tpmsocket_keytab.kdc
+          - ./_testcreds/enrollclient:/enrollclient:ro
+        environment:
+          - HCP_CONFIG_FILE=/usecase/hosts/kdc_keytab.json
+
+    kdc_keytab_tpm:
+        extends: common_tpm
+        hostname: kdc_keytab_tpm.hcphacking.xyz
+        volumes:
+          - tpm_kdc_keytab:/tpm_keytab.kdc
+          - tpmsocket_kdc_keytab:/tpmsocket_keytab.kdc
+        environment:
+          - HCP_CONFIG_FILE=/usecase/hosts/kdc_keytab.json
 
     ssherver:
         extends: common_nontpm
