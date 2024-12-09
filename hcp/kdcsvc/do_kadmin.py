@@ -12,8 +12,6 @@ sys.path.insert(1, '/hcp/common')
 from hcp_common import log, bail, current_tracefile, \
 		http2exit, exit2http, hcp_config_extract
 
-sys.path.insert(1, '/hcp/xtra')
-
 from HcpRecursiveUnion import union
 import HcpJsonExpander
 

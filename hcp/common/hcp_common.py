@@ -9,7 +9,8 @@ import getpass
 from pathlib import Path
 from datetime import datetime, timezone, timedelta
 
-sys.path.insert(1, '/hcp/xtra')
+sys.path.insert(1, '/hcp/python')
+
 import HcpJsonPath
 from HcpJsonScope import parse_scope, run_scope
 

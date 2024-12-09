@@ -158,7 +158,7 @@ else
 		hlog 2 "- from: $HCP_CONFIG_FILE"
 		hlog 2 "-   to: $newpath"
 		mkdir -p -m 755 $workloadpath
-		cat "$HCP_CONFIG_FILE" | /hcp/xtra/HcpJsonScope.py > "$newpath.tmp"
+		cat "$HCP_CONFIG_FILE" | /hcp/python/HcpJsonScope.py > "$newpath.tmp"
 		chmod 444 "$newpath.tmp"
 		mv "$newpath.tmp" "$newpath"
 		export HCP_CONFIG_FILE=$newpath
@@ -362,3 +362,4 @@ function dict_timedelta {
 for i in $(find / -maxdepth 1 -mindepth 1 -type d -name "install-*"); do
 	add_install_path "$i"
 done
+export PYTHONPATH=/hcp/python

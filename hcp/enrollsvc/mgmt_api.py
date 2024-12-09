@@ -10,11 +10,10 @@ from werkzeug.utils import secure_filename
 import tempfile
 import requests
 
+from HcpRecursiveUnion import union
+
 sys.path.insert(1, '/hcp/common')
 from hcp_common import log, exit2http, current_tracefile
-
-sys.path.insert(1, '/hcp/xtra')
-from HcpRecursiveUnion import union
 
 sys.path.insert(1, '/hcp/enrollsvc')
 import db_common

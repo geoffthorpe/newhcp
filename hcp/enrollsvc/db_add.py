@@ -9,16 +9,14 @@ import hashlib
 from tempfile import TemporaryDirectory
 from uuid import uuid4
 
+from HcpHostname import valid_hostname, dc_hostname, pop_hostname, pop_domain
+from HcpRecursiveUnion import union
+import HcpJsonExpander
+
 sys.path.insert(1, '/hcp/common')
 
 from hcp_common import log, current_tracefile, http2exit, \
 	env_get_dir, env_get_file, hcp_config_extract
-
-sys.path.insert(1, '/hcp/xtra')
-
-from HcpHostname import valid_hostname, dc_hostname, pop_hostname, pop_domain
-from HcpRecursiveUnion import union
-import HcpJsonExpander
 
 sys.path.insert(1, '/hcp/enrollsvc')
 import db_common

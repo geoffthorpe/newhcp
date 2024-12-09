@@ -10,12 +10,11 @@ from werkzeug.utils import secure_filename
 import tempfile
 import requests
 
-sys.path.insert(1, '/hcp/common')
-from hcp_common import log, current_tracefile, http2exit, exit2http
-
-sys.path.insert(1, '/hcp/xtra')
 from HcpRecursiveUnion import union
 from HcpPemHelper import get_email_address
+
+sys.path.insert(1, '/hcp/common')
+from hcp_common import log, current_tracefile, http2exit, exit2http
 
 app = flask.Flask(__name__)
 app.config["DEBUG"] = False

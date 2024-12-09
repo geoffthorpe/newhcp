@@ -221,6 +221,7 @@ die-on-term = true
 route-if = equal:${{PATH_INFO}};/healthcheck donotlog:
 harakiri = {myharakiri}
 '''.format(myuid = myuid, mygid = mygid, myapp = myapp, myharakiri = myharakiri))
+    fp.write("env = PYTHONPATH=/hcp/python\n")
     for k in myenv:
         fp.write(f"env = {k}={myenv[k]}\n")
     if myhttps:

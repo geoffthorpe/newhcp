@@ -10,11 +10,10 @@ from werkzeug.utils import secure_filename
 import tempfile
 import requests
 
+import HcpJsonPolicy
+
 sys.path.insert(1, '/hcp/common')
 from hcp_common import log, bail, hcp_config_extract
-
-sys.path.insert(1, '/hcp/xtra')
-import HcpJsonPolicy
 
 app = flask.Flask(__name__)
 app.config["DEBUG"] = False

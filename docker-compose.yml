@@ -45,6 +45,7 @@ services:
           - HCP_LAUNCHER_TGTS=${HCP_LAUNCHER_TGTS:-}
           - HCP_NOTRACEFILE=1
           - VERBOSE=${VERBOSE:-0}
+          - PYTHONPATH=/hcp/python
         healthcheck:
             test: /hcp/common/healthcheck.py
             timeout: 10s
