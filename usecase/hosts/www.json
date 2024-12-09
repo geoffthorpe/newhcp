@@ -3,7 +3,7 @@
         "id": "www",
         "services": [ "attester", "webapi", "webapi2" ],
         "default_targets": [ "start-attester", "start-services" ],
-        "webapi_app": "/hcp/tools/flask_dummy.py"
+        "webapi_app": "/hcp/python/HcpFlaskDummy.py"
     },
     "vars_webapi": {
         "webapi_fqdn": "www.hcphacking.xyz",

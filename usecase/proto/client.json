@@ -4,6 +4,6 @@
     "attest_url": "{client_url}",
     "tcti": "swtpm:path=/tpmsocket_{id}/tpm",
     "enroll_CA": "{client_CA}",
-    "callbacks": [ "/hcp/tools/attest_callback_common.py" ],
+    "callbacks": [ "/hcp/python/HcpToolAttestCallback.py" ],
     "global": "{client_global}"
 }

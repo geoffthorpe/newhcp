@@ -252,7 +252,7 @@ api_prerequisites()
 		return 1
 	fi
 	echo "api_prerequisites: building api_cmd" > $out2
-	api_cmd="python3 /hcp/tools/enroll_api.py --api $enroll_api"
+	api_cmd="python3 -m HcpApiEnroll --api $enroll_api"
 	api_cmd="$api_cmd --retries $retries"
 	api_cmd="$api_cmd --pause $pause"
 	api_cmd="$api_cmd --timeout $timeout"
