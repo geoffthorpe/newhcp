@@ -1,10 +1,10 @@
 {
     "vars": {
-        "id": "ssherver",
+        "id": "ssherver1",
         "services": [ "attester", "sshd" ],
 	"default_targets": [ "start-attester", "start-services" ],
         "client_global": false,
-	"sshd_fqdn": "ssherver.hcphacking.xyz",
+	"sshd_fqdn": "ssherver1.hcphacking.xyz",
 	"sshd_port": 22
     },
     "args_for": "sshd",
@@ -23,8 +23,8 @@
 
     "env": {
         "set": {
-            "KRB5_KTNAME": "/etc/hcp/ssherver/krb5.host.ssherver.hcphacking.xyz.keytab",
-            "KRB5_CONFIG": "/etc/hcp/ssherver/krb5.conf"
+            "KRB5_KTNAME": "/etc/hcp/ssherver1/krb5.host.ssherver1.hcphacking.xyz.keytab",
+            "KRB5_CONFIG": "/etc/hcp/ssherver1/krb5.conf"
         }
     },
 

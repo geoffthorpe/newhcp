@@ -16,8 +16,8 @@ volumes:
     tpmsocket_kdc_secondary:
     tpm_kdc_keytab:
     tpmsocket_kdc_keytab:
-    tpm_ssherver:
-    tpmsocket_ssherver:
+    tpm_ssherver1:
+    tpmsocket_ssherver1:
     tpm_workstation1:
     tpmsocket_workstation1:
     tpm_bigbrother:
@@ -115,7 +115,7 @@ services:
           - tpm_kdc_primary:/tpm_primary.kdc
           - tpm_kdc_secondary:/tpm_secondary.kdc
           - tpm_kdc_keytab:/tpm_keytab.kdc
-          - tpm_ssherver:/tpm_ssherver
+          - tpm_ssherver1:/tpm_ssherver1
           - tpm_workstation1:/tpm_workstation1
           - tpm_bigbrother:/tpm_bigbrother
           - tpm_www:/tpm_www
@@ -195,22 +195,22 @@ services:
         environment:
           - HCP_CONFIG_FILE=/usecase/hosts/kdc_keytab.json
 
-    ssherver:
+    ssherver1:
         extends: common_nontpm
-        hostname: ssherver.hcphacking.xyz
+        hostname: ssherver1.hcphacking.xyz
         volumes:
-          - tpmsocket_ssherver:/tpmsocket_ssherver
+          - tpmsocket_ssherver1:/tpmsocket_ssherver1
         environment:
-          - HCP_CONFIG_FILE=/usecase/hosts/ssherver.json
+          - HCP_CONFIG_FILE=/usecase/hosts/ssherver1.json
 
-    ssherver_tpm:
+    ssherver1_tpm:
         extends: common_tpm
-        hostname: ssherver_tpm.hcphacking.xyz
+        hostname: ssherver1_tpm.hcphacking.xyz
         volumes:
-          - tpm_ssherver:/tpm_ssherver
-          - tpmsocket_ssherver:/tpmsocket_ssherver
+          - tpm_ssherver1:/tpm_ssherver1
+          - tpmsocket_ssherver1:/tpmsocket_ssherver1
         environment:
-          - HCP_CONFIG_FILE=/usecase/hosts/ssherver.json
+          - HCP_CONFIG_FILE=/usecase/hosts/ssherver1.json
 
     workstation1:
         extends: common_nontpm
