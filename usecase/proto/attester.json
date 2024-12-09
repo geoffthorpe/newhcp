@@ -1,5 +1,5 @@
 {
-    "exec": "/hcp/common/attester.py",
+    "exec": "/hcp/python/HcpSvcAttester.py",
     "__TODO_healthcheck": null,
     "until": "/etc/hcp/{id}/touch-attested",
     "nowait": 1,

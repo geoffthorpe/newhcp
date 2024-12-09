@@ -3,7 +3,7 @@
         "touchfile": "/etc/hcp/{id}/touch-kdcsvc-local-setup"
     },
     "exec": [
-        "/hcp/common/restarter.py", "-t", "5",
+        "/hcp/python/HcpSvcRestarter.py", "-t", "5",
         "kinit",
         "-C",
         "FILE:/etc/hcp/{id}/pkinit/iprop-key.pem",

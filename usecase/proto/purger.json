@@ -1,5 +1,5 @@
 {
-    "exec": "/hcp/common/purger.py",
+    "exec": "/hcp/python/HcpSvcPurger.py",
     "nowait": 1,
     "tag": "{purger_tag}",
     "dir": "{purger_dir}",

@@ -1,7 +1,7 @@
 {
     "setup": { "touchfile": "/etc/hcp/{id}/touch-kdcsvc-local-setup" },
     "exec": [
-        "/hcp/common/restarter.py", "-t", "5",
+        "/hcp/python/HcpSvcRestarter.py", "-t", "5",
         "/install-heimdal/libexec/ipropd-master"
     ],
     "args": [
