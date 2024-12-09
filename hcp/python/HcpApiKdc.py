@@ -51,6 +51,7 @@ import os
 import sys
 import argparse
 import time
+import subprocess
 
 loglevel = 0
 def set_loglevel(v):
@@ -68,18 +69,6 @@ def debug(s):
     _log(2, s)
 
 auth = None
-if os.environ.get('HCP_GSSAPI'):
-    log('Enabling GSSAPI authentication')
-    try:
-        from requests_gssapi import HTTPSPNEGOAuth, DISABLED
-        auth = HTTPSPNEGOAuth(mutual_authentication=DISABLED, opportunistic_auth=True)
-    except ModuleNotFoundError:
-        log("'requests-gssapi' unavailable, falling back to 'requests-kerberos'")
-        try:
-            from requests_kerberos import HTTPKerberosAuth, DISABLED
-            auth = HTTPKerberosAuth(mutual_authentication=DISABLED, force_preemptive=True)
-        except ModuleNotFoundError:
-            log("'requests-kerberos' unavailable, falling back to no authentication")
 
 # This internal function is used as a wrapper to deal with exceptions and
 # retries. 'args' specifies whether retries' should be attempted and how many
@@ -160,12 +149,12 @@ def kdc_add_ns(args):
     debug(f" - response: {response}")
     debug(f" - response.content: {response.content}")
     if response.status_code != 200:
-        err(f"Error, 'reenroll' response status code was {response.status_code}")
+        err(f"Error, 'add_ns' response status code was {response.status_code}")
         return False, None
     try:
         jr = json.loads(response.content)
     except Exception as e:
-        err(f"Error, JSON decoding of 'add' response failed: {e}")
+        err(f"Error, JSON decoding of 'add_ns' response failed: {e}")
         return False, None
     debug(f" - jr: {jr}")
     return True, jr
@@ -214,12 +203,12 @@ def kdc_del(args):
     debug(f" - response: {response}")
     debug(f" - response.content: {response.content}")
     if response.status_code != 200:
-        err(f"Error, 'add' response status code was {response.status_code}")
+        err(f"Error, 'del' response status code was {response.status_code}")
         return False, None
     try:
         jr = json.loads(response.content)
     except Exception as e:
-        err(f"Error, JSON decoding of 'add' response failed: {e}")
+        err(f"Error, JSON decoding of 'del' response failed: {e}")
         return False, None
     debug(f" - jr: {jr}")
     return True, jr
@@ -241,39 +230,57 @@ def kdc_del_ns(args):
     debug(f" - response: {response}")
     debug(f" - response.content: {response.content}")
     if response.status_code != 200:
-        err(f"Error, 'add' response status code was {response.status_code}")
+        err(f"Error, 'del_ns' response status code was {response.status_code}")
         return False, None
     try:
         jr = json.loads(response.content)
     except Exception as e:
-        err(f"Error, JSON decoding of 'add' response failed: {e}")
+        err(f"Error, JSON decoding of 'del_ns' response failed: {e}")
         return False, None
     debug(f" - jr: {jr}")
     return True, jr
 
 def kdc_ext_keytab(args):
-    form_data = { 'principals': (None, json.dumps(args.principals)) }
-    if args.profile is not None:
-        form_data['profile'] = (None, args.profile)
-    debug("'add' handler about to call API")
-    debug(f" - url: {args.api + '/v1/ext_keytab'}")
-    debug(f" - files: {form_data}")
-    myrequest = lambda: requests.post(args.api + '/v1/ext_keytab',
-                             files=form_data,
-                             auth=auth,
-                             verify=args.requests_verify,
-                             cert=args.requests_cert,
-                             timeout=args.timeout)
-    response = requester_loop(args, myrequest)
-    debug(f" - response: {response}")
-    debug(f" - response.content: {response.content}")
-    if response.status_code != 200:
-        err(f"Error, 'add' response status code was {response.status_code}")
-        return False, None
+    if args.kerberos:
+        # Special handling. python-requests-kerberos' seems to be broken on
+        # debian, so we use "curl --negotiate" instead.
+        myrequest = lambda: subprocess.run([
+                'curl', '-F', 'principals="[]"',
+                '--cacert', args.requests_verify,
+                '--negotiate', '-u', ':',
+                args.api + '/v1/ext_keytab' ],
+            stdout = subprocess.PIPE,
+            stderr = subprocess.PIPE)
+        response = requester_loop(args, myrequest)
+        if response.returncode != 0:
+            err(f"Error, 'ext_keytab' curl exit code was {response.returncode}")
+            return False, None
+        myjson = response.stdout
+    else:
+        form_data = { 'principals': (None, json.dumps(args.principals)) }
+        if args.profile is not None:
+            form_data['profile'] = (None, args.profile)
+        debug("'add' handler about to call API")
+        debug(f" - url: {args.api + '/v1/ext_keytab'}")
+        debug(f" - files: {form_data}")
+        myrequest = lambda: requests.post(
+                args.api + '/v1/ext_keytab',
+                files=form_data,
+                auth=auth,
+                verify=args.requests_verify,
+                cert=args.requests_cert,
+                timeout=args.timeout)
+        response = requester_loop(args, myrequest)
+        debug(f" - response: {response}")
+        debug(f" - response.content: {response.content}")
+        if response.status_code != 200:
+            err(f"Error, 'ext_keytab' response status code was {response.status_code}")
+            return False, None
+        myjson = response.content
     try:
-        jr = json.loads(response.content)
+        jr = json.loads(myjson)
     except Exception as e:
-        err(f"Error, JSON decoding of 'add' response failed: {e}")
+        err(f"Error, JSON decoding of 'ext_keytab' response failed: {e}")
         return False, None
     debug(f" - jr: {jr}")
     return True, jr
@@ -294,6 +301,7 @@ if __name__ == '__main__':
     To use a client certificate to authenticate to the server, specify
     '--clientcert'. If that file doesn't include the private key, specify it with
     '--clientkey'.
+    To use kerberos (SPNEGO) authentication, specify '--kerberos'.
 
     To see subcommand-specific help, pass '-h' to the subcommand.
     """
@@ -304,6 +312,7 @@ if __name__ == '__main__':
     kdc_help_verbosity = 'verbosity level, 0 means quiet, more than 0 means less quiet'
     kdc_help_clientcert = 'path to client cert to authenticate with'
     kdc_help_clientkey = 'path to client key (if not included with --clientcert)'
+    kdc_help_kerberos = 'use Kerberos TGT to authenticate with'
     kdc_help_retries = 'max number of API retries'
     kdc_help_pause = 'number of seconds between retries'
     kdc_help_timeout = 'number of seconds to allow before giving up'
@@ -325,6 +334,8 @@ if __name__ == '__main__':
     parser.add_argument('--clientkey', metavar='<PATH>',
                         default=os.environ.get('KDCSVC_API_CLIENTKEY'),
                         help=kdc_help_clientkey)
+    parser.add_argument('--kerberos', action='store_true',
+                        help=kdc_help_kerberos)
     parser.add_argument('--verbosity', type=int, metavar='<level>',
                         default=0, help=kdc_help_verbosity)
     parser.add_argument('--retries', type=int, metavar='<num>',
@@ -348,7 +359,7 @@ if __name__ == '__main__':
     add_help_principals = 'principals to be registered in the KDC'
     parser_a = subparsers.add_parser('add', help=add_help, epilog=add_epilog)
     parser_a.add_argument('principals', help=add_help_principals, nargs='*')
-    parser_a.set_defaults(func=kdc_add)
+    parser_a.set_defaults(func=kdc_add, fname='add')
 
     add_ns_help = 'Register new namespace principals with the KDC'
     add_ns_epilog = """
@@ -361,7 +372,7 @@ if __name__ == '__main__':
     add_ns_help_principals = 'namespace principals to be registered in the KDC'
     parser_a = subparsers.add_parser('add_ns', help=add_ns_help, epilog=add_ns_epilog)
     parser_a.add_argument('principals', help=add_ns_help_principals, nargs='*')
-    parser_a.set_defaults(func=kdc_add_ns)
+    parser_a.set_defaults(func=kdc_add_ns, fname='add_ns')
 
     get_help = 'Retrieve/list principals on the KDC'
     get_epilog = """
@@ -375,7 +386,7 @@ if __name__ == '__main__':
     get_help_principals = 'principals to be queried for on the KDC'
     parser_a = subparsers.add_parser('get', help=get_help, epilog=get_epilog)
     parser_a.add_argument('principals', help=get_help_principals, nargs='*')
-    parser_a.set_defaults(func=kdc_get)
+    parser_a.set_defaults(func=kdc_get, fname='get')
 
     del_help = 'Delete principals from the KDC'
     del_epilog = """
@@ -387,7 +398,7 @@ if __name__ == '__main__':
     del_help_principals = 'principals to be removed from the KDC'
     parser_a = subparsers.add_parser('del', help=del_help, epilog=del_epilog)
     parser_a.add_argument('principals', help=del_help_principals, nargs='*')
-    parser_a.set_defaults(func=kdc_del)
+    parser_a.set_defaults(func=kdc_del, fname='del')
 
     del_ns_help = 'Delete namespace principals from the KDC'
     del_ns_epilog = """
@@ -400,7 +411,7 @@ if __name__ == '__main__':
     del_ns_help_principals = 'namespace principals to be removed from the KDC'
     parser_a = subparsers.add_parser('del_ns', help=del_ns_help, epilog=del_ns_epilog)
     parser_a.add_argument('principals', help=del_ns_help_principals, nargs='*')
-    parser_a.set_defaults(func=kdc_del_ns)
+    parser_a.set_defaults(func=kdc_del_ns, fname='del_ns')
 
     ext_keytab_help = 'Extract keytab with service principals from the KDC'
     ext_keytab_epilog = """
@@ -413,7 +424,7 @@ if __name__ == '__main__':
     ext_keytab_help_principals = 'namespace principals to be removed from the KDC'
     parser_a = subparsers.add_parser('ext_keytab', help=ext_keytab_help, epilog=ext_keytab_epilog)
     parser_a.add_argument('principals', help=ext_keytab_help_principals, nargs='*')
-    parser_a.set_defaults(func=kdc_ext_keytab)
+    parser_a.set_defaults(func=kdc_ext_keytab, fname='ext_keytab')
 
     # Process the command-line
     args = parser.parse_args()
@@ -428,6 +439,13 @@ if __name__ == '__main__':
         args.requests_verify = args.cacert
     else:
         args.requests_verify = True
+    if args.kerberos:
+        if args.clientcert:
+            err("Error, we don't support clientcert + kerberos")
+            sys.exit(-1)
+        if args.fname != 'ext_keytab':
+            err("Error, we only support kerberos for 'ext_keytab'")
+            sys.exit(-1)
     if args.clientcert:
         if args.clientkey:
             args.requests_cert = (args.clientcert,args.clientkey)
