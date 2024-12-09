@@ -59,14 +59,14 @@ do_run "Wait for ssherver to be ready" \
 do_run "Wait for workstation1 to be ready" \
 	exec "workstation1 /hcp/attested.py -R 10 -P 1"
 sso_cmd="/install-heimdal/bin/kinit -C FILE:/home/luser/.hcp/pkinit/user-luser-key.pem luser"
-sso_cmd="$sso_cmd ssh -l luser -p 2222 ssherver.hcphacking.xyz echo"
+sso_cmd="$sso_cmd ssh -l luser ssherver.hcphacking.xyz echo"
 sso_cmd="$sso_cmd \"This output indicates successful SSO+ssh\""
 do_run "Do SSO login from workstation1 to ssherver as 'luser'" \
 	exec "workstation1 $sso_cmd"
 do_run "Wait for bigbrother to be ready" \
 	exec "bigbrother /hcp/attested.py -R 10 -P 1"
 sso_cmd="/install-heimdal/bin/kinit -C FILE:/root/.hcp/pkinit/user-root-key.pem root"
-sso_cmd="$sso_cmd ssh -l root -p 2222 ssherver.hcphacking.xyz echo"
+sso_cmd="$sso_cmd ssh -l root ssherver.hcphacking.xyz echo"
 sso_cmd="$sso_cmd \"If root==\$(whoami) then success\""
 do_run "Do SSO login from bigbrother to ssherver as 'root'" \
 	exec "bigbrother $sso_cmd"

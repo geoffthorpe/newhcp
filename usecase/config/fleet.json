@@ -2,7 +2,7 @@
 	"defaults": {
 		"tpm_create": true,
 		"tpm_enroll": true,
-		"enroll_api": "https://emgmt.hcphacking.xyz:8443",
+		"enroll_api": "https://emgmt.hcphacking.xyz",
 		"enroll_profile": {
 			"__env": {
 				"ENROLL_PKINIT_USER_PRINC": "nobody",

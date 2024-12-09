@@ -7,13 +7,13 @@
     },
     "vars_webapi": {
         "webapi_fqdn": "www.hcphacking.xyz",
-        "webapi_port": 8443,
+        "webapi_port": 443,
         "webapi_https_authentication": "kerberos"
     },
     "vars_webapi2": {
     	"webapi_name": "webapi2",
         "webapi_fqdn": "www2.hcphacking.xyz",
-        "webapi_port": 8444,
+        "webapi_port": 8443,
         "webapi_https_authentication": "clientcert"
     },
 

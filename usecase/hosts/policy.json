@@ -7,7 +7,7 @@
     },
     "vars_webapi": {
         "webapi_fqdn": "policy.hcphacking.xyz",
-        "webapi_port": 8080
+        "webapi_port": 80
     },
 
     "scope": [

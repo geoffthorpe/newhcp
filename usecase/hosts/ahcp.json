@@ -5,7 +5,7 @@
         "default_targets": [ "setup-global", "start-services" ],
         "webapi_app": "/hcp/attestsvc/hcp_api.py",
         "webapi_fqdn": "ahcp.hcphacking.xyz",
-        "webapi_port": 8080,
+        "webapi_port": 80,
         "webapi_uwsgi_env": {
             "HOME": "/home/ahcpflask",
             "HCP_TRACEFILE": "/home/ahcpflask",

@@ -5,7 +5,7 @@
 	"default_targets": [ "start-attester", "start-services" ],
         "client_global": false,
 	"sshd_fqdn": "ssherver.hcphacking.xyz",
-	"sshd_port": 2222
+	"sshd_port": 22
     },
     "args_for": "sshd",
 

@@ -3,11 +3,11 @@
         "id": "emgmt",
         "services": [ "enrollsvc", "webapi", "reenroller", "purger" ],
         "default_targets": [ "setup-global", "setup-local", "start-services" ],
-        "enrollsvc_policyurl": "http://policy.hcphacking.xyz:8080",
+        "enrollsvc_policyurl": "http://policy.hcphacking.xyz",
         "reenroller_uid": "emgmtdb",
 	"webapi_app": "/hcp/enrollsvc/mgmt_api.py",
         "webapi_fqdn": "emgmt.hcphacking.xyz",
-        "webapi_port": 8443,
+        "webapi_port": 443,
         "webapi_https_authentication": "clientcert",
 	"webapi_https_certificate": "/enrollserver/server.pem",
 	"webapi_setup": { "touchfile": "/etc/hcp/{id}/touch-enrollsvc-local-setup" },
@@ -93,7 +93,7 @@
                     }
                 },
                 "genkrb5keytab": {
-                    "kdcsvc": "http://primary.kdc.hcphacking.xyz:9090",
+                    "kdcsvc": "http://primary.kdc.hcphacking.xyz",
                     "principals": [ "host/{ENROLL_HOSTNAME}" ]
                 },
                 "genconf-krb5": {
