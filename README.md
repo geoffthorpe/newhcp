@@ -100,10 +100,6 @@ Demonstrates how PKI-based identity can underpin a Kerberos network, because non
 
 A cotenant service that allows a host's user accounts to become ssh-accessible using Kerberos (GSS-API) authentication. Together with the Stateless KDC service, this shows an end-to-end SSO solution running on top of an HCP-bootstrapped network.
 
-### Policy service
-
-A policy-enforcement service in which a JSON configuration document defines all the policy rules (iptables-like) for examining input payloads (which are also JSON) and then returns success or failure. The https-based APIs for the TPM enrollment service and the KDC both implement hooks on the back-end to support using the policy service, and the example workflow shows them in use. Ie. the service represents its client's request as a JSON document and submits that to its associated policy service for approval/rejection. This allows for an architecture to have some separation between what it enables (the application service) and what constraints it imposes (codified in the policy service).
-
 ### WebAPI service
 
 A web-API-hosting service (based on uwsgi) for representing Flask applications and, if enabled, providing a HTTPS reverse-proxy (based on nginx) using TLS certificates obtained from TPM enrollment. This service runs co-tenant inside all the other serviecs that provide web APIs (dog-food).
@@ -111,5 +107,5 @@ A web-API-hosting service (based on uwsgi) for representing Flask applications a
 ### **[Tooling](doc/tooling.md)**
 
 * Workload launcher, for defining and running workloads, consisting of services and dependencies. This consumes a basic JSON description of what has to be setup and started and runs like a container init daemon.
-* JSON manipulations, for parameter expansion (HcpJsonExpander), policy evaluation (HcpJsonPolicy), programmatic manipulation (HcpJsonScope), etc.
+* JSON manipulations, for parameter expansion (HcpJsonExpander), programmatic manipulation (HcpJsonScope), etc.
 * Extensible workflow, for building and running.

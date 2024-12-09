@@ -37,10 +37,9 @@ do_exit() {
 
 [[ -n $NOTRAP ]] || trap do_exit EXIT
 
-STARTSERVICES="emgmt emgmt_pol erepl arepl ahcp aclient_tpm"
+STARTSERVICES="emgmt erepl arepl ahcp aclient_tpm"
 STARTSERVICES="$STARTSERVICES kdc_primary kdc_secondary"
 STARTSERVICES="$STARTSERVICES kdc_primary_tpm kdc_secondary_tpm"
-STARTSERVICES="$STARTSERVICES kdc_primary_pol kdc_secondary_pol"
 STARTSERVICES="$STARTSERVICES ssherver workstation1 bigbrother www"
 STARTSERVICES="$STARTSERVICES ssherver_tpm workstation1_tpm www_tpm"
 do_run "Starting basic services" \

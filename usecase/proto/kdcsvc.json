@@ -13,7 +13,7 @@
     "secondaries": "{kdcsvc_secondaries}",
     "realm": "{kdcsvc_realm}",
     "namespace": "{kdcsvc_namespace}",
-    "policy_url": "{kdcsvc_policyurl}",
+    "TODO_policy_url": "{kdcsvc_policyurl}",
     "kadmin": {
         "preclient": {
             "__env": {

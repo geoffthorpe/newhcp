@@ -389,224 +389,189 @@
          x="37.22171"
          y="22.703672">enroll, unenroll, etc.</tspan></text>
     <g
-       id="g52"
-       transform="translate(-2.6458335,-69.522626)">
+       id="g9">
       <text
          xml:space="preserve"
          style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.175px;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:start;writing-mode:lr-tb;direction:ltr;text-anchor:start;fill:#0000ff;fill-opacity:1;stroke:#0000ff;stroke-width:0.065;stroke-dasharray:none;stroke-opacity:1"
-         x="14.862479"
-         y="166.5667"
+         x="13.679235"
+         y="97.044067"
          id="text3-8-1-8"><tspan
            sodipodi:role="line"
            id="tspan50"
-           x="14.862479"
-           y="166.5667">TPM</tspan></text>
+           x="13.679235"
+           y="97.044067">TPM</tspan></text>
       <rect
          style="fill:none;stroke:#0000ff;stroke-width:0.282371;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1"
          id="rect3-4-5-0"
          width="11.718856"
          height="4.1813421"
-         x="12.121467"
-         y="163.32184" />
+         x="10.938222"
+         y="93.79921" />
       <text
          xml:space="preserve"
          style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.23333px;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:start;writing-mode:lr-tb;direction:ltr;text-anchor:start;fill:#000000;stroke-width:0.264583"
-         x="12.409293"
-         y="161.61523"
+         x="9.7634592"
+         y="92.092606"
          id="text3-8-9-8"><tspan
            sodipodi:role="line"
            id="tspan48"
-           x="12.409293"
-           y="161.61523">aclient</tspan></text>
+           x="9.7634592"
+           y="92.092606">aclient</tspan></text>
       <rect
          style="fill:none;stroke:#000000;stroke-width:0.412771;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1"
          id="rect3-4-4-1"
          width="17.836721"
          height="5.8703427"
-         x="10.525123"
-         y="157.10393" />
+         x="7.8792892"
+         y="87.581299" />
     </g>
-    <text
-       xml:space="preserve"
-       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.175px;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:start;writing-mode:lr-tb;direction:ltr;text-anchor:start;fill:#0000ff;fill-opacity:1;stroke:#0000ff;stroke-width:0.065;stroke-dasharray:none;stroke-opacity:1"
-       x="118.05006"
-       y="97.044075"
-       id="text3-8-1-8-8"><tspan
-         sodipodi:role="line"
-         id="tspan50-1"
-         x="118.05006"
-         y="97.044075">TPM</tspan></text>
-    <rect
-       style="fill:none;stroke:#0000ff;stroke-width:0.282371;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1"
-       id="rect3-4-5-0-9"
-       width="11.718856"
-       height="4.1813421"
-       x="115.30905"
-       y="93.799217" />
-    <text
-       xml:space="preserve"
-       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.23333px;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:start;writing-mode:lr-tb;direction:ltr;text-anchor:start;fill:#000000;stroke-width:0.264583"
-       x="114.62405"
-       y="92.096733"
-       id="text3-8-9-8-8"><tspan
-         sodipodi:role="line"
-         id="tspan2"
-         x="114.62405"
-         y="92.096733">ssherver</tspan></text>
-    <rect
-       style="fill:none;stroke:#000000;stroke-width:0.452098;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1"
-       id="rect3-4-4-1-7"
-       width="21.541742"
-       height="5.8310161"
-       x="113.08259"
-       y="87.60096" />
     <g
-       id="g53"
-       transform="translate(-3.7041669,-69.787595)">
+       id="g3">
       <text
          xml:space="preserve"
          style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.175px;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:start;writing-mode:lr-tb;direction:ltr;text-anchor:start;fill:#0000ff;fill-opacity:1;stroke:#0000ff;stroke-width:0.065;stroke-dasharray:none;stroke-opacity:1"
-         x="66.985435"
-         y="166.83167"
+         x="120.73505"
+         y="97.044075"
+         id="text3-8-1-8-8"><tspan
+           sodipodi:role="line"
+           id="tspan50-1"
+           x="120.73505"
+           y="97.044075">TPM</tspan></text>
+      <rect
+         style="fill:none;stroke:#0000ff;stroke-width:0.282371;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1"
+         id="rect3-4-5-0-9"
+         width="11.718856"
+         height="4.1813421"
+         x="117.99403"
+         y="93.799217" />
+      <text
+         xml:space="preserve"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.23333px;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:start;writing-mode:lr-tb;direction:ltr;text-anchor:start;fill:#000000;stroke-width:0.264583"
+         x="114.62405"
+         y="92.096733"
+         id="text3-8-9-8-8"><tspan
+           sodipodi:role="line"
+           id="tspan2"
+           x="114.62405"
+           y="92.096733">ssherver</tspan></text>
+      <rect
+         style="fill:none;stroke:#000000;stroke-width:0.452098;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1"
+         id="rect3-4-4-1-7"
+         width="21.541742"
+         height="5.8310161"
+         x="113.08259"
+         y="87.60096" />
+    </g>
+    <g
+       id="g1">
+      <text
+         xml:space="preserve"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.175px;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:start;writing-mode:lr-tb;direction:ltr;text-anchor:start;fill:#0000ff;fill-opacity:1;stroke:#0000ff;stroke-width:0.065;stroke-dasharray:none;stroke-opacity:1"
+         x="68.977196"
+         y="97.044067"
          id="text3-8-1-8-6"><tspan
            sodipodi:role="line"
            id="tspan50-5"
-           x="66.985435"
-           y="166.83167">TPM</tspan></text>
+           x="68.977196"
+           y="97.044067">TPM</tspan></text>
       <rect
          style="fill:none;stroke:#0000ff;stroke-width:0.282371;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1"
          id="rect3-4-5-0-1"
          width="11.718856"
          height="4.1813421"
-         x="64.244423"
-         y="163.58681" />
-      <text
-         xml:space="preserve"
-         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.175px;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:start;writing-mode:lr-tb;direction:ltr;text-anchor:start;fill:#0000ff;fill-opacity:1;stroke:#0000ff;stroke-width:0.065;stroke-dasharray:none;stroke-opacity:1"
-         x="77.418541"
-         y="166.56424"
-         id="text3-8-1-8-6-4"><tspan
-           sodipodi:role="line"
-           id="tspan53"
-           x="77.418541"
-           y="166.56424">policy</tspan></text>
-      <rect
-         style="fill:none;stroke:#0000ff;stroke-width:0.282371;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1"
-         id="rect3-4-5-0-1-4"
-         width="11.718856"
-         height="4.1813421"
-         x="76.245651"
-         y="163.58681" />
+         x="66.236183"
+         y="93.79921" />
       <text
          xml:space="preserve"
          style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.23333px;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:start;writing-mode:lr-tb;direction:ltr;text-anchor:start;fill:#000000;stroke-width:0.264583"
-         x="70.805771"
-         y="161.8802"
+         x="67.101601"
+         y="92.092606"
          id="text3-8-9-8-0"><tspan
            sodipodi:role="line"
            id="tspan52"
-           x="70.805771"
-           y="161.8802">kdc1</tspan></text>
+           x="67.101601"
+           y="92.092606">kdc1</tspan></text>
       <rect
          style="fill:none;stroke:#000000;stroke-width:0.412771;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1"
          id="rect3-4-4-1-9"
          width="17.836721"
          height="5.8703427"
-         x="66.881416"
-         y="157.3689" />
+         x="63.17725"
+         y="87.581299" />
     </g>
     <g
-       id="g54"
-       transform="translate(-4.7625003,-69.195951)">
+       id="g2">
       <text
          xml:space="preserve"
          style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.175px;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:start;writing-mode:lr-tb;direction:ltr;text-anchor:start;fill:#0000ff;fill-opacity:1;stroke:#0000ff;stroke-width:0.065;stroke-dasharray:none;stroke-opacity:1"
-         x="93.837593"
-         y="166.24002"
+         x="94.771027"
+         y="97.044067"
          id="text3-8-1-8-6-5"><tspan
            sodipodi:role="line"
            id="tspan50-5-3"
-           x="93.837593"
-           y="166.24002">TPM</tspan></text>
+           x="94.771027"
+           y="97.044067">TPM</tspan></text>
       <rect
          style="fill:none;stroke:#0000ff;stroke-width:0.282371;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1"
          id="rect3-4-5-0-1-3"
          width="11.718856"
          height="4.1813421"
-         x="91.096581"
-         y="162.99516" />
-      <text
-         xml:space="preserve"
-         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.175px;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:start;writing-mode:lr-tb;direction:ltr;text-anchor:start;fill:#0000ff;fill-opacity:1;stroke:#0000ff;stroke-width:0.065;stroke-dasharray:none;stroke-opacity:1"
-         x="104.2707"
-         y="165.9726"
-         id="text3-8-1-8-6-4-3"><tspan
-           sodipodi:role="line"
-           id="tspan53-7"
-           x="104.2707"
-           y="165.9726">policy</tspan></text>
-      <rect
-         style="fill:none;stroke:#0000ff;stroke-width:0.282371;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1"
-         id="rect3-4-5-0-1-4-4"
-         width="11.718856"
-         height="4.1813421"
-         x="103.09781"
-         y="162.99516" />
+         x="92.030006"
+         y="93.79921" />
       <text
          xml:space="preserve"
          style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.23333px;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:start;writing-mode:lr-tb;direction:ltr;text-anchor:start;fill:#000000;stroke-width:0.264583"
-         x="97.570076"
-         y="161.28856"
+         x="92.807579"
+         y="92.092606"
          id="text3-8-9-8-0-3"><tspan
            sodipodi:role="line"
            id="tspan54"
-           x="97.570076"
-           y="161.28856">kdc2</tspan></text>
+           x="92.807579"
+           y="92.092606">kdc2</tspan></text>
       <rect
          style="fill:none;stroke:#000000;stroke-width:0.412771;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1"
          id="rect3-4-4-1-9-0"
          width="17.836721"
          height="5.8703427"
-         x="93.733574"
-         y="156.77725" />
+         x="88.971077"
+         y="87.581299" />
     </g>
     <g
-       id="g51"
-       transform="translate(-5.291667,-69.850038)">
+       id="g8">
       <text
          xml:space="preserve"
          style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.175px;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:start;writing-mode:lr-tb;direction:ltr;text-anchor:start;fill:#0000ff;fill-opacity:1;stroke:#0000ff;stroke-width:0.065;stroke-dasharray:none;stroke-opacity:1"
-         x="37.881248"
-         y="166.83165"
+         x="40.672188"
+         y="96.981613"
          id="text3-8-1-8-3"><tspan
            sodipodi:role="line"
            id="tspan50-8"
-           x="37.881248"
-           y="166.83165">TPM</tspan></text>
+           x="40.672188"
+           y="96.981613">TPM</tspan></text>
       <rect
          style="fill:none;stroke:#0000ff;stroke-width:0.282371;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1"
          id="rect3-4-5-0-3"
          width="11.718856"
          height="4.1813421"
-         x="35.140236"
-         y="163.58679" />
+         x="37.931175"
+         y="93.736755" />
       <text
          xml:space="preserve"
          style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.23333px;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:start;writing-mode:lr-tb;direction:ltr;text-anchor:start;fill:#000000;stroke-width:0.264583"
-         x="35.428062"
-         y="161.88019"
+         x="30.136395"
+         y="92.030151"
          id="text3-8-9-8-7"><tspan
            sodipodi:role="line"
            id="tspan51"
-           x="35.428062"
-           y="161.88019">workstation1</tspan></text>
+           x="30.136395"
+           y="92.030151">workstation1</tspan></text>
       <rect
          style="fill:none;stroke:#000000;stroke-width:0.413;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1"
          id="rect3-4-4-1-0"
          width="30.951612"
          height="5.7451982"
-         x="33.606464"
-         y="157.49391" />
+         x="28.314796"
+         y="87.643875" />
     </g>
     <rect
        style="fill:none;fill-opacity:1;stroke:#ff0000;stroke-width:0.274093;stroke-linejoin:round;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
