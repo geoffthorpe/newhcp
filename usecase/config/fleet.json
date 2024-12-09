@@ -10,10 +10,7 @@
 			},
 			"genprogs": "genconf-krb5 gencert-hxtool",
 			"genkrb5keytab": {
-				"principals": [
-					"host/{ENROLL_HOSTNAME}",
-					"host/monolith.hcphacking.xyz"
-				]
+				"principals": [ "host/{ENROLL_HOSTNAME}" ]
 			},
 			"gencert-hxtool": {
 				"list": [ "default-https-hostclient" ],
