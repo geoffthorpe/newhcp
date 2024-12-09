@@ -41,6 +41,8 @@ services:
           - ${TOP}/hcp:/hcp:ro
           - ${TOP}/safeboot:/install-safeboot
           - ./usecase:/usecase:ro
+          - ./_testcreds/enrollcertchecker:/enrollcertchecker:ro
+          - ./_testcreds/enrollhealthclient:/enrollhealthclient:ro
         environment:
           - HCP_LAUNCHER_TGTS=${HCP_LAUNCHER_TGTS:-}
           - HCP_NOTRACEFILE=1
@@ -76,7 +78,6 @@ services:
           - ./_testcreds/enrollsigner:/enrollsigner:ro
           - ./_testcreds/enrollverifier:/enrollverifier:ro
           - ./_testcreds/enrollcertissuer:/enrollcertissuer:ro
-          - ./_testcreds/enrollcertchecker:/enrollcertchecker:ro
           - ./_testcreds/enrollclient:/enrollclient:ro
           - ./_testcreds/enrollserver:/enrollserver:ro
         environment:
@@ -162,7 +163,6 @@ services:
           - kdc_primary:/kdc_primary
           - tpmsocket_kdc_primary:/tpmsocket_primary.kdc
           - ./_testcreds/enrollcertchecker:/enrollcertchecker:ro
-          - ./_testcreds/enrollclient:/enrollclient:ro
           - ./_testcreds/enrollverifier:/enrollverifier:ro
         environment:
           - HCP_CONFIG_FILE=/usecase/hosts/kdc_primary.json
@@ -186,7 +186,6 @@ services:
           - kdc_secondary:/kdc_secondary
           - tpmsocket_kdc_secondary:/tpmsocket_secondary.kdc
           - ./_testcreds/enrollcertchecker:/enrollcertchecker:ro
-          - ./_testcreds/enrollclient:/enrollclient:ro
           - ./_testcreds/enrollverifier:/enrollverifier:ro
         environment:
           - HCP_CONFIG_FILE=/usecase/hosts/kdc_secondary.json
@@ -264,7 +263,6 @@ services:
           - tpmsocket_www:/tpmsocket_www
           - ./_testcreds/enrollverifier:/enrollverifier:ro
           - ./_testcreds/enrollcertchecker:/enrollcertchecker:ro
-          - ./_testcreds/enrollclient:/enrollclient:ro
         environment:
           - HCP_CONFIG_FILE=/usecase/hosts/www.json
 

@@ -14,13 +14,16 @@ TESTCREDS_ENROLLSERVER := $(TESTCREDS_OUT)/enrollserver
 TESTCREDS_DONE += $(TESTCREDS_ENROLLSERVER)/server.pem
 TESTCREDS_ENROLLCLIENT := $(TESTCREDS_OUT)/enrollclient
 TESTCREDS_DONE += $(TESTCREDS_ENROLLCLIENT)/client.pem
+TESTCREDS_ENROLLHEALTHCLIENT := $(TESTCREDS_OUT)/enrollhealthclient
+TESTCREDS_DONE += $(TESTCREDS_ENROLLHEALTHCLIENT)/client.pem
 TESTCREDS_CHILDREN := \
 	$(TESTCREDS_ENROLLSIGNER) \
 	$(TESTCREDS_ENROLLVERIFIER) \
 	$(TESTCREDS_ENROLLCERTISSUER) \
 	$(TESTCREDS_ENROLLCERTCHECKER) \
 	$(TESTCREDS_ENROLLSERVER) \
-	$(TESTCREDS_ENROLLCLIENT)
+	$(TESTCREDS_ENROLLCLIENT) \
+	$(TESTCREDS_ENROLLHEALTHCLIENT)
 $(TESTCREDS_CHILDREN): | $(TESTCREDS_OUT)
 $(TESTCREDS_OUT) $(TESTCREDS_CHILDREN):
 	$Qmkdir $@
@@ -60,6 +63,17 @@ $(TESTCREDS_ENROLLCLIENT)/client.pem: $(TESTCREDS_ENROLLCERTISSUER)/CA.cert
 		--hostname="orchestrator.hcphacking.xyz" \
 		--subject="UID=orchestrator,DC=hcphacking,DC=xyz" \
 			--email="orchestrator@hcphacking.xyz" \
+		--generate-key=rsa --key-bits=2048 \
+		--certificate="FILE:client.pem"
+$(TESTCREDS_ENROLLHEALTHCLIENT)/client.pem: | $(TESTCREDS_ENROLLHEALTHCLIENT)
+$(TESTCREDS_ENROLLHEALTHCLIENT)/client.pem: $(TESTCREDS_ENROLLCERTISSUER)/CA.cert
+	$Qcd $(TESTCREDS_ENROLLHEALTHCLIENT) && \
+		hxtool issue-certificate \
+		--ca-certificate="FILE:$(TESTCREDS_ENROLLCERTISSUER)/CA.pem" \
+		--type=https-client \
+		--hostname="orchestrator.hcphacking.xyz" \
+		--subject="UID=healthclient,DC=hcphacking,DC=xyz" \
+			--email="healthclient@hcphacking.xyz" \
 		--generate-key=rsa --key-bits=2048 \
 		--certificate="FILE:client.pem"
 

@@ -53,7 +53,7 @@
     "webapi_https_certificate": "/etc/https-server/{webapi_fqdn}-key.pem",
     "webapi_https_authentication": "none",
     "webapi_https_client_CA": "/enrollcertchecker/CA.cert",
-    "webapi_https_healthclient": "/enrollclient/client.pem",
+    "webapi_https_healthclient": "/enrollhealthclient/client.pem",
     "webapi_setup": {},
     "webapi_uwsgi_env": {},
     "webapi_uwsgi_uid": "www-data",
