@@ -41,8 +41,8 @@ STARTSERVICES="emgmt emgmt_pol erepl arepl ahcp aclient_tpm"
 STARTSERVICES="$STARTSERVICES kdc_primary kdc_secondary"
 STARTSERVICES="$STARTSERVICES kdc_primary_tpm kdc_secondary_tpm"
 STARTSERVICES="$STARTSERVICES kdc_primary_pol kdc_secondary_pol"
-STARTSERVICES="$STARTSERVICES sherver workstation1 bigbrother www"
-STARTSERVICES="$STARTSERVICES sherver_tpm workstation1_tpm www_tpm"
+STARTSERVICES="$STARTSERVICES ssherver workstation1 bigbrother www"
+STARTSERVICES="$STARTSERVICES ssherver_tpm workstation1_tpm www_tpm"
 do_run "Starting basic services" \
 	up "$STARTSERVICES"
 do_run "Fail a premature attestation" \
@@ -55,19 +55,19 @@ do_run "Wait for secondary KDC to have realm replicated" \
 	exec "kdc_secondary /hcp/kdcsvc/realm_healthcheck.py -R 10 -P 1"
 do_run "Create and enroll remaining TPMs" \
 	run "orchestrator /hcp/tools/run_orchestrator.sh -c -e"
-do_run "Wait for sherver to be ready" \
-	exec "sherver /hcp/sshd.py --healthcheck -R 10 -P 1"
+do_run "Wait for ssherver to be ready" \
+	exec "ssherver /hcp/sshd.py --healthcheck -R 10 -P 1"
 do_run "Wait for workstation1 to be ready" \
 	exec "workstation1 /hcp/attested.py -R 10 -P 1"
 sso_cmd="/install-heimdal/bin/kinit -C FILE:/home/luser/.hcp/pkinit/user-luser-key.pem luser"
-sso_cmd="$sso_cmd ssh -l luser -p 2222 sherver.hcphacking.xyz echo"
+sso_cmd="$sso_cmd ssh -l luser -p 2222 ssherver.hcphacking.xyz echo"
 sso_cmd="$sso_cmd \"This output indicates successful SSO+ssh\""
-do_run "Do SSO login from workstation1 to sherver as 'luser'" \
+do_run "Do SSO login from workstation1 to ssherver as 'luser'" \
 	exec "workstation1 $sso_cmd"
 do_run "Wait for bigbrother to be ready" \
 	exec "bigbrother /hcp/attested.py -R 10 -P 1"
 sso_cmd="/install-heimdal/bin/kinit -C FILE:/root/.hcp/pkinit/user-root-key.pem root"
-sso_cmd="$sso_cmd ssh -l root -p 2222 sherver.hcphacking.xyz echo"
+sso_cmd="$sso_cmd ssh -l root -p 2222 ssherver.hcphacking.xyz echo"
 sso_cmd="$sso_cmd \"If root==\$(whoami) then success\""
-do_run "Do SSO login from bigbrother to sherver as 'root'" \
+do_run "Do SSO login from bigbrother to ssherver as 'root'" \
 	exec "bigbrother $sso_cmd"

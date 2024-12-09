@@ -29,7 +29,7 @@ Processing entry: aclient (doesn't exist)
 Processing entry: kdc_primary (doesn't exist)
 Processing entry: kdc_secondary (doesn't exist)
 Processing entry: workstation1 (doesn't exist)
-Processing entry: sherver (doesn't exist)
+Processing entry: ssherver (doesn't exist)
 Processing entry: bigbrother (doesn't exist)
 Processing entry: www (doesn't exist)
 $ docker-compose run orchestrator -c -e aclient
@@ -41,7 +41,7 @@ Processing entry: aclient (exists, enrolled)
 Processing entry: kdc_primary (doesn't exist)
 Processing entry: kdc_secondary (doesn't exist)
 Processing entry: workstation1 (doesn't exist)
-Processing entry: sherver (doesn't exist)
+Processing entry: ssherver (doesn't exist)
 Processing entry: bigbrother (doesn't exist)
 Processing entry: www (doesn't exist)
 ```
@@ -269,7 +269,7 @@ As can be seen from the following excerpt of [`docker-compose.yml`](../docker-co
           - tpm_aclient:/tpm_aclient
           - tpm_kdc_primary:/tpm_primary.kdc
           - tpm_kdc_secondary:/tpm_secondary.kdc
-          - tpm_sherver:/tpm_sherver
+          - tpm_ssherver:/tpm_ssherver
           - tpm_workstation1:/tpm_workstation1
           - tpm_bigbrother:/tpm_bigbrother
           - tpm_www:/tpm_www

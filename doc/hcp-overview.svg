@@ -25,7 +25,7 @@
      inkscape:document-units="mm"
      inkscape:lockguides="false"
      inkscape:zoom="2.0359278"
-     inkscape:cx="272.60299"
+     inkscape:cx="272.3574"
      inkscape:cy="199.90886"
      inkscape:window-width="1920"
      inkscape:window-height="1010"
@@ -350,42 +350,34 @@
          style="stroke-width:0.065"
          x="109.72092"
          y="74.617569" /></text>
-    <g
-       id="g46"
-       transform="translate(-23.761911,-5.627278)">
-      <g
-         id="g3"
-         transform="translate(1.8559809,-3.5601934)">
-        <text
-           xml:space="preserve"
-           style="font-size:4.23333px;text-align:start;writing-mode:lr-tb;direction:ltr;text-anchor:start;fill:#000000;stroke-width:0.264583"
-           x="45.115662"
-           y="21.589527"
-           id="text3"><tspan
-             sodipodi:role="line"
-             id="tspan3"
-             style="font-size:4.23333px;stroke-width:0.264583"
-             x="45.115662"
-             y="21.589527">orchestrator</tspan></text>
-        <rect
-           style="fill:none;stroke:#000000;stroke-width:0.565;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1"
-           id="rect3"
-           width="34.308681"
-           height="5.7181134"
-           x="41.066452"
-           y="17.154341" />
-      </g>
-      <text
-         xml:space="preserve"
-         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.23333px;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:start;writing-mode:lr-tb;direction:ltr;text-anchor:start;fill:#ff0000;fill-opacity:1;stroke-width:0.264583"
-         x="37.157261"
-         y="11.867561"
-         id="text3-8-19-5"><tspan
-           sodipodi:role="line"
-           id="tspan39"
-           x="37.157261"
-           y="11.867561">Trusted infrastructure</tspan></text>
-    </g>
+    <text
+       xml:space="preserve"
+       style="font-size:4.23333px;text-align:start;writing-mode:lr-tb;direction:ltr;text-anchor:start;fill:#000000;stroke-width:0.264583"
+       x="23.209732"
+       y="12.402056"
+       id="text3"><tspan
+         sodipodi:role="line"
+         id="tspan3"
+         style="font-size:4.23333px;stroke-width:0.264583"
+         x="23.209732"
+         y="12.402056">orchestrator</tspan></text>
+    <rect
+       style="fill:none;stroke:#000000;stroke-width:0.565;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1"
+       id="rect3"
+       width="34.308681"
+       height="5.7181134"
+       x="19.160522"
+       y="7.9668694" />
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.23333px;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:start;writing-mode:lr-tb;direction:ltr;text-anchor:start;fill:#ff0000;fill-opacity:1;stroke-width:0.264583"
+       x="13.39535"
+       y="6.2402835"
+       id="text3-8-19-5"><tspan
+         sodipodi:role="line"
+         id="tspan39"
+         x="13.39535"
+         y="6.2402835">Trusted infrastructure</tspan></text>
     <text
        xml:space="preserve"
        style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.175px;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:start;writing-mode:lr-tb;direction:ltr;text-anchor:start;fill:#000000;fill-opacity:1;stroke:#0000ff;stroke-width:0;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1"
@@ -434,44 +426,40 @@
          x="10.525123"
          y="157.10393" />
     </g>
-    <g
-       id="g55"
-       transform="translate(1.5875,-69.787591)">
-      <text
-         xml:space="preserve"
-         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.175px;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:start;writing-mode:lr-tb;direction:ltr;text-anchor:start;fill:#0000ff;fill-opacity:1;stroke:#0000ff;stroke-width:0.065;stroke-dasharray:none;stroke-opacity:1"
-         x="116.46256"
-         y="166.83167"
-         id="text3-8-1-8-8"><tspan
-           sodipodi:role="line"
-           id="tspan50-1"
-           x="116.46256"
-           y="166.83167">TPM</tspan></text>
-      <rect
-         style="fill:none;stroke:#0000ff;stroke-width:0.282371;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1"
-         id="rect3-4-5-0-9"
-         width="11.718856"
-         height="4.1813421"
-         x="113.72155"
-         y="163.58681" />
-      <text
-         xml:space="preserve"
-         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.23333px;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:start;writing-mode:lr-tb;direction:ltr;text-anchor:start;fill:#000000;stroke-width:0.264583"
-         x="114.00937"
-         y="161.88432"
-         id="text3-8-9-8-8"><tspan
-           sodipodi:role="line"
-           id="tspan55"
-           x="114.00937"
-           y="161.88432">sherver</tspan></text>
-      <rect
-         style="fill:none;stroke:#000000;stroke-width:0.436193;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1"
-         id="rect3-4-4-1-7"
-         width="19.998161"
-         height="5.846921"
-         x="112.13692"
-         y="157.3806" />
-    </g>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.175px;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:start;writing-mode:lr-tb;direction:ltr;text-anchor:start;fill:#0000ff;fill-opacity:1;stroke:#0000ff;stroke-width:0.065;stroke-dasharray:none;stroke-opacity:1"
+       x="118.05006"
+       y="97.044075"
+       id="text3-8-1-8-8"><tspan
+         sodipodi:role="line"
+         id="tspan50-1"
+         x="118.05006"
+         y="97.044075">TPM</tspan></text>
+    <rect
+       style="fill:none;stroke:#0000ff;stroke-width:0.282371;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1"
+       id="rect3-4-5-0-9"
+       width="11.718856"
+       height="4.1813421"
+       x="115.30905"
+       y="93.799217" />
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.23333px;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:start;writing-mode:lr-tb;direction:ltr;text-anchor:start;fill:#000000;stroke-width:0.264583"
+       x="114.62405"
+       y="92.096733"
+       id="text3-8-9-8-8"><tspan
+         sodipodi:role="line"
+         id="tspan2"
+         x="114.62405"
+         y="92.096733">ssherver</tspan></text>
+    <rect
+       style="fill:none;stroke:#000000;stroke-width:0.452098;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1"
+       id="rect3-4-4-1-7"
+       width="21.541742"
+       height="5.8310161"
+       x="113.08259"
+       y="87.60096" />
     <g
        id="g53"
        transform="translate(-3.7041669,-69.787595)">

@@ -8,15 +8,15 @@ volumes:
     attestdb:
     kdc_primary:
     kdc_secondary:
-    sherver:
+    ssherver:
     tpm_aclient:
     tpmsocket_aclient:
     tpm_kdc_primary:
     tpmsocket_kdc_primary:
     tpm_kdc_secondary:
     tpmsocket_kdc_secondary:
-    tpm_sherver:
-    tpmsocket_sherver:
+    tpm_ssherver:
+    tpmsocket_ssherver:
     tpm_workstation1:
     tpmsocket_workstation1:
     tpm_bigbrother:
@@ -129,7 +129,7 @@ services:
           - tpm_aclient:/tpm_aclient
           - tpm_kdc_primary:/tpm_primary.kdc
           - tpm_kdc_secondary:/tpm_secondary.kdc
-          - tpm_sherver:/tpm_sherver
+          - tpm_ssherver:/tpm_ssherver
           - tpm_workstation1:/tpm_workstation1
           - tpm_bigbrother:/tpm_bigbrother
           - tpm_www:/tpm_www
@@ -220,26 +220,26 @@ services:
         environment:
           - HCP_CONFIG_FILE=/usecase/hosts/kdc_secondary.json
 
-    sherver:
+    ssherver:
         extends: common
-        hostname: sherver.hcphacking.xyz
+        hostname: ssherver.hcphacking.xyz
         networks:
           - hcpnetwork
         volumes:
-          - sherver:/sherver
-          - tpmsocket_sherver:/tpmsocket_sherver
+          - ssherver:/ssherver
+          - tpmsocket_ssherver:/tpmsocket_ssherver
           - ./_testcreds/enrollverifier:/enrollverifier:ro
         environment:
-          - HCP_CONFIG_FILE=/usecase/hosts/sherver.json
+          - HCP_CONFIG_FILE=/usecase/hosts/ssherver.json
 
-    sherver_tpm:
+    ssherver_tpm:
         extends: common_tpm
-        hostname: sherver_tpm.hcphacking.xyz
+        hostname: ssherver_tpm.hcphacking.xyz
         volumes:
-          - tpm_sherver:/tpm_sherver
-          - tpmsocket_sherver:/tpmsocket_sherver
+          - tpm_ssherver:/tpm_ssherver
+          - tpmsocket_ssherver:/tpmsocket_ssherver
         environment:
-          - HCP_CONFIG_FILE=/usecase/hosts/sherver.json
+          - HCP_CONFIG_FILE=/usecase/hosts/ssherver.json
 
     workstation1:
         extends: common

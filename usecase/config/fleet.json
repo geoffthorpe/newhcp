@@ -113,9 +113,9 @@
 			}
 		},
 		{
-			"name": "sherver",
-			"tpm_path": "/tpm_sherver",
-			"enroll_hostname": "sherver.hcphacking.xyz",
+			"name": "ssherver",
+			"tpm_path": "/tpm_ssherver",
+			"enroll_hostname": "ssherver.hcphacking.xyz",
 			"enroll_profile": {
 				"__env": {
 					"ENROLL_PKINIT_USER_PRINC": "user1"

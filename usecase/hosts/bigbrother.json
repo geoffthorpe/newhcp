@@ -27,8 +27,8 @@
 
     "env": {
         "set": {
-            "KRB5_KTNAME": "/etc/hcp/sherver/krb5.keytab",
-            "KRB5_CONFIG": "/etc/hcp/sherver/krb5.conf"
+            "KRB5_KTNAME": "/etc/hcp/bigbrother/krb5.keytab",
+            "KRB5_CONFIG": "/etc/hcp/bigbrother/krb5.conf"
         }
     },
 
