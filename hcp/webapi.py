@@ -97,8 +97,8 @@ if myhttps:
         mykinit += [
             'kinit',
             '-C',
-            'FILE:/etc/creds/unknown/healthcheck/pkinit/user-healthcheck-key.pem',
-            'healthcheck' ]
+            'FILE:/etc/pkinit/healthclient-key.pem',
+            f"healthclient.{myservername}" ]
 else:
     myURL = f"http://{myURL}"
 if not args.curl_args:
