@@ -2,7 +2,7 @@
         "setup": [ {
                 "tag": "global",
                 "exec": [
-                    "/hcp/common/wait_touchfile.py",
+                    "/hcp/python/HcpToolWaitTouchfile.py",
                     "{attestsvc_db}/initialized"
                 ],
                 "touchfile": "{attestsvc_db}/initialized"

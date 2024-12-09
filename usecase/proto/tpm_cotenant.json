@@ -5,7 +5,7 @@
     ],
     "setup": [ {
         "tag": "swtpm",
-        "exec": [ "/hcp/common/wait_touchfile.py", "/tpm_{id}/tpm/ek.pub" ],
+        "exec": [ "/hcp/python/HcpToolWaitTouchfile.py", "/tpm_{id}/tpm/ek.pub" ],
         "touchfile": "/tpm_{id}/tpm/ek.pub"
     }, {
         "tag": "swtpm",

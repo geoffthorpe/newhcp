@@ -34,4 +34,4 @@ RUN adduser --disabled-password --quiet --gecos "Test User 3,,,," user3
 #COPY hcp /hcp
 
 # Set the launcher as our entrypoint
-ENTRYPOINT ["/hcp/common/launcher.py"]
+ENTRYPOINT ["/hcp/python/HcpToolLauncher.py"]

@@ -9,13 +9,13 @@ sys.path.insert(1, '/hcp/common')
 from HcpCommon import bail, log, hlog
 
 if len(sys.argv) < 2:
-	bail("'wait_touchfile' expects a path argument")
+	bail("'HcpToolWaitTouchfile' expects a path argument")
 
 p = sys.argv[1]
-log(f"wait_touchfile({p}) starting")
+log(f"HcpToolWaitTouchfile({p}) starting")
 
 while not os.path.isfile(p):
 	hlog(2, f"touchfile {p} doesn't exist yet")
 	time.sleep(1)
 
-log(f"wait_touchfile({p}) done")
+log(f"HcpToolWaitTouchfile({p}) done")

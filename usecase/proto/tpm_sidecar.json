@@ -12,7 +12,7 @@
         "setup": {
             "tag": "global",
             "exec": [
-                "/hcp/common/wait_touchfile.py",
+                "/hcp/python/HcpToolWaitTouchfile.py",
                 "/tpm_{id}/tpm/ek.pub"
             ],
             "touchfile": "/tpm_{id}/tpm/ek.pub"
