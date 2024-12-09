@@ -9,8 +9,11 @@ This feature implements a kind of "wildcard" service principal, such that all pr
 The reference usecase uses two namespace principals, as can be seen in the following output;
 
 ```
-$ docker-compose exec kdc_primary /hcp/tools/kdc_api.py \
-    --api http://primary.kdc.hcphacking.xyz:9090 get > foo.json
+$ docker-compose exec emgmt /hcp/python/HcpApiKdc.py \
+    --api https://secondary.kdc.hcphacking.xyz \
+    --cacert /enrollcertchecker/CA.cert \
+    --clientcert /enrollclient/client.pem \
+    get > foo.json
 $ jq . foo.json
 {
   "cmd": "get",
@@ -34,40 +37,72 @@ $ jq . foo.json
 
 The last two principals have the `WELLKNOWN/HOSTBASED-NAMESPACE` prefix - they are the namespace principals. The first of the two has an underscore as the service identifier, which acts as a wild-card. The latter of the two has the `host` service identifier, as used for SSH services, and that namespace principal is configured to allow delegation. Service principals that match the network address `<something>.hcphacking.xyz` and the realm `HCPHACKING.XYZ` but do not have the `host` service identifier will match on (and be derived from) the underscored namespace principal, which is configured not to allow delegation.
 
-Note, there are two ways for services to obtain (and update) their service principals. In the reference usecase, the enrollment (and periodic reenrollment) of the service host causes a keytab to be generated as a secret (sealed) asset, so the `ssherver` SSH host (for example) gets its kerberos keytab via attestation. However, the service host could obtain its keytab directly from the KDC in precisely the same way that the Enrollment service does in the reference usecase. NB: this would require the KDC service to use HTTPS and client authentication, unlike the development configuration using HTTP that you see here.
+Note, the `kdcsvc` API endpoint provides two ways to obtain keytabs for service principals.
+
+* The `ext_keytab` API will provide keytabs for _any_ requested principals, so long as the caller of the API has successfully authenticated using a client certificate. It is therefore essential to use an appropriately privileged CA for such credentials. In the reference usecase, the `emgmt` container of the Enrollment service uses client certificate authentication to enroll keytab assets for arbitrary enrolled hosts and this is how `ssherver1` gets its keytab, namely via attestation.
+* If the caller of the `ext_keytab` API successfully authenticates using kerberos (SPNEGO), it will be issued with a keytab _only for the caller's principal_. In the reference usecase, the `ssherver2` host gets a pkinit-style certificate through attestation, and that will have the service principal encoded within it. The `ssherver2` host then runs a `keytabber` service that can use that certificate to obtain the keytab corresponding to it, using `run_keytabclient.sh`. 
+
+The following steps are performed automatically within `emgmt`, to get the keytab for `ssherver1`'s enrollment data. In the example below, you can see how the key versions in the keytabs being returned to `ssherver1` rotate with time.
+```
+$ docker-compose exec emgmt bash
+root@emgmt:/# \
+        /hcp/python/HcpApiKdc.py \
+                --api https://secondary.kdc.hcphacking.xyz \
+                --cacert /enrollcertchecker/CA.cert \
+                --clientcert /enrollclient/client.pem \
+                ext_keytab host/ssherver1.hcphacking.xyz | \
+        jq -r .stdout | \
+        base64 -d > kt
+root@emgmt:/# ktutil -k kt list
+kt:
+
+Vno  Type                     Principal                                     Aliases
+ 28  aes128-cts-hmac-sha1-96  host/ssherver1.hcphacking.xyz@HCPHACKING.XYZ
+ 29  aes128-cts-hmac-sha1-96  host/ssherver1.hcphacking.xyz@HCPHACKING.XYZ
+root@emgmt:/#
+root@emgmt:/# # Sleep 1 hour, the default rotation period for namespace principals
+root@emgmt:/# sleep 3600
+root@emgmt:/# \
+        /hcp/python/HcpApiKdc.py \
+                --api https://secondary.kdc.hcphacking.xyz \
+                --cacert /enrollcertchecker/CA.cert \
+                --clientcert /enrollclient/client.pem \
+                ext_keytab host/ssherver1.hcphacking.xyz | \
+        jq -r .stdout | \
+        base64 -d > kt
+root@emgmt:/# ktutil -k kt list
+kt:
+
+Vno  Type                     Principal                                     Aliases
+ 29  aes128-cts-hmac-sha1-96  host/ssherver1.hcphacking.xyz@HCPHACKING.XYZ
+ 30  aes128-cts-hmac-sha1-96  host/ssherver1.hcphacking.xyz@HCPHACKING.XYZ
+```
+
+The following steps are performed periodically within `ssherver2`, which relies on an always-fresh, pkinit-style certificate being provided to it via attestation. (The `attester` background service makes sure this is so by periodically running the attestation client.) People familiar with Kerberos will want to take note that the TGT being used in this example is issued for a _service principal_, and not a user/role-style principal as would normally be the case.
 
 ```
-$ docker-compose exec kdc_primary /hcp/tools/kdc_api.py \
-    --api http://primary.kdc.hcphacking.xyz:9090 \
-    ext_keytab HTTP/newserver.hcphacking.xyz > foo.json
-$ jq . foo.json
-{
-  "cmd": "ext_keytab",
-  "realm": "HCPHACKING.XYZ",
-  "requested": [
-    "HTTP/newserver.hcphacking.xyz"
-  ],
-  "stdout": "BQIAAABXAAIADkhDUEhBQ0tJTkcuWFlaAARIVFRQABhuZXdzZXJ2ZXIuaGNwaGFja2luZy54eXoAAAABZ0Pe6xsAEQAQ48nGvfVjwt/7GBqCo7+BdgAAABsAAAAAAAAAVwACAA5IQ1BIQUNLSU5HLlhZWgAESFRUUAAYbmV3c2VydmVyLmhjcGhhY2tpbmcueHl6AAAAAWdD3usaABEAEF5okbCKpSK+FKhm5VdIt/4AAAAaAAAAAA=="
-}
-$ jq -r .stdout foo.json | base64 -d > kt
-$ ktutil --keytab=kt list
+$ docker-compose exec ssherver2 bash
+root@ssherver2:/# kinit -C FILE:/etc/pkinit/sshd-key.pem host/ssherver2.hcphacking.xyz bash
+root@ssherver2:/# klist
+Credentials cache: FILE:/tmp/krb5cc_LKLfZS
+        Principal: host/ssherver2.hcphacking.xyz@HCPHACKING.XYZ
+
+  Issued                Expires               Principal
+Dec 12 22:07:20 2024  Dec 12 22:37:20 2024  krbtgt/HCPHACKING.XYZ@HCPHACKING.XYZ
+root@ssherver2:/# \
+        /hcp/python/HcpApiKdc.py \
+                --api https://keytab.kdc.hcphacking.xyz \
+                --cacert /enrollcertchecker/CA.cert \
+                --kerberos \
+                ext_keytab | \
+        jq -r .stdout | \
+        base64 -d > kt
+root@ssherver2:/# ktutil -k kt list
 kt:
 
 Vno  Type                     Principal                                     Aliases
- 27  aes128-cts-hmac-sha1-96  HTTP/newserver.hcphacking.xyz@HCPHACKING.XYZ
- 26  aes128-cts-hmac-sha1-96  HTTP/newserver.hcphacking.xyz@HCPHACKING.XYZ
-$ # Sleep 1 hour, the default rotation period for namespace principals
-$ sleep 3600
-$ docker-compose exec kdc_primary /hcp/tools/kdc_api.py \
-    --api http://primary.kdc.hcphacking.xyz:9090 \
-    ext_keytab HTTP/newserver.hcphacking.xyz > foo.json
-$ jq -r .stdout foo.json | base64 -d > kt
-$ ktutil --keytab=kt list
-kt:
-
-Vno  Type                     Principal                                     Aliases
- 28  aes128-cts-hmac-sha1-96  HTTP/newserver.hcphacking.xyz@HCPHACKING.XYZ
- 27  aes128-cts-hmac-sha1-96  HTTP/newserver.hcphacking.xyz@HCPHACKING.XYZ
+ 29  aes128-cts-hmac-sha1-96  host/ssherver2.hcphacking.xyz@HCPHACKING.XYZ
+ 28  aes128-cts-hmac-sha1-96  host/ssherver2.hcphacking.xyz@HCPHACKING.XYZ
 ```
 
 ## Synthetic principals
@@ -114,13 +149,13 @@ Nov 25 19:48:25 2024  Nov 25 19:53:25 2024  krbtgt/HCPHACKING.XYZ@HCPHACKING.XYZ
 
 ## `kdcsvc`
 
-### The kdcsvc API, and `/hcp/tools/kdc_api.py`
+### The kdcsvc API, and `/hcp/python/HcpApiKdc.py`
 
-The KDC Service runs a `webapi` instance whose interface is derived from the command-line interface of the kadmin tool. It supports the following actions on the KDC database; `add`, `add_ns`, `get`, `del`, and `del_ns`, and `ext_keytab`. These allow it to (respectively) add new regular principals, add new namespace principals, query principals, delete regular principals, delete namespace principals, and extract keytabs for service principals. As with all webapi-hosted apps, it supports optional HTTPS with various client-authentication options, but the reference usecase runs the interface over unencrypted HTTP. (Yes, this would be a bad idea in production.)
+The KDC Service runs a `webapi` instance whose interface is derived from the command-line interface of the kadmin tool. It supports the following actions on the KDC database; `add`, `add_ns`, `get`, `del`, `del_ns`, and `ext_keytab`. These allow it to (respectively) add new regular principals, add new namespace principals, query principals, delete regular principals, delete namespace principals, and extract keytabs for service principals. This service should always be run with HTTPS. As with all webapi-hosted apps, it supports client-authentication options `clientcert` and `kerberos`. The service will allow any and all commands if a valid client certificate was used, as this is used to infer administrative privilege. If instead the client is kerberos-authenticated, the service will only support the `ext_keytab` command and will only allow the user's own principal to be exported to a keytab.
 
 Note, in the HCP workflow and the reference usecase, the presence of the KDC service is to show how it can operate statelessly, where _all_ principals are derived on-the-fly based on certificates. In this mode of operation, there should be no need to manipulate the KDC database, but the ability to do so supports hybrid scenarios and/or helps when migrating a legacy database over to stateless usage. The KDC's database can register and use (and replicate) conventional principals, even if the reference usecase only makes use of the new, dynamically-generated kinds of principals.
 
-To help with the use of the KDC web API, the `/hcp/tools/kdc_api.py` library and tool can be used. The earlier section on namespace principals shows an example usage - one can get further usage information about how to invoke the tool by adding a `--help` argument. (For importing it into other python code, the easiest reference is to read the code itself.)
+To help with the use of the KDC web API, the `/hcp/python/HcpApiKdc.py` library and tool can be used. The earlier section on namespace principals shows an example usage - one can get further usage information about how to invoke the tool by adding a `--help` argument. (For importing it into other python code, the easiest reference is to read the code itself.)
 
 ### kdcsvc replication
 

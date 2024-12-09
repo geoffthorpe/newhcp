@@ -64,8 +64,8 @@ FILE:/tmp/krb5cc_zJ0xtC
 ### Step 2 of 2: ssh
 
 ```
-luser@workstation1:~$ ssh -p 2222 sherver.hcphacking.xyz
-luser@sherver:~$
+luser@workstation1:~$ ssh ssherver1.hcphacking.xyz
+luser@ssherver1:~$
 ```
 
 ### Teardown all running containers

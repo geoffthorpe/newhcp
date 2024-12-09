@@ -23,25 +23,29 @@ The following diagram shows the HCP's reference usecase and most of its componen
 
 1. A new host and its TPM are enrolled with the Enrollment service, generally by automated logic in the infrastructure. This is represented by the `orchestrator` host in the reference usecase, which consumes a JSON description of the fleet called [fleet.json](../usecase/config/fleet.json).
 ```
-$ docker-compose up -d emgmt_pol emgmt erepl arepl ahcp aclient_tpm
+$ docker-compose up -d emgmt erepl arepl ahcp attestclient_tpm
 $ docker-compose run orchestrator
-Processing entry: aclient (doesn't exist)
+Processing entry: attestclient (doesn't exist)
 Processing entry: kdc_primary (doesn't exist)
 Processing entry: kdc_secondary (doesn't exist)
+Processing entry: kdc_keytab (doesn't exist)
 Processing entry: workstation1 (doesn't exist)
-Processing entry: ssherver (doesn't exist)
+Processing entry: ssherver1 (doesn't exist)
+Processing entry: ssherver2 (doesn't exist)
 Processing entry: bigbrother (doesn't exist)
 Processing entry: www (doesn't exist)
-$ docker-compose run orchestrator -c -e aclient
-Processing entry: aclient (doesn't exist)
+$ docker-compose run orchestrator -c -e attestclient
+Processing entry: attestclient (doesn't exist)
     create: TPM created successfully
     enroll: TPM enrolled successfully
 $ docker-compose run orchestrator
-Processing entry: aclient (exists, enrolled)
+Processing entry: attestclient (exists, enrolled)
 Processing entry: kdc_primary (doesn't exist)
 Processing entry: kdc_secondary (doesn't exist)
+Processing entry: kdc_keytab (doesn't exist)
 Processing entry: workstation1 (doesn't exist)
-Processing entry: ssherver (doesn't exist)
+Processing entry: ssherver1 (doesn't exist)
+Processing entry: ssherver2 (doesn't exist)
 Processing entry: bigbrother (doesn't exist)
 Processing entry: www (doesn't exist)
 ```
@@ -54,8 +58,7 @@ Processing entry: www (doesn't exist)
 
 5. If the attestation was successful and assets have been returned, any sealed (secret) assets are unsealed, then the canonical attestation callback (overridable) is called to examine the returned assets and perform any necessary post-processing. I.e. install assets into the appropriate directories, signal any dependent apps ("HUP") to reload assets that might be expiring, etc. The following trace shows the reference usecase's `aclient` performing this sequence;
 ```
-$ docker-compose run aclient
-Creating newhcp_aclient_run ... done
+$ docker-compose run attestclient
 Running 'attestclient'
 Info, 'tpm2-attest attest' succeeded
 Extracting the attestation result
@@ -66,8 +69,8 @@ Extracting the attestation result
 ./ek.pub
 ./ekpubhash
 ./enroll.conf
-./hint-reenroll-20241118230151
-./hint-reenroll-20241118230151.sig
+./hint-reenroll-20241212175721
+./hint-reenroll-20241212175721.sig
 ./hostcert-default-https-hostclient-key.pem.enc
 ./hostcert-default-https-hostclient-key.pem.enc.sig
 ./hostcert-default-https-hostclient-key.pem.policy
@@ -113,7 +116,7 @@ Unsealing asset 'hostcert-user-https-client-barry-key.pem'
 Unsealing asset 'hostcert-user-pkinit-admin-alicia-key.pem'
 Unsealing asset 'hostcert-user-pkinit-user-alicia-key.pem'
 Unsealing asset 'rootfs.key'
-Running callback '/hcp/tools/attest_callback_common.py'
+Running callback '/hcp/python/HcpToolAttestCallback.py'
 Processing assets returned from attestation
 Class: genconf-krb5
  - asset: krb5.conf (644) [changed]
@@ -122,6 +125,14 @@ Class: genconf-krb5
       dest: /etc/krb5.conf
  [postinstall]
 Class: gencert-hxtool
+ - asset: hostcert-user-pkinit-admin-alicia.pem (644) [changed]
+ - asset: hostcert-user-pkinit-admin-alicia-key.pem (600) [changed]
+ [preinstall]
+ - install: hostcert-user-pkinit-admin-alicia.pem,644
+      dest: /home/alicia/.hcp/pkinit/admin-alicia.pem
+ - install: hostcert-user-pkinit-admin-alicia-key.pem,600
+      dest: /home/alicia/.hcp/pkinit/admin-alicia-key.pem
+ [postinstall]
  - asset: hostcert-user-pkinit-user-alicia.pem (644) [changed]
  - asset: hostcert-user-pkinit-user-alicia-key.pem (600) [changed]
  [preinstall]
@@ -129,14 +140,6 @@ Class: gencert-hxtool
       dest: /home/alicia/.hcp/pkinit/user-alicia.pem
  - install: hostcert-user-pkinit-user-alicia-key.pem,600
       dest: /home/alicia/.hcp/pkinit/user-alicia-key.pem
- [postinstall]
- - asset: hostcert-default-https-hostclient.pem (644) [changed]
- - asset: hostcert-default-https-hostclient-key.pem (600) [changed]
- [preinstall]
- - install: hostcert-default-https-hostclient.pem,644
-      dest: /etc/https-hostclient/aclient.hcphacking.xyz.pem
- - install: hostcert-default-https-hostclient-key.pem,600
-      dest: /etc/https-hostclient/aclient.hcphacking.xyz-key.pem
  [postinstall]
  - asset: hostcert-user-https-client-barry.pem (644) [changed]
  - asset: hostcert-user-https-client-barry-key.pem (600) [changed]
@@ -146,19 +149,19 @@ Class: gencert-hxtool
  - install: hostcert-user-https-client-barry-key.pem,600
       dest: /etc/creds/unknown/barry/https/client-barry-key.pem
  [postinstall]
- - asset: hostcert-user-pkinit-admin-alicia.pem (644) [changed]
- - asset: hostcert-user-pkinit-admin-alicia-key.pem (600) [changed]
+ - asset: hostcert-default-https-hostclient.pem (644) [changed]
+ - asset: hostcert-default-https-hostclient-key.pem (600) [changed]
  [preinstall]
- - install: hostcert-user-pkinit-admin-alicia.pem,644
-      dest: /home/alicia/.hcp/pkinit/admin-alicia.pem
- - install: hostcert-user-pkinit-admin-alicia-key.pem,600
-      dest: /home/alicia/.hcp/pkinit/admin-alicia-key.pem
+ - install: hostcert-default-https-hostclient.pem,644
+      dest: /etc/https-hostclient/attestclient.hcphacking.xyz.pem
+ - install: hostcert-default-https-hostclient-key.pem,600
+      dest: /etc/https-hostclient/attestclient.hcphacking.xyz-key.pem
  [postinstall]
 Class: gencert-issuer
  - asset: certissuer.pem (644) [changed]
  [preinstall]
  - install: certissuer.pem,644
-      dest: /usr/share/ca-certificates/aclient/certissuer.pem
+      dest: /usr/share/ca-certificates/attestclient/certissuer.pem
  [postinstall]
 Updating certificates in /etc/ssl/certs...
 rehash: warning: skipping ca-certificates.crt, it does not contain exactly one certificate or CRL
@@ -181,6 +184,8 @@ This service is where cryptographic assets get produced for the enrolled hosts. 
 
 If a policy service is configured for the Enrollment service, the processed JSON request is sent to the policy service for adjudication, otherwise the operation is assumed acceptable. The Enrollment service is presumed accessible only to trusted infrastructure, so the use of a policy service hook may be surplus to requirements, especially if the Enrollment service is configured to allow little or no flexibility in client requests.
 
+The reference implementation runs a `policy` container that simply dumps all the JSON inputs to files in the `/tmp` directory and returns success. This can help to provide a corpus of inputs corresponding to expected behavior, which in turn should help implement an actual policy responder for the destination environment.
+
 ### Keeping enrollment assets fresh with `reenroller`
 
 The enrollment service also provides a background `reenroller` agent, whose job it is to determine the enrollments that are due for reenrollment and causes them to reenroll. This has the affect of updating assets that are too close to their expiry times.
@@ -201,14 +206,15 @@ That said, who generates the credentials used by HCP itself? The assumption is t
 
 The reference usecase automatically generates this core set of credentials and automatically mounts them into HCP containers as appropriate;
 
-| Host path                     | Mount path         | Usage                                     |
-| ----------------------------- | ------------------ | ----------------------------------------- |
-| \_testcreds/enrollcertissuer  | /enrollcertissuer  | CA with private key                       |
-| \_testcreds/enrollcertchecker | /enrollcertchecker | CA without private key                    |
-| \_testcreds/enrollsigner      | /enrollsigner      | Enrollment signature key-pair             |
-| \_testcreds/enrollverifier    | /enrollverifier    | Enrollment signature public key           |
-| \_testcreds/enrollserver      | /enrollserver      | `emgmt` HTTPS certificate and key         |
-| \_testcreds/enrollclient      | /enrollclient      | `orchestrator` client certificate and key |
+| Host path                      | Mount path          | Usage                                     |
+| ------------------------------ | ------------------- | ----------------------------------------- |
+| \_testcreds/enrollcertissuer   | /enrollcertissuer   | CA with private key                       |
+| \_testcreds/enrollcertchecker  | /enrollcertchecker  | CA without private key                    |
+| \_testcreds/enrollsigner       | /enrollsigner       | Enrollment signature key-pair             |
+| \_testcreds/enrollverifier     | /enrollverifier     | Enrollment signature public key           |
+| \_testcreds/enrollserver       | /enrollserver       | `emgmt` HTTPS certificate and key         |
+| \_testcreds/enrollclient       | /enrollclient       | `orchestrator` client certificate and key |
+| \_testcreds/enrollhealthclient | /enrollhealthclient | healthcheck client certificate and key    |
 
 ---
 
@@ -259,17 +265,17 @@ As can be seen from the following excerpt of [`docker-compose.yml`](../docker-co
 
 ```
     orchestrator:
-        extends: common
+        extends: common_nontpm
         hostname: orchestrator.hcphacking.xyz
-        networks:
-          - hcpnetwork
         volumes:
           - ./_testcreds/enrollcertchecker:/enrollcertchecker:ro
           - ./_testcreds/enrollclient:/enrollclient:ro
-          - tpm_aclient:/tpm_aclient
+          - tpm_attestclient:/tpm_attestclient
           - tpm_kdc_primary:/tpm_primary.kdc
           - tpm_kdc_secondary:/tpm_secondary.kdc
-          - tpm_ssherver:/tpm_ssherver
+          - tpm_kdc_keytab:/tpm_keytab.kdc
+          - tpm_ssherver1:/tpm_ssherver1
+          - tpm_ssherver2:/tpm_ssherver2
           - tpm_workstation1:/tpm_workstation1
           - tpm_bigbrother:/tpm_bigbrother
           - tpm_www:/tpm_www
@@ -284,62 +290,59 @@ As can be seen from the following excerpt of [`docker-compose.yml`](../docker-co
 All of the fleet hosts in the reference usecase;
 
 * have software TPMs,
-* execute `/hcp/tools/run_client.sh` on start-up to attest and receive assets,
-* run the `attester` service to periodically re-run `run_client.sh`.
+* execute `/hcp/tools/run_attestclient.sh` on start-up to attest and receive assets,
+* run the `attester` service to periodically re-run `run_attestclient.sh`.
 
-As such, the `aclient` container is really just a short-lived subset of what all the other fleet hosts do. It simply runs `/hcp/tools/run_client.sh` once, and then exits.
+As such, the `attestclient` container is really just a short-lived subset of what all the other fleet hosts do. It simply runs `/hcp/tools/run_attestclient.sh` once, and then exits.
 
 ### Identifying the TPM
 
-The `run_client.sh` attestation script uses the TCG's tpm2-tools library and mechanisms to interface with a TPM, and this is no less true when it is interacting with our very own Software TPM service. As can be seen from the following default config for `run_client.sh` ([proto/client.json](../usecase/proto/client.json)), the `tcti` indicates the transport (`"swtpm"`) and location (`/tpmsocket_{id}/tpm`) of the TPM (here `{id}` is substituted with the hostname). `run_client.sh` takes that value and sets the TPM2TOOLS\_TCTI environment variable to it, which is how the TCG's canonical TPM stack identifies the TPM.
+The `run_client.sh` attestation script uses the TCG's tpm2-tools library and mechanisms to interface with a TPM, and this is no less true when it is interacting with our very own Software TPM service. As can be seen from the following default config for `run_attestclient.sh` ([proto/attestclient.json](../usecase/proto/attestclient.json)), the `tcti` indicates the transport (`"swtpm"`) and location (`/tpmsocket_{id}/tpm`) of the TPM (here `{id}` is substituted with the hostname). `run_attestclient.sh` takes that value and sets the TPM2TOOLS\_TCTI environment variable to it, which is how the TCG's canonical TPM stack identifies the TPM.
 ```
 {
-    "exec": "/hcp/tools/run_client.sh",
-    "tag": "{client_tag}",
-    "attest_url": "{client_url}",
+    "exec": "/hcp/tools/run_attestclient.sh",
+    "tag": "{attestclient_tag}",
+    "attest_url": "{attestclient_url}",
     "tcti": "swtpm:path=/tpmsocket_{id}/tpm",
-    "enroll_CA": "{client_CA}",
-    "callbacks": [ "/hcp/tools/attest_callback_common.py" ],
-    "global": "{client_global}"
+    "enroll_CA": "{attestclient_CA}",
+    "callbacks": [ "/hcp/python/HcpToolAttestCallback.py" ],
+    "global": "{attestclient_global}"
 }
 ```
 
-The following excerpt of [docker-compose.yml](../docker-compose.yml) shows how `aclient`'s TPM is mounted at the expected location for `aclient` and its TPM side-car, `aclient_tpm`;
+The following excerpt of [docker-compose.yml](../docker-compose.yml) shows how `attestclient`'s TPM is mounted at the expected location for `attestclient` and its TPM side-car, `attestclient_tpm`;
 
 ```
-    aclient:
-        extends: common
-        hostname: aclient.hcphacking.xyz
-        networks:
-          - hcpnetwork
+    attestclient:
+        extends: common_nontpm
+        hostname: attestclient.hcphacking.xyz
         volumes:
-          - tpmsocket_aclient:/tpmsocket_aclient
-          - ./_testcreds/enrollverifier:/enrollverifier:ro
+          - tpmsocket_attestclient:/tpmsocket_attestclient
         environment:
-          - HCP_CONFIG_FILE=/usecase/hosts/aclient.json
+          - HCP_CONFIG_FILE=/usecase/hosts/attestclient.json
 
-    aclient_tpm:
+    attestclient_tpm:
         extends: common_tpm
-        hostname: aclient_tpm.hcphacking.xyz
+        hostname: attestclient_tpm.hcphacking.xyz
         volumes:
-          - tpm_aclient:/tpm_aclient
-          - tpmsocket_aclient:/tpmsocket_aclient
+          - tpm_attestclient:/tpm_attestclient
+          - tpmsocket_attestclient:/tpmsocket_attestclient
         environment:
-          - HCP_CONFIG_FILE=/usecase/hosts/aclient.json
+          - HCP_CONFIG_FILE=/usecase/hosts/attestclient.json
 ```
 
 ### Running the TPM side-car
 
-As can be seen from the last excerpt, the "TPM" that `aclient` sees is actually a unix domain socket sitting in a (very small) docker volume, `tpmsocket_aclient`, whose sole purpose is to house that socket as an IPC channel between the `aclient` and `aclient_tpm` containers. The latter (the software TPM) has the same volume mounted for the same reason, but it also has the volume holding the _actual_ TPM state, `tpm_aclient` (i.e. without the "`socket"`). NB: the only other container that mounts `tpm_aclient` is `orchestrator`, as it is responsible for creating and destroying TPM state.
+As can be seen from the last excerpt, the "TPM" that `attestclient` sees is actually a unix domain socket sitting in a (very small) docker volume, `tpmsocket_attestclient`, whose sole purpose is to house that socket as an IPC channel between the `attestclient` and `attestclient_tpm` containers. The latter (the software TPM) has the same volume mounted for the same reason, but it also has the volume holding the _actual_ TPM state, `tpm_attestclient` (i.e. without the "`socket`"). NB: the only other container that mounts `tpm_attestclient` is `orchestrator`, as it is responsible for creating and destroying TPM state.
 
-The TPM side-car `aclient_tpm`, like all other TPM side-cars, is cut off from all networking and runs nothing but the `swtpm` daemon;
+The TPM side-car `attestclient_tpm`, like all other TPM side-cars, is cut off from all networking and runs nothing but the `swtpm` daemon;
 
 ```
-$ docker-compose exec aclient_tpm ps axf
+$ docker-compose exec attestclient_tpm ps axf
     PID TTY      STAT   TIME COMMAND
-  30629 pts/0    Rs+    0:00 ps axf
-      1 ?        Ss     0:24 /sbin/docker-init -- /hcp/common/launcher.py
-      7 ?        S      0:18 /usr/bin/python3 /hcp/common/launcher.py
-     36 ?        S      0:00  \_ /usr/bin/python3 /hcp/swtpm.py
-     37 ?        S      0:34      \_ swtpm socket --tpm2 --tpmstate dir=/tpm_acl
+   1007 pts/0    Rs+    0:00 ps axf
+      1 ?        Ss     0:00 /sbin/docker-init -- /hcp/python/HcpToolLauncher.py
+      7 ?        S      0:00 /usr/bin/python3 /hcp/python/HcpToolLauncher.py
+    612 ?        S      0:00  \_ /usr/bin/python3 /hcp/swtpm.py
+    613 ?        S      0:00      \_ swtpm socket --tpm2 --tpmstate dir=/tpm_attestclient/tpm
 ```
