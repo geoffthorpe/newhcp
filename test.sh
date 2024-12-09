@@ -37,7 +37,7 @@ do_exit() {
 
 [[ -n $NOTRAP ]] || trap do_exit EXIT
 
-STARTSERVICES="emgmt erepl arepl ahcp aclient_tpm"
+STARTSERVICES="policy emgmt erepl arepl ahcp aclient_tpm"
 STARTSERVICES="$STARTSERVICES kdc_primary kdc_secondary"
 STARTSERVICES="$STARTSERVICES kdc_primary_tpm kdc_secondary_tpm"
 STARTSERVICES="$STARTSERVICES ssherver workstation1 bigbrother www"

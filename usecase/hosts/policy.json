@@ -1,0 +1,23 @@
+{
+    "vars": {
+        "id": "policy",
+        "services": [ "webapi" ],
+        "default_targets": [ "start-services" ],
+        "webapi_app": "/hcp/python/HcpFlaskPolicyDummy.py"
+    },
+    "vars_webapi": {
+        "webapi_fqdn": "policy.hcphacking.xyz",
+        "webapi_port": 8080
+    },
+
+    "scope": [
+        { "load": ".defaults", "path": "/usecase/proto/defaults.json" },
+        { "vars": ".defaults" },
+        { "import": ".", "source": "." },
+        { "vars": ".vars" },
+        { "loadunion": ".", "path": "/usecase/proto/root.json" },
+        { "vars": ".vars_webapi" },
+        { "load": ".webapi", "path": "/usecase/proto/webapi.json" },
+        { "delete": ".webapi.https" }
+    ]
+}

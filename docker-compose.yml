@@ -57,6 +57,14 @@ services:
         environment:
           - HCP_CONFIG_SCOPE=.tpm
 
+    policy:
+        extends: common
+        hostname: policy.hcphacking.xyz
+        networks:
+          - hcpnetwork
+        environment:
+          - HCP_CONFIG_FILE=/usecase/hosts/policy.json
+
     emgmt:
         extends: common
         hostname: emgmt.hcphacking.xyz
