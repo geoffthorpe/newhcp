@@ -77,3 +77,4 @@ sso_cmd="$sso_cmd ssh -l luser ssherver2.hcphacking.xyz echo"
 sso_cmd="$sso_cmd \"This output indicates successful SSO+ssh\""
 do_run "Do SSO login from workstation1 to ssherver2 as 'luser'" \
 	exec "workstation1 $sso_cmd"
+echo "Success"
