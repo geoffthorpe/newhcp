@@ -15,6 +15,8 @@
     "namespace": "{kdcsvc_namespace}",
     "policy_url": "{kdcsvc_policyurl}",
     "admin_email": "{kdcsvc_admin_email}",
+    "anchor": "{kdcsvc_anchor}",
+    "pkinit_identity": "{kdcsvc_pkinit_identity}",
     "kadmin": {
         "preclient": {
             "__env": {

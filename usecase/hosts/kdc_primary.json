@@ -9,6 +9,7 @@
 	"kdcsvc_policyurl": "http://policy.hcphacking.xyz",
         "kdcsvc_secondaries": [ "secondary.kdc.hcphacking.xyz" ],
 	"kdcsvc_TGS_port": "3089",
+	"kdcsvc_pkinit_identity": "/etc/hcp/primary.kdc/pkinit/kdc-key.pem",
         "webapi_app": "/hcp/kdcsvc/mgmt_api.py",
         "webapi_fqdn": "primary.kdc.hcphacking.xyz",
         "webapi_port": 443,

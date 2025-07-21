@@ -31,6 +31,8 @@
     "kdcsvc_realm": "HCPHACKING.XYZ",
     "kdcsvc_namespace": "hcphacking.xyz",
     "kdcsvc_admin_email": "orchestrator@hcphacking.xyz",
+    "kdcsvc_anchor": "/enrollcertchecker/CA.cert",
+    "NODEFAULT_kdcsvc_pkinit_identity": "none",
     "NODEFAULT_kdcsvc_policyurl": "none",
     "kdcsvc_TGS_tag": "services",
     "NODEFAULT_kdcsvc_TGS_port": -1,

@@ -12,6 +12,8 @@ export HCP_KDCSVC_SECONDARIES=$(echo "$HCP_KDCSVC_JSON" | jq -r ".secondaries //
 export HCP_KDCSVC_REALM=$(echo "$HCP_KDCSVC_JSON" | jq -r ".realm")
 export HCP_KDCSVC_NAMESPACE=$(echo "$HCP_KDCSVC_JSON" | jq -r ".namespace")
 export HCP_KDCSVC_POLICYURL=$(echo "$HCP_KDCSVC_JSON" | jq -r ".policy_url")
+export HCP_KDCSVC_ANCHOR=$(echo "$HCP_KDCSVC_JSON" | jq -r ".anchor")
+export HCP_KDCSVC_PKINIT_IDENTITY=$(echo "$HCP_KDCSVC_JSON" | jq -r ".pkinit_identity")
 
 echo "Parsed 'kdcsvc': $HCP_HOSTNAME"
 echo "       STATE: $HCP_KDCSVC_STATE"
@@ -22,6 +24,8 @@ echo " SECONDARIES: $HCP_KDCSVC_SECONDARIES"
 echo "       REALM: $HCP_KDCSVC_REALM"
 echo "   NAMESPACE: $HCP_KDCSVC_NAMESPACE"
 echo "   POLICYURL: $HCP_KDCSVC_POLICYURL"
+echo "      ANCHOR: $HCP_KDCSVC_ANCHOR"
+echo "   PKINIT_ID: $HCP_KDCSVC_PKINIT_IDENTITY"
 
 if [[ ! -d $HCP_KDCSVC_STATE ]]; then
 	echo "Error, kdcsvc::state isn't a directory: $HCP_KDCSVC_STATE" >&2

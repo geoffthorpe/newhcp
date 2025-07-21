@@ -24,8 +24,8 @@ cat > $HCP_KDCSVC_STATE/etc/kdc.conf << EOF
 	signal_socket = $HCP_KDCSVC_STATE/var/signalsock-iprop
 	iprop-acl = $HCP_KDCSVC_STATE/etc/iprop-secondaries
 	enable-pkinit = yes
-	pkinit_identity = FILE:/etc/hcp/$HCP_ID/pkinit/kdc-key.pem
-	pkinit_anchors = FILE:/usr/share/ca-certificates/$HCP_ID/certissuer.pem
+	pkinit_identity = FILE:$HCP_KDCSVC_PKINIT_IDENTITY
+	pkinit_anchors = FILE:$HCP_KDCSVC_ANCHOR
 	#pkinit_pool = PKCS12:/path/to/useful-intermediate-certs.pfx
 	#pkinit_pool = FILE:/path/to/other-useful-intermediate-certs.pem
 	pkinit_allow_proxy_certificate = no
@@ -40,7 +40,10 @@ cat > $HCP_KDCSVC_STATE/etc/kdc.conf << EOF
 	enable_synthetic_clients = true
 	synthetic_clients_forwardable = true
 EOF
-cat /etc/hcp/$HCP_ID/krb5.conf >> $HCP_KDCSVC_STATE/etc/kdc.conf
+if [[ ! -n $KRB5_CONFIG ]]; then
+	export KRB5_CONFIG=/etc/hcp/$HCP_ID/krb5.conf
+fi
+cat $KRB5_CONFIG >> $HCP_KDCSVC_STATE/etc/kdc.conf
 
 # Produce sudoers
 echo "Creating $HCP_KDCSVC_STATE/etc/sudoers.env"
