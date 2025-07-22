@@ -14,9 +14,13 @@
     "realm": "{kdcsvc_realm}",
     "namespace": "{kdcsvc_namespace}",
     "policy_url": "{kdcsvc_policyurl}",
-    "admin_email": "{kdcsvc_admin_email}",
     "anchor": "{kdcsvc_anchor}",
     "pkinit_identity": "{kdcsvc_pkinit_identity}",
+    "key_rotation_epoch": "{kdcsvc_key_rotation_epoch}",
+    "key_rotation_period": "{kdcsvc_key_rotation_period}",
+    "max_ticket_life": "{kdcsvc_max_ticket_life}",
+    "max_renewable_life": "{kdcsvc_max_renewable_life}",
+    "admin_email": "{kdcsvc_admin_email}",
     "kadmin": {
         "preclient": {
             "__env": {
