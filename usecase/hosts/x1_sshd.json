@@ -1,0 +1,26 @@
+{
+    "vars": {
+        "id": "sshd.x1",
+        "services": [ "sshd" ],
+	"default_targets": [ "start-services" ],
+	"sshd_fqdn": "sshd.x1.hcphacking.xyz",
+	"sshd_port": 22
+    },
+    "args_for": "sshd",
+
+    "scope": [
+        { "load": ".defaults", "path": "/usecase/proto/defaults.json" },
+        { "vars": ".defaults" },
+        { "import": ".", "source": "." },
+        { "vars": ".vars" },
+        { "loadunion": ".", "path": "/usecase/proto/root.json" },
+        { "load": ".sshd", "path": "/usecase/proto/sshd.json" }
+    ],
+
+    "env": {
+        "set": {
+            "KRB5_KTNAME": "/x1_backdoor/keytab",
+            "KRB5_CONFIG": "/usecase/config/x1.krb5.conf"
+        }
+    }
+}

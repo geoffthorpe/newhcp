@@ -1,0 +1,39 @@
+{
+    "vars": {
+        "id": "client",
+        "services": [ "hack" ],
+	"default_targets": [ "setup-hack", "start-hack" ]
+    },
+
+    "scope": [
+        { "load": ".defaults", "path": "/usecase/proto/defaults.json" },
+        { "vars": ".defaults" },
+        { "import": ".", "source": "." },
+        { "vars": ".vars" },
+        { "loadunion": ".", "path": "/usecase/proto/root.json" }
+    ],
+
+    "env": {
+        "set": {
+            "KRB5_CONFIG": "/usecase/config/x1.krb5.conf"
+        }
+    },
+
+    "hack": {
+        "setup": [ {
+                "tag": "hack",
+                "exec": [ "hxtool", "issue-certificate",
+                    "--certificate=/pkinit_identity.pem",
+                    "--type=pkinit-client",
+                    "--generate-key=rsa",
+                    "--key-bits=2048",
+                    "--lifetime=10y",
+                    "--ca-certificate=FILE:/enrollcertissuer/CA.pem",
+                    "--pk-init-principal=alicia@HCPHACKING.XYZ",
+		    "--subject=CN=alicia,DC=x1_sshd,DC=hcphacking,DC=xyz" ],
+                "touchfile": "/pkinit_identity.pem"
+            } ],
+    	"exec": [ "bash", "/usecase/config/x1.client.sh" ],
+	"tag": "hack"
+    }
+}

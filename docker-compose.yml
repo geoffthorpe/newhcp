@@ -25,6 +25,8 @@ volumes:
     tpm_bigbrother:
     tpm_www:
     tpmsocket_www:
+    x1_kdc:
+    x1_backdoor:
 
 networks:
     hcpnetwork:
@@ -279,3 +281,32 @@ services:
           - tpmsocket_www:/tpmsocket_www
         environment:
           - HCP_CONFIG_FILE=/usecase/hosts/www.json
+
+#### X1 hosts
+
+    x1_kdc:
+        extends: common_nontpm
+        hostname: kdc.x1.hcphacking.xyz
+        volumes:
+          - x1_kdc:/x1_kdc
+          - x1_backdoor:/x1_backdoor
+          - ./_testcreds/enrollcertissuer:/enrollcertissuer:ro
+        environment:
+          - HCP_CONFIG_FILE=/usecase/hosts/x1_kdc.json
+
+    x1_sshd:
+        extends: common_nontpm
+        hostname: sshd.x1.hcphacking.xyz
+        volumes:
+          - x1_backdoor:/x1_backdoor
+        environment:
+          - HCP_CONFIG_FILE=/usecase/hosts/x1_sshd.json
+
+    x1_client:
+        extends: common_nontpm
+        hostname: client.x1.hcphacking.xyz
+        volumes:
+          - x1_backdoor:/x1_backdoor
+          - ./_testcreds/enrollcertissuer:/enrollcertissuer:ro
+        environment:
+          - HCP_CONFIG_FILE=/usecase/hosts/x1_client.json
