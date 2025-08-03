@@ -278,23 +278,6 @@ function add_install_path {
 
 }
 
-function source_safeboot_functions {
-	if [[ ! -f /install-safeboot/functions.sh ]]; then
-		echo "Error, Safeboot 'functions.sh' isn't installed"
-		return 1
-	fi
-	source "/install-safeboot/functions.sh"
-}
-
-function show_hcp_env {
-	printenv | egrep -e "^HCP_" | sort
-}
-
-function export_hcp_env {
-	printenv | egrep -e "^HCP_" | sort | sed -e "s/^HCP_/export HCP_/" |
-		sed -e "s/\"/\\\"/" | sed -e "s/=/=\"/" | sed -e "s/$/\"/"
-}
-
 # Utility for adding a PEM file to the set of trust roots for the system. This
 # can be called multiple times to update (if changed) the same trust roots, eg.
 # when used inside an attestation-completion callback. As such, $2 and $3

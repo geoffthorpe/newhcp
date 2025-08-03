@@ -1,9 +1,0 @@
-{
-    "setup": [ {
-            "tag": "global",
-            "exec": [ "/hcp/attestsvc/setup_global.sh", "--retry" ],
-            "touchfile": "{attestsvc_db}/initialized"
-        } ],
-    "state": "{attestsvc_db}",
-    "enrollsvc": "{attestsvc_ereplurl}"
-}

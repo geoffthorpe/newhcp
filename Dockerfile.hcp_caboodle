@@ -20,10 +20,6 @@ RUN systemctl disable sshd
 # TODO: actually we're building nginx from source for now...
 #RUN systemctl disable nginx
 
-RUN adduser --disabled-password --quiet --gecos "Attestsvc DB role,,,," auser
-RUN adduser --disabled-password --quiet --gecos "Attestsvc Flask role,,,," ahcpflask
-RUN adduser --disabled-password --quiet --gecos "Enrollsvc DB role,,,," emgmtdb
-RUN adduser --disabled-password --quiet --gecos "Enrollsvc Flask role,,,," emgmtflask
 RUN adduser --disabled-password --quiet --gecos "For remote logins,,,," luser
 RUN adduser --disabled-password --quiet --gecos "Alicia Nom-Composé,,,," alicia
 RUN adduser --disabled-password --quiet --gecos "Test User 1,,,," user1
