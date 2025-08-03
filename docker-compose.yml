@@ -25,7 +25,6 @@ services:
         init: true
         volumes:
           - ${TOP}/hcp:/hcp:ro
-          - ${TOP}/safeboot:/install-safeboot
           - ./usecase:/usecase:ro
         environment:
           - HCP_LAUNCHER_TGTS=${HCP_LAUNCHER_TGTS:-}
