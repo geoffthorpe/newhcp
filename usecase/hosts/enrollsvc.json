@@ -1,0 +1,31 @@
+{
+    "vars": {
+        "id": "enrollsvc",
+        "services": [ "createdb", "webapi" ],
+        "default_targets": [ "setup-createdb", "start-services" ],
+        "webapi_app": "/hcp/example1/enrollsvc.py",
+        "webapi_fqdn": "enrollsvc.hcphacking.xyz",
+        "webapi_port": 443,
+        "webapi_https_authentication": "clientcert",
+        "webapi_https_certificate": "/enrollserver/server.pem"
+    },
+    "args_for": "enrollsvc",
+
+    "scope": [
+        { "load": ".defaults", "path": "/usecase/proto/defaults.json" },
+        { "vars": ".defaults" },
+        { "import": ".", "source": "." },
+        { "vars": ".vars" },
+        { "loadunion": ".", "path": "/usecase/proto/root.json" },
+        { "load": ".webapi", "path": "/usecase/proto/webapi.json" }
+    ],
+
+    "createdb": {
+        "setup": [ {
+                "tag": "createdb",
+                "exec": [ "bash", "-c",
+                    "mkdir -p /example/db && chown -R www-data /example/db && touch /example/.db-created" ],
+                "touchfile": "/example/.db-created"
+        } ]
+    }
+}

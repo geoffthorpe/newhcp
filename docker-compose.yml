@@ -4,6 +4,9 @@
 version: "2.4"
 
 volumes:
+    example:
+    tpm_host1:
+    tpmsocket_host1:
     kdc_primary:
     kdc_secondary:
     tpm_kdc_primary:
@@ -55,13 +58,51 @@ services:
         extends: common_nontpm
         hostname: orchestrator.hcphacking.xyz
         volumes:
-          - ./_testcreds/enrollcertchecker:/enrollcertchecker:ro
           - ./_testcreds/enrollclient:/enrollclient:ro
+          - tpm_host1:/tpm_host1
           - tpm_kdc_primary:/tpm_primary.kdc
           - tpm_kdc_secondary:/tpm_secondary.kdc
           - tpm_kdc_keytab:/tpm_keytab.kdc
         environment:
           - HCP_CONFIG_FILE=/usecase/hosts/orchestrator.json
+
+    host1:
+        extends: common_nontpm
+        hostname: host1.hcphacking.xyz
+        volumes:
+          - tpmsocket_host1:/tpmsocket_host1
+        environment:
+          - HCP_CONFIG_FILE=/usecase/hosts/host1.json
+
+    host1_tpm:
+        extends: common_tpm
+        hostname: host1_tpm.hcphacking.xyz
+        volumes:
+          - tpm_host1:/tpm_host1
+          - tpmsocket_host1:/tpmsocket_host1
+        environment:
+          - HCP_CONFIG_FILE=/usecase/hosts/host1.json
+
+    enrollsvc:
+        extends: common_nontpm
+        hostname: enrollsvc.hcphacking.xyz
+        volumes:
+          - example:/example
+          - ./_testcreds/enrollserver:/enrollserver:ro
+        environment:
+          - HCP_CONFIG_FILE=/usecase/hosts/enrollsvc.json
+
+    attestsvc:
+        extends: common_nontpm
+        hostname: attestsvc.hcphacking.xyz
+        volumes:
+          - example:/example
+          - ./_testcreds/attestserver:/attestserver:ro
+          - ./_testcreds/attestnoncer:/attestnoncer:ro
+          - ./_testcreds/enrollsigner:/enrollsigner:ro
+          - ./_testcreds/enrollcertissuer:/enrollcertissuer:ro
+        environment:
+          - HCP_CONFIG_FILE=/usecase/hosts/attestsvc.json
 
     kdc_primary:
         extends: common_nontpm
@@ -69,7 +110,6 @@ services:
         volumes:
           - kdc_primary:/kdc_primary
           - tpmsocket_kdc_primary:/tpmsocket_primary.kdc
-          - ./_testcreds/enrollcertchecker:/enrollcertchecker:ro
         environment:
           - HCP_CONFIG_FILE=/usecase/hosts/kdc_primary.json
 
@@ -88,7 +128,6 @@ services:
         volumes:
           - kdc_secondary:/kdc_secondary
           - tpmsocket_kdc_secondary:/tpmsocket_secondary.kdc
-          - ./_testcreds/enrollcertchecker:/enrollcertchecker:ro
         environment:
           - HCP_CONFIG_FILE=/usecase/hosts/kdc_secondary.json
 

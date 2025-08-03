@@ -1,0 +1,39 @@
+{
+    "vars": {
+        "id": "attestsvc",
+        "services": [ "waitdb", "copykey", "webapi" ],
+        "default_targets": [ "setup-waitdb", "setup-copykey", "start-services" ],
+        "webapi_app": "/hcp/example1/attestsvc.py",
+        "webapi_fqdn": "attestsvc.hcphacking.xyz",
+        "webapi_port": 443,
+        "webapi_https_authentication": "none",
+        "webapi_https_certificate": "/attestserver/server.pem"
+    },
+    "args_for": "attestsvc",
+
+    "scope": [
+        { "load": ".defaults", "path": "/usecase/proto/defaults.json" },
+        { "vars": ".defaults" },
+        { "import": ".", "source": "." },
+        { "vars": ".vars" },
+        { "loadunion": ".", "path": "/usecase/proto/root.json" },
+        { "load": ".webapi", "path": "/usecase/proto/webapi.json" }
+    ],
+
+    "waitdb": {
+        "setup": [ {
+            "tag": "waitdb",
+            "exec": [ "/hcp/python/HcpToolWaitTouchfile.py", "/example/.db-created" ],
+            "touchfile": "/example/.db-created"
+        } ]
+    },
+
+    "copykey": {
+        "setup": [ {
+            "tag": "copykey",
+            "exec": [ "bash", "-c",
+                "cp /attestnoncer/key /tmp/www-data-noncekey && cp /enrollsigner/key.priv /tmp/www-data-signer && chown www-data /tmp/www-data-* && touch /tmp/www-data.copied"],
+            "touchfile": "/tmp/www-data.copied"
+        } ]
+    }
+}

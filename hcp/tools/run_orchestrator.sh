@@ -303,14 +303,10 @@ raw_tpm_enroll()
 	api_prerequisites
 	# Enroll
 	echo "Enrolling TPM '$name'"
-	if [[ -z $enroll_hostname ]]; then
-		echo "Error, TPM '$name' has no hostname for enrollment" >&2
-		return 1
-	fi
 	echo "raw_tpm_enroll: api_cmd: $api_cmd add --profile \"$enroll_profile\" \\" > $out2
-	echo "                $tpm_path/tpm/ek.pub $enroll_hostname" > $out2
+	echo "                $tpm_path/tpm/ek.pub" > $out2
 	if ! myquery=$($api_cmd add --profile "$enroll_profile" \
-				$tpm_path/tpm/ek.pub $enroll_hostname); then
+				$tpm_path/tpm/ek.pub); then
 		echo "Error, enrollment failure ($myquery)" >&2
 		return 1
 	fi
@@ -398,7 +394,6 @@ do_item()
 	if [[ -z $enroll_api ]]; then
 		enroll_api="$URL"
 	fi
-	enroll_hostname=$(echo "$entry" | jq -r ".enroll_hostname // empty")
 	enroll_profile=$(echo "$entry" | jq -r ".enroll_profile // {}")
 	cat > $out2 <<EOF
  - entry=$entry
@@ -406,7 +401,6 @@ do_item()
  - tpm_create=$tpm_create
  - tpm_enroll=$tpm_enroll
  - enroll_api=$enroll_api
- - enroll_hostname=$enroll_hostname
  - enroll_profile=$enroll_profile
 EOF
 	check_exists=$(raw_tpm_exists)

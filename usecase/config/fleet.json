@@ -2,30 +2,50 @@
 	"defaults": {
 		"tpm_create": true,
 		"tpm_enroll": true,
-		"enroll_api": "https://emgmt.hcphacking.xyz",
+		"enroll_api": "https://enrollsvc.hcphacking.xyz",
 		"enroll_profile": {
+			"certgen": ["https-server"],
+			"lifetime": "2h",
+			"key-type": "rsa",
+			"key-bits": 2048
 		}
 	},
 	"fleet": [
 		{
+			"name": "host1",
+			"tpm_path": "/tpm_host1",
+			"enroll_profile": {
+				"hostname": "host1.hcphacking.xyz",
+				"certgen": ["https-server", "pkinit-client"],
+				"https-server-hostnames": [
+					"host1.hcphacking.xyz",
+					"www.hcphacking.com"
+				],
+				"pkinit-clients": [
+					"nobody",
+					"alicia"
+				]
+			}
+		},
+		{
 			"name": "kdc_primary",
 			"tpm_path": "/tpm_primary.kdc",
-			"enroll_hostname": "primary.kdc.hcphacking.xyz",
 			"enroll_profile": {
+				"hostname": "primary.kdc.hcphacking.xyz"
 			}
 		},
 		{
 			"name": "kdc_secondary",
 			"tpm_path": "/tpm_secondary.kdc",
-			"enroll_hostname": "secondary.kdc.hcphacking.xyz",
 			"enroll_profile": {
+				"hostname": "secondary.kdc.hcphacking.xyz"
 			}
 		},
 		{
 			"name": "kdc_keytab",
 			"tpm_path": "/tpm_keytab.kdc",
-			"enroll_hostname": "keytab.kdc.hcphacking.xyz",
 			"enroll_profile": {
+				"hostname": "keytab.kdc.hcphacking.xyz"
 			}
 		}
 	]

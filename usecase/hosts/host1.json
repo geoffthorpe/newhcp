@@ -1,0 +1,22 @@
+{
+    "vars": {
+        "id": "host1",
+        "services": [ "nada" ],
+        "default_targets": [ "start-services" ]
+    },
+    "args_for": "nada",
+
+    "scope": [
+        { "load": ".defaults", "path": "/usecase/proto/defaults.json" },
+        { "vars": ".defaults" },
+        { "import": ".", "source": "." },
+        { "vars": ".vars" },
+        { "loadunion": ".", "path": "/usecase/proto/root.json" },
+        { "load": ".nada", "path": "/usecase/proto/do_nothing.json" },
+        { "load": ".tpm", "path": "/usecase/proto/tpm_sidecar.json" }
+    ],
+
+    "env": {
+        "set": { "TPM2TOOLS_TCTI": "swtpm:path=/tpmsocket_host1/tpm" }
+    }
+}

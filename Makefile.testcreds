@@ -16,6 +16,10 @@ TESTCREDS_ENROLLCLIENT := $(TESTCREDS_OUT)/enrollclient
 TESTCREDS_DONE += $(TESTCREDS_ENROLLCLIENT)/client.pem
 TESTCREDS_ENROLLHEALTHCLIENT := $(TESTCREDS_OUT)/enrollhealthclient
 TESTCREDS_DONE += $(TESTCREDS_ENROLLHEALTHCLIENT)/client.pem
+TESTCREDS_ATTESTSERVER := $(TESTCREDS_OUT)/attestserver
+TESTCREDS_DONE += $(TESTCREDS_ATTESTSERVER)/server.pem
+TESTCREDS_ATTESTNONCER := $(TESTCREDS_OUT)/attestnoncer
+TESTCREDS_DONE += $(TESTCREDS_ATTESTNONCER)/key
 TESTCREDS_CHILDREN := \
 	$(TESTCREDS_ENROLLSIGNER) \
 	$(TESTCREDS_ENROLLVERIFIER) \
@@ -23,7 +27,9 @@ TESTCREDS_CHILDREN := \
 	$(TESTCREDS_ENROLLCERTCHECKER) \
 	$(TESTCREDS_ENROLLSERVER) \
 	$(TESTCREDS_ENROLLCLIENT) \
-	$(TESTCREDS_ENROLLHEALTHCLIENT)
+	$(TESTCREDS_ENROLLHEALTHCLIENT) \
+	$(TESTCREDS_ATTESTSERVER) \
+	$(TESTCREDS_ATTESTNONCER)
 $(TESTCREDS_CHILDREN): | $(TESTCREDS_OUT)
 $(TESTCREDS_OUT) $(TESTCREDS_CHILDREN):
 	$Qmkdir $@
@@ -50,7 +56,7 @@ $(TESTCREDS_ENROLLSERVER)/server.pem: $(TESTCREDS_ENROLLCERTISSUER)/CA.cert
 		hxtool issue-certificate \
 		--ca-certificate="FILE:$(TESTCREDS_ENROLLCERTISSUER)/CA.pem" \
 		--type=https-server \
-		--hostname="emgmt.hcphacking.xyz" \
+		--hostname="enrollsvc.hcphacking.xyz" \
 		--subject="UID=emgmt,DC=hcphacking,DC=xyz" \
 		--generate-key=rsa --key-bits=2048 \
 		--certificate="FILE:server.pem"
@@ -76,6 +82,19 @@ $(TESTCREDS_ENROLLHEALTHCLIENT)/client.pem: $(TESTCREDS_ENROLLCERTISSUER)/CA.cer
 			--email="healthclient@hcphacking.xyz" \
 		--generate-key=rsa --key-bits=2048 \
 		--certificate="FILE:client.pem"
+$(TESTCREDS_ATTESTSERVER)/server.pem: | $(TESTCREDS_ATTESTSERVER)
+$(TESTCREDS_ATTESTSERVER)/server.pem: $(TESTCREDS_ENROLLCERTISSUER)/CA.cert
+	$Qcd $(TESTCREDS_ATTESTSERVER) && \
+		hxtool issue-certificate \
+		--ca-certificate="FILE:$(TESTCREDS_ENROLLCERTISSUER)/CA.pem" \
+		--type=https-server \
+		--hostname="attestsvc.hcphacking.xyz" \
+		--subject="UID=emgmt,DC=hcphacking,DC=xyz" \
+		--generate-key=rsa --key-bits=2048 \
+		--certificate="FILE:server.pem"
+$(TESTCREDS_ATTESTNONCER)/key: | $(TESTCREDS_ATTESTNONCER)
+	$Qcd $(TESTCREDS_ATTESTNONCER) && \
+		openssl rand -out key -hex 32
 
 testcreds: $(TESTCREDS_DONE)
 ifneq (,$(wildcard $(TESTCREDS_OUT)))
