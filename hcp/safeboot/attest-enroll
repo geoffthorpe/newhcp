@@ -27,15 +27,6 @@ else
 	exit 1
 fi
 
-# Make sure to export SAFEBOOT_ENROLL_CONF for external genprogs
-#
-# If one or more -C options given, use the first one for this (see getopts
-# loop below).
-cf=$(safeboot_file etc safeboot.conf)
-if [[ -n $cf && -f $cf ]]; then
-	export SAFEBOOT_ENROLL_CONF=/etc/safeboot/enroll.conf
-	CONF=$SAFEBOOT_ENROLL_CONF
-fi
 configured=false
 
 EKPUB=/dev/stdin

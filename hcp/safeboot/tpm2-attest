@@ -35,20 +35,6 @@ else
 	exit 1
 fi
 
-cf=$(safeboot_file etc safeboot.conf)
-if [[ -n $cf && -f $cf ]]; then
-	# shellcheck disable=SC1090
-	. "$cf"
-	export SAFEBOOT_CONF="$cf"
-fi
-cf=$(safeboot_file etc local.conf)
-if [[ -n $cf && -f $cf ]]; then
-	# shellcheck disable=SC1090
-	. "$cf"
-fi
-: "${PREFIX:=}"
-: "${DIR:=/etc/safeboot}"
-
 setup
 
 # Apply $PREFIX to files and use default value
