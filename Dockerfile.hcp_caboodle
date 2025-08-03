@@ -26,8 +26,5 @@ RUN adduser --disabled-password --quiet --gecos "Test User 1,,,," user1
 RUN adduser --disabled-password --quiet --gecos "Test User 2,,,," user2
 RUN adduser --disabled-password --quiet --gecos "Test User 3,,,," user3
 
-#COPY safeboot /install-safeboot
-#COPY hcp /hcp
-
 # Set the launcher as our entrypoint
 ENTRYPOINT ["/hcp/python/HcpToolLauncher.py"]
