@@ -5,7 +5,7 @@
 #
 # add:     curl -v -F ekpub=@</path/to/ek.pub> \
 #               -F hostname=<hostname> \
-#               -F profile=<profile> \
+#               -F profile=<jsonstring> \
 #               <enrollsvc-URL>/v1/add
 #
 # query:   curl -v -G -d ekpubhash=<hexstring> \
@@ -17,12 +17,7 @@
 # reenroll: curl -v -F ekpubhash=<hexstring> \
 #               <enrollsvc-URL>/v1/reenroll
 #
-# find:    curl -v -G -d hostname_regex=<hostname_regex> \
-#               <enrollsvc-URL>/v1/find
-#
 # janitor: curl -v -G <enrollsvc-URL>/v1/janitor
-#
-# get-asset-signer:  curl -v -G <enrollsvc-URL>/v1/get-asset-signer
 
 import json
 import requests
@@ -158,10 +153,12 @@ def enroll_reenroll(args):
     return True, jr
 
 def do_query_or_delete(args, is_delete):
+    form_data = {
+        'ekpubhash': (None, args.ekpubhash)
+    }
+    if args.nofiles:
+        form_data['nofiles'] = (None, True)
     if is_delete:
-        form_data = { 'ekpubhash': (None, args.ekpubhash) }
-        if args.nofiles:
-            form_data['nofiles'] = (None, True)
         debug("'delete' handler about to call API")
         debug(f" - url: {args.api + '/v1/delete'}")
         debug(f" - files: {form_data}")
@@ -173,12 +170,9 @@ def do_query_or_delete(args, is_delete):
                                  timeout=args.timeout)
         response = requester_loop(args, myrequest)
     else:
-        form_data = { 'ekpubhash': args.ekpubhash }
-        if args.nofiles:
-            form_data['nofiles'] = True
         debug("'query' handler about to call API")
         debug(f" - url: {args.api + '/v1/query'}")
-        debug(f" - files: {form_data}")
+        debug(f" - params: {form_data}")
         myrequest = lambda: requests.get(args.api + '/v1/query',
                                 params=form_data,
                                 auth=auth,
@@ -205,31 +199,6 @@ def enroll_query(args):
 def enroll_delete(args):
     return do_query_or_delete(args, True)
 
-def enroll_find(args):
-    form_data = { 'hostname_regex': args.hostname_regex }
-    debug("'find' handler about to call API")
-    debug(f" - url: {args.api + '/v1/find'}")
-    debug(f" - files: {form_data}")
-    myrequest = lambda: requests.get(args.api + '/v1/find',
-                            params=form_data,
-                            auth=auth,
-                            verify=args.requests_verify,
-                            cert=args.requests_cert,
-                            timeout=args.timeout)
-    response = requester_loop(args, myrequest)
-    debug(f" - response: {response}")
-    debug(f" - response.content: {response.content}")
-    if response.status_code != 200:
-        log(f"Error, 'find' response status code was {response.status_code}")
-        return False, None
-    try:
-        jr = json.loads(response.content)
-    except Exception as e:
-        log("Error, JSON decoding of 'find' response failed: {e}")
-        return False, None
-    debug(f" - jr: {jr}")
-    return True, jr
-
 def enroll_janitor(args):
     debug("'janitor' handler about to call API")
     debug(f" - url: {args.api + '/v1/janitor'}")
@@ -251,28 +220,6 @@ def enroll_janitor(args):
         return False, None
     debug(f" - jr: {jr}")
     return True, jr
-
-def enroll_getAssetSigner(args):
-    debug("'getAssetSigner' handler about to call API")
-    debug(f" - url: {args.api + '/v1/get-asset-signer'}")
-    myrequest = lambda: requests.get(args.api + '/v1/get-asset-signer',
-                            auth=auth,
-                            verify=args.requests_verify,
-                            cert=args.requests_cert,
-                            timeout=args.timeout)
-    response = requester_loop(args, myrequest)
-    debug(f" - response: {response}")
-    debug(f" - response.content: {response.content}")
-    if response.status_code != 200:
-        log(f"Error, 'getAssetSigner' response status code was {response.status_code}")
-        return False, None
-    if args.output:
-        debug(" - output: {args.output}")
-        open(args.output, 'wb').write(response.content)
-    else:
-        debug(" - output: stdout")
-        sys.stdout.buffer.write(response.content)
-    return True, None
 
 if __name__ == '__main__':
 
@@ -343,7 +290,7 @@ if __name__ == '__main__':
     """
     add_help_ekpub = 'path to the public key file for the TPM\'s Endorsement Key'
     add_help_hostname = 'hostname to be enrolled with (and bound to) the TPM'
-    add_help_profile = 'enrollment profile to use (optional)'
+    add_help_profile = 'json string enrollment profile to use (optional)'
     parser_a = subparsers.add_parser('add', help=add_help, epilog=add_epilog)
     parser_a.add_argument('ekpub', help=add_help_ekpub)
     parser_a.add_argument('hostname', help=add_help_hostname)
@@ -397,22 +344,6 @@ if __name__ == '__main__':
     parser_d.add_argument('--nofiles', action='store_true', help=query_help_nofiles)
     parser_d.set_defaults(func=enroll_delete)
 
-    find_help = 'Find enrollments based on regex-search for hostname'
-    find_epilog = """
-    The 'find' subcommand invokes the '/v1/find' handler of the Enrollment Service's
-    management API, to retrieve an array of enrollment entries whose hostnames match
-    the given regular expression. Unlike 'query' which searches based on the hash of
-    the TPM's EK public key, 'find' looks at the hostname each TPM is enrolled for.
-    Note, the array returned from this command consists of solely of 'ekpubhash'
-    values for matching enrollments. To obtain details about the matching entries
-    (including the hostnames that matched), subsequent API calls (using 'query')
-    should be performed using the 'ekpubhash' fields.
-    """
-    find_help_regex = 'hostname regular expression'
-    parser_f = subparsers.add_parser('find', help=find_help, epilog=find_epilog)
-    parser_f.add_argument('hostname_regex', help=find_help_regex)
-    parser_f.set_defaults(func=enroll_find)
-
     janitor_help = 'Scrub the enrollment DB to fix known issues, and rebuild hn2ek'
     janitor_epilog = """
     The 'janitor' subcommand invokes the '/v1/janitor' handler of the Enrollment
@@ -423,21 +354,6 @@ if __name__ == '__main__':
     """
     parser_j = subparsers.add_parser('janitor', help=janitor_help, epilog=janitor_epilog)
     parser_j.set_defaults(func=enroll_janitor)
-
-    getAssetSigner_help = 'Retrieve trust anchor for asset-signing'
-    getAssetSigner_epilog = """
-    The 'getAssetSigner' subcommand invokes the '/v1/getAssetSigner' handler of
-    the Enrollment Service's management API, to download the trust anchor to
-    allow an attestation client to validate the signatures on its enrolled
-    assets.
-    """
-    getAssetSigner_help_output = 'path to the save the trust anchor to'
-    parser_g = subparsers.add_parser('getAssetSigner', help=getAssetSigner_help,
-                                     epilog=getAssetSigner_epilog)
-    parser_g.add_argument('--output', metavar='<PATH>',
-                          default = None,
-                          help=getAssetSigner_help_output)
-    parser_g.set_defaults(func=enroll_getAssetSigner)
 
     # Process the command-line
     args = parser.parse_args()
