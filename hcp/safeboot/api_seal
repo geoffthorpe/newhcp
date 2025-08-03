@@ -1,0 +1,106 @@
+#!/bin/bash
+
+PROG=${0##*/}
+BINDIR=$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")
+TOP=$(dirname "$BINDIR")
+
+# TODO: this should be configured somehow/somewhere
+FIXED_POLICY='7fdad037a921f7eec4f97c08722692028e96888f0b970dc7b3bb6a9c97e8f988'
+
+if [[ -s $TOP/safeboot/functions.sh ]]; then
+	# shellcheck disable=SC1090 source=functions.sh
+	. "$TOP/safeboot/functions.sh"
+else
+	echo "Unable to find Safeboot function library" 1>&2
+	exit 1
+fi
+if [[ -d $TOP/safeboot ]]; then
+	export PATH=$TOP/safeboot:$PATH
+fi
+
+set -euo pipefail
+shopt -s extglob
+
+# shellcheck disable=SC2209
+function usage {
+	((${1:-1} > 0)) && exec 1>&2
+	pager=cat
+	if [[ -t 0 && -t 1 && -t 2 ]]; then
+		if [[ -z ${PAGER:-} ]] && type less >/dev/null 2>&1; then
+			pager=less
+		elif [[ -z ${PAGER:-} ]] && type more >/dev/null 2>&1; then
+			pager=more
+		elif [[ -n ${PAGER:-} ]]; then
+			pager=$PAGER
+		fi
+	fi
+        $pager <<EOF
+Usage: $PROG EKPUB SIGNKEY INPUT OUTPUT  # encrypt+sign
+       $PROG -s SIGNKEY INPUT OUTPUT     # sign
+
+  {$PROG}, by default, encrypts and signs an input file using the
+  given parameters. If the '-s' option is provided, it only signs
+  the input file. The {OUTPUT} path will be created as a directory
+  specific to the given asset.
+
+  Options:
+
+	-s		Sign-only
+
+  Arguments:
+
+        {EKPUB}         Path to the recipient's TPM Endorsement Key
+	{SIGNKEY}	Path to an RSA signing key
+	{INPUT}         The file to be sealed
+	{OUTPUT}        Prefix for the output files
+EOF
+	exit "${1:-1}"
+}
+
+signonly=no
+
+if (($# >= 1)) && [[ $1 == '-s' ]]; then
+	signonly=yes
+	shift
+	if (($# != 3)); then
+		echo "Error: wrong number of arguments" >&2
+		exit 1
+	fi
+	signkey=$1
+	input=$2
+	output=$3
+else
+	if (($# != 4)); then
+		echo "Error: wrong number of arguments" >&2
+		exit 1
+	fi
+	ekpub=$1
+	signkey=$2
+	input=$3
+	output=$4
+fi
+
+tmp=
+function cleanup() {
+	[[ -d $tmp ]] && rm -rf $tmp
+}
+trap cleanup EXIT
+tmp=$(mktemp -d)
+
+mkdir "$output"
+if [[ "x$signonly" == "xno" ]]; then
+	openssl rand 32 > $tmp/symkey
+	aead_encrypt "$input" \
+		"$tmp/symkey" \
+		"$output/enc"
+	tpm2-send -f -P "$FIXED_POLICY" -M WK \
+		"$ekpub" \
+		"$tmp/symkey" \
+		"$output/symkeyenc"
+	echo "$FIXED_POLICY" > "$output/policy"
+else
+	cp "$input" "$output/data"
+fi
+openssl pkeyutl -sign -keyform PEM -inkey "$signkey" \
+	-in <(sha256 < "$input" | hex2bin) \
+	-out "$output/sig"
