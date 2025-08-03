@@ -211,7 +211,9 @@ raw_tpm_create()
 	# retry loop.
 	echo "raw_tpm_create: entering retry loop for 'createek'" > $out2
 	waitcount=0
-	until tpm2 createek -c "$tt/ek.ctx" -u "$tt/ek.pub"; do
+	until tpm2 createek --ek-context="$tt/ek.ctx" \
+			--public="$tt/ek.pub" \
+			--key-algorithm=rsa; do
 		if [[ $((++waitcount)) -eq 10 ]]; then
 			echo "Error, TPM '$name' failed pt 2" >&2
 			return 1
