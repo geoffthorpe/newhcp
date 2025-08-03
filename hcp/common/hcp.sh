@@ -346,3 +346,12 @@ for i in $(find / -maxdepth 1 -mindepth 1 -type d -name "install-*"); do
 	add_install_path "$i"
 done
 export PYTHONPATH=/hcp/python
+envjson_set=$(hcp_config_extract ".env.set")
+if [[ $envjson_set != 'null' ]]; then
+	envjson_set_keys=$(echo "$envjson_set" | jq 'keys[]')
+	for i in $envjson_set_keys; do
+		j=$(echo "$i" | jq -r .)
+		v=$(echo "$envjson_set" | jq -r ".$j")
+		export $j="$v"
+	done
+fi
