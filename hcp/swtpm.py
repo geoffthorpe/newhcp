@@ -83,6 +83,8 @@ if args.healthcheck:
 h.hlog(2, f"Changing directory: {mystate}")
 os.chdir(mystate)
 
+subprocess.run(['mkdir', '-p', f"{mytpmsocket}.files"])
+subprocess.run(['cp', f"{mystate}/tpm/ek.pub", f"{mytpmsocket}.files/"])
 swtpmcmd = [
 	'swtpm', 'socket', '--tpm2',
 	'--tpmstate', f"dir={mystate}/tpm",
