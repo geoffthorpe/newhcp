@@ -5,6 +5,9 @@
 # shellcheck disable=SC2016 disable=SC1090 disable=SC1091
 export LC_ALL=C
 
+export PATH=/hcp/safeboot:$PATH
+export TOP=/hcp
+
 die_msg=""
 die() {
 	local e=1;
