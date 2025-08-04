@@ -100,6 +100,7 @@ services:
           - ./_testcreds/attestserver:/attestserver:ro
           - ./_testcreds/attestnoncer:/attestnoncer:ro
           - ./_testcreds/enrollsigner:/enrollsigner:ro
+          - ./_testcreds/enrollclient:/enrollclient:ro
           - ./_testcreds/enrollcertissuer:/enrollcertissuer:ro
         environment:
           - HCP_CONFIG_FILE=/usecase/hosts/attestsvc.json
