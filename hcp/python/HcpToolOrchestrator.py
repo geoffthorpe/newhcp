@@ -21,7 +21,7 @@ fleetconfpath = hcp_config_extract('.orchestrator.fleet', must_exist = True)
 if not os.path.isfile(fleetconfpath):
     bail(f"No config at '{fleetconfpath}'")
 with open(fleetconfpath, 'r') as fp:
-    fleetconf = json.loads(fp.read())
+    fleetconf = expandload(json.loads(fp.read()))
 fleetdefaults = fleetconf.pop('defaults') if 'defaults' in fleetconf else {}
 fleet = fleetconf.pop('fleet') if 'fleet' in fleetconf else {}
 fleethosts = [ name for name in fleet if name != '_']
