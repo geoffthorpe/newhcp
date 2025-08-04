@@ -81,6 +81,8 @@ tmp=$(mktemp -d)
 	exit 1
 
 if [[ "x$signonly" == "xno" ]]; then
+	restore=$(umask -p)
+	umask 077
 	# TODO: what is the purpose of $input/policy in this unsealing
 	# process? Did we have a reason to write it in the first place?
 	tpm2-recv "$input/symkeyenc" \
@@ -90,6 +92,7 @@ if [[ "x$signonly" == "xno" ]]; then
 		"$tmp/symkey" \
 		"$tmp/output"
 	sigsource="$tmp/output"
+	$restore
 else
 	sigsource="$input/data"
 fi
