@@ -152,5 +152,10 @@ p = subprocess.Popen(
 	],
 	text = True)
 
+# Seeing as we created /run/sshd/, put a touchfile there to indicate
+# We've started the daemon.
+with open('/run/sshd/started', 'w') as _:
+	pass
+
 print("Done.")
 p.wait()
