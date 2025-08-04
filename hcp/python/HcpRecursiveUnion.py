@@ -1,4 +1,7 @@
+#!/usr/bin/python3
+# vim: set expandtab shiftwidth=4 softtabstop=4:
 import json
+import argparse
 
 # Apparently there's all sorts of "history" around unions with python types.
 # I'm implementing the semantics here, without ambiguity. Hopefully this can be
@@ -30,28 +33,47 @@ import json
 # TODO: this should be turned into one of those "class-factory"-like Python
 # classes.
 def union(a, b, noDictUnion=False, noListUnion=False, noSetUnion=False,
-		listDedup=True):
-	ta = type(a)
-	tb = type(b)
-	if ta != tb:
-		return b
-	if ta == dict and not noDictUnion:
-		result = a.copy()
-		for i in b:
-			if i in a:
-				result[i] = union(a[i], b[i], noDictUnion, noListUnion, noSetUnion)
-			else:
-				result[i] = b[i]
-		return result
-	if ta == list and not noListUnion:
-		c = a + b
-		if listDedup:
-			d = list()
-			for i in c:
-				if i not in d:
-					d.append(i)
-			c = d
-		return c
-	if ta == set and not noSetUnion:
-		return a | b
-	return b
+          listDedup=True):
+    ta = type(a)
+    tb = type(b)
+    if ta != tb:
+        return b
+    if ta == dict and not noDictUnion:
+        result = a.copy()
+        for i in b:
+            if i in a:
+                result[i] = union(a[i], b[i], noDictUnion, noListUnion, noSetUnion)
+            else:
+                result[i] = b[i]
+        return result
+    if ta == list and not noListUnion:
+        c = a + b
+        if listDedup:
+            d = list()
+            for i in c:
+                if i not in d:
+                    d.append(i)
+            c = d
+        return c
+    if ta == set and not noSetUnion:
+        return a | b
+    return b
+
+if __name__ == '__main__':
+    # Wrapper tool, using argparse
+    _desc = 'Perform deep merge of two JSON structures'
+    _epilog = """
+    Given two JSON strings, perform a deep merge and return the resulting
+    JSON string to stdout.
+    """
+    _help_json1 = 'The first JSON string'
+    _help_json2 = 'The second JSON string'
+    parser = argparse.ArgumentParser(description = _desc,
+                                     epilog = _epilog)
+    parser.add_argument('json1', help = _help_json1)
+    parser.add_argument('json2', help = _help_json2)
+    args = parser.parse_args()
+    s1 = json.loads(args.json1)
+    s2 = json.loads(args.json2)
+    r = union(s1, s2)
+    print(json.dumps(r))
