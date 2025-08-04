@@ -117,12 +117,12 @@ def attest_initiate(args):
     debug(f" - response: {response}")
     debug(f" - response.content: {response.content}")
     if response.status_code != 200:
-        err(f"Error, 'add' response status code was {response.status_code}")
+        err(f"Error, 'initiate' response status code was {response.status_code}")
         return False
     try:
         jr = json.loads(response.content)
     except Exception as e:
-        err(f"Error, JSON decoding of 'add' response failed: {e}")
+        err(f"Error, JSON decoding of 'initiate' response failed: {e}")
         return False
     debug(f" - jr: {jr}")
     with open(args.output, 'w') as fp:
