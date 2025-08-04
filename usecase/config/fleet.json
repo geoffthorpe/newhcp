@@ -1,81 +1,91 @@
 {
-	"defaults": {
-		"tpm_create": true,
-		"tpm_enroll": true,
-		"enroll_api": "https://enrollsvc.hcphacking.xyz",
-		"enroll_profile": {
-			"certgen": [ "https-server", "pkinit-client" ],
-			"pkinit-clients": [ "nobody" ],
-			"realm": "HCPHACKING.XYZ",
-			"lifetime": "2h",
-			"key-type": "rsa",
-			"key-bits": 2048,
-			"krb5conf": {
-				"logging": {
-					"default": "STDERR"
-				},
-				"libdefaults": {
-					"default_realm": "HCPHACKING.XYZ",
-					"dns_lookup_kdc": "no",
-					"dns_lookup_realm": "no",
-					"ignore_acceptor_hostname": "yes",
-					"dns_canonicalize_hostname": "no",
-					"rdns": "no",
-					"forwardable": "true",
-					"kuserok": [
-						"SYSTEM-K5LOGIN:/etc/k5login.d",
-						"USER-K5LOGIN",
-						"SIMPLE"
-					]
-				},
-				"appdefaults": {
-					"pkinit_anchors": "FILE:/enrollcertchecker/CA.cert"
-				},
-				"domain_realm": {
-					".hcphacking.xyz": "HCPHACKING.XYZ"
-				},
-				"realms": {
-					"HCPHACKING.XYZ": {
-						"kdc": "secondary.kdc.hcphacking.xyz:3088",
-						"pkinit_require_eku": "true",
-						"pkinit_require_krbtgt_otherName": "true",
-						"pkinit_win2k": "no",
-						"pkinit_win2k_require_binding": "yes"
-					}
-				}
-			}
-		}
-	},
-	"fleet": [
-		{
-			"name": "host1",
-			"tpm_path": "/tpm_host1",
-			"enroll_profile": {
-				"hostname": "host1.hcphacking.xyz"
-			}
-		},
-		{
-			"name": "kdc_primary",
-			"tpm_path": "/tpm_primary.kdc",
-			"enroll_profile": {
-				"hostname": "primary.kdc.hcphacking.xyz",
-				"certgen": [ "https-server", "pkinit-kdc" ]
-			}
-		},
-		{
-			"name": "kdc_secondary",
-			"tpm_path": "/tpm_secondary.kdc",
-			"enroll_profile": {
-				"hostname": "secondary.kdc.hcphacking.xyz",
-				"certgen": [ "https-server", "pkinit-kdc" ]
-			}
-		},
-		{
-			"name": "kdc_keytab",
-			"tpm_path": "/tpm_keytab.kdc",
-			"enroll_profile": {
-				"hostname": "keytab.kdc.hcphacking.xyz"
-			}
-		}
-	]
+    "_": "  vim: set expandtab shiftwidth=4 softtabstop=4: ",
+    "defaults": {
+        "tpm_create": true,
+        "tpm_enroll": true,
+        "enroll_api": "https://enrollsvc.hcphacking.xyz",
+        "enroll_api_cacert": "/enrollcertchecker/CA.cert",
+        "enroll_api_clientcert": "/enrollclient/client.pem",
+        "enroll_profile": {
+            "certgen": [ "https-server", "pkinit-client" ],
+            "pkinit-clients": [ "nobody" ],
+            "realm": "HCPHACKING.XYZ",
+            "lifetime": "2h",
+            "key-type": "rsa",
+            "key-bits": 2048,
+            "krb5conf": {
+                "logging": {
+                    "default": "STDERR"
+                },
+                "libdefaults": {
+                    "default_realm": "HCPHACKING.XYZ",
+                    "dns_lookup_kdc": "no",
+                    "dns_lookup_realm": "no",
+                    "ignore_acceptor_hostname": "yes",
+                    "dns_canonicalize_hostname": "no",
+                    "rdns": "no",
+                    "forwardable": "true",
+                    "kuserok": [
+                        "SYSTEM-K5LOGIN:/etc/k5login.d",
+                        "USER-K5LOGIN",
+                        "SIMPLE"
+                    ]
+                },
+                "appdefaults": {
+                    "pkinit_anchors": "FILE:/enrollcertchecker/CA.cert"
+                },
+                "domain_realm": {
+                    ".hcphacking.xyz": "HCPHACKING.XYZ"
+                },
+                "realms": {
+                    "HCPHACKING.XYZ": {
+                        "kdc": "secondary.kdc.hcphacking.xyz:3088",
+                        "pkinit_require_eku": "true",
+                        "pkinit_require_krbtgt_otherName": "true",
+                        "pkinit_win2k": "no",
+                        "pkinit_win2k_require_binding": "yes"
+                    }
+                }
+            }
+        }
+    },
+    "fleet": {
+        "host1": {
+            "tpm_path": "/tpm_host1",
+            "enroll_profile": {
+                "hostname": "host1.hcphacking.xyz"
+            }
+        },
+        "kdc_primary": {
+            "tpm_path": "/tpm_primary.kdc",
+            "enroll_profile": {
+                "hostname": "primary.kdc.hcphacking.xyz",
+                "certgen": [ "https-server", "pkinit-kdc" ]
+            }
+        },
+        "kdc_secondary": {
+            "tpm_path": "/tpm_secondary.kdc",
+            "enroll_profile": {
+                "hostname": "secondary.kdc.hcphacking.xyz",
+                "certgen": [ "https-server", "pkinit-kdc",
+                             "pkinit-iprop" ],
+                "krb5conf": {
+                    "_": ["The point here is that kdc_secondary is the only host",
+                          "that doesn't have kdc_secondary as its KDC, so we",
+                          "override the setting in this one case."],
+                    "realms": {
+                        "HCPHACKING.XYZ": {
+                            "kdc": "primary.kdc.hcphacking.xyz:3089"
+                        }
+                    }
+                }
+            }
+        },
+        "kdc_keytab": {
+            "tpm_path": "/tpm_keytab.kdc",
+            "enroll_profile": {
+                "hostname": "keytab.kdc.hcphacking.xyz"
+            }
+        }
+    }
 }
