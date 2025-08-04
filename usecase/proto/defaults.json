@@ -27,7 +27,7 @@
     "kdcsvc_secondaries": [],
     "kdcsvc_realm": "HCPHACKING.XYZ",
     "kdcsvc_namespace": "hcphacking.xyz",
-    "NODEFAULT_kdcsvc_policyurl": "none",
+    "kdcsvc_policyurl": null,
     "kdcsvc_anchor": "/enrollcertchecker/CA.cert",
     "NODEFAULT_kdcsvc_pkinit_identity": "none",
     "kdcsvc_key_rotation_epoch": "-1d",
