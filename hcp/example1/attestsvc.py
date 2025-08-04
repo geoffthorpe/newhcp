@@ -15,8 +15,13 @@ import glob
 import shutil
 import hcp.attestsvc as attestsvc
 from hcp.example1.common import *
+import hcp.python.HcpApiKdc as kapi
+from hcp.python.HcpCommon import hcp_config_extract
 
 app = attestsvc.app
+
+requests_verify = hcp_config_extract('.example1.cacert', must_exist = True)
+requests_cert = hcp_config_extract('.example1.clientcert', must_exist = True)
 
 def add_secret(enrollpath, _input, output):
     c = subprocess.run(['/hcp/safeboot/api_seal',
@@ -52,6 +57,9 @@ def my_get_assets(ekpubhash, outdir):
         certgen = profile['certgen'] if 'certgen' in profile else []
         realm = profile['realm'] if 'realm' in profile else None
         krb5conf = profile['krb5conf'] if 'krb5conf' in profile else None
+        ktgen = profile['ktgen'] if 'ktgen' in profile else None
+        if ktgen:
+            ktgenapi = ktgen.pop('api')
         hxcmd = ['hxtool', 'issue-certificate',
                    '--ca-certificate=FILE:/enrollcertissuer/CA.pem']
         hxcmd.append('--lifetime=' + str(profile['lifetime'] if 'lifetime' in profile else '1d'))
@@ -149,6 +157,24 @@ def my_get_assets(ekpubhash, outdir):
             add_public(enrollpath, f"{tempdir}/krb5.conf",
                        f"{outdir}/krb5.conf")
             result.append([f"krb5.conf", True])
+        if ktgen:
+            if not isinstance(ktgen, dict):
+                raise Exception("ktgen should be a dict")
+            for name in ktgen:
+                princs = ktgen[name]
+                if isinstance(princs, str):
+                    princs = [ princs ]
+                if not isinstance(princs, list):
+                    raise Exception(f"ktgen[{name}] should be a str or list")
+                retcode, _ = kapi.kdc_ext_keytab(ktgenapi, princs, False,
+                                                 f"{tempdir}/keytab-{name}",
+                                                 requests_verify = requests_verify,
+                                                 requests_cert = requests_cert)
+                if not retcode:
+                    raise Exception(f"ktgen[{name}] failed")
+                add_secret(enrollpath, f"{tempdir}/keytab-{name}",
+                           f"{outdir}/keytab-{name}")
+                result.append([f"keytab-{name}", False])
         return result
 
 # Connect our hooks to the attestsvc

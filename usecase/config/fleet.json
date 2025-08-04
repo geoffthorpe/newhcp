@@ -1,12 +1,17 @@
 {
     "_": "  vim: set expandtab shiftwidth=4 softtabstop=4: ",
     "defaults": {
+        "vars": {
+            "realm": "HCPHACKING.XYZ",
+            "domain": "hcphacking.xyz"
+        },
         "tpm_create": true,
         "tpm_enroll": true,
         "enroll_api": "https://enrollsvc.hcphacking.xyz",
         "enroll_api_cacert": "/enrollcertchecker/CA.cert",
         "enroll_api_clientcert": "/enrollclient/client.pem",
         "enroll_profile": {
+            "hostname": "{hostname}",
             "certgen": [ "https-server", "pkinit-client" ],
             "pkinit-clients": [ "nobody" ],
             "realm": "HCPHACKING.XYZ",
@@ -46,27 +51,31 @@
                         "pkinit_win2k_require_binding": "yes"
                     }
                 }
+            },
+            "ktgen": {
+                "api": "https://secondary.kdc.hcphacking.xyz",
+                "sshd": [ "host/{hostname}" ]
             }
         }
     },
     "fleet": {
         "host1": {
-            "tpm_path": "/tpm_host1",
-            "enroll_profile": {
-                "hostname": "host1.hcphacking.xyz"
-            }
+            "vars": { "hostname": "host1.hcphacking.xyz" },
+            "tpm_path": "/tpm_host1"
         },
         "kdc_primary": {
+            "vars": { "hostname": "primary.kdc.hcphacking.xyz" },
             "tpm_path": "/tpm_primary.kdc",
             "enroll_profile": {
-                "hostname": "primary.kdc.hcphacking.xyz",
+                "ktgen": [],
                 "certgen": [ "https-server", "pkinit-kdc" ]
             }
         },
         "kdc_secondary": {
+            "vars": { "hostname": "secondary.kdc.hcphacking.xyz" },
             "tpm_path": "/tpm_secondary.kdc",
             "enroll_profile": {
-                "hostname": "secondary.kdc.hcphacking.xyz",
+                "ktgen": [],
                 "certgen": [ "https-server", "pkinit-kdc",
                              "pkinit-iprop" ],
                 "krb5conf": {
@@ -82,10 +91,8 @@
             }
         },
         "kdc_keytab": {
-            "tpm_path": "/tpm_keytab.kdc",
-            "enroll_profile": {
-                "hostname": "keytab.kdc.hcphacking.xyz"
-            }
+            "vars": { "hostname": "keytab.kdc.hcphacking.xyz" },
+            "tpm_path": "/tpm_keytab.kdc"
         }
     }
 }

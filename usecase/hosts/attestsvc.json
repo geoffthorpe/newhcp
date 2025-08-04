@@ -35,5 +35,11 @@
                 "cp /attestnoncer/key /tmp/www-data-noncekey && cp /enrollsigner/key.priv /tmp/www-data-signer && chown www-data /tmp/www-data-* && touch /tmp/www-data.copied"],
             "touchfile": "/tmp/www-data.copied"
         } ]
+    },
+
+    "example1": {
+        "_": "The hooks in hcp/example1/attestsvc will consume these.",
+        "cacert": "/enrollcertchecker/CA.cert",
+        "clientcert": "/enrollclient/client.pem"
     }
 }
