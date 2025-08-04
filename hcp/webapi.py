@@ -97,7 +97,7 @@ if myhttps:
         mykinit += [
             'kinit',
             '-C',
-            'FILE:/etc/pkinit/healthclient-key.pem',
+            'FILE:/assets/healthclient.pem',
             f"healthclient.{myservername}" ]
 else:
     myURL = f"http://{myURL}"
