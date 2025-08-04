@@ -50,7 +50,8 @@ HcpApiAttest.py complete "$tmp/initial" "$tmp/quote" "$tmp/bundle.tar.gz"
 
 echo "Unsealing returned assets..."
 mkdir -p "$ASSETDIR"
-HcpApiAttest.py unseal "$VERIFKEY" "$tmp/bundle.tar.gz" "$ASSETDIR"
+HcpApiAttest.py unseal --callback /hcp/tools/cb_attestclient.sh \
+			"$VERIFKEY" "$tmp/bundle.tar.gz" "$ASSETDIR"
 
 echo "Done"
 touch "$ASSETDIR/touch"

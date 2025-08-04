@@ -10,6 +10,7 @@ import time
 import subprocess
 import tempfile
 import shutil
+import filecmp
 
 loglevel = 0
 def set_loglevel(v):
@@ -200,7 +201,7 @@ def attest_complete(api, initial, quote, output, requests_verify = True,
         fp.write(response.content)
     return True
 
-def attest_unseal(bundle, output):
+def attest_unseal(bundle, output, callback = None):
     if not os.path.isfile(f"{bundle}"):
         err(f"Error, no bundle at path '{bundle}'")
         return False
@@ -239,14 +240,23 @@ def attest_unseal(bundle, output):
                 if not sr(['/hcp/safeboot/api_unseal',
                            '/enrollverifier/key.pem',
                            f"{tempdir}/{d}",
-                           f"{output}/{d}"]):
+                           f"{output}/{d}.tmp"]):
                     return False
             else:
                 if not sr(['/hcp/safeboot/api_unseal', '-s',
                            '/enrollverifier/key.pem',
                            f"{tempdir}/{d}",
-                           f"{output}/{d}"]):
+                           f"{output}/{d}.tmp"]):
                     return False
+            if callback:
+                if not os.path.isfile(f"{output}/{d}") or \
+                    not filecmp.cmp(f"{output}/{d}", f"{output}/{d}.tmp",
+                                    shallow = False):
+                    c = subprocess.run([callback, d], cwd = output)
+                    if c.returncode != 0:
+                        err(f"Error, callback failed ({d})")
+                        return False
+            shutil.move(f"{output}/{d}.tmp", f"{output}/{d}")
             log(f"Unsealed asset: {d}")
     return True
 
@@ -348,12 +358,18 @@ if __name__ == '__main__':
     unseal_help = 'Unseal an attestation-returned asset bundle'
     unseal_epilog = """
     The 'unseal' subcommand interacts with the host's TPM to unseal an asset bundle
-    that was returned from the Attestation Service.
+    that was returned from the Attestation Service. If '--callback' is used to set
+    an update callback, it will be invoked each and every time an asset is unbundled
+    and is not replacing an identical existing asset. This hook can be used to
+    restart or HUP services that need to re-read asset inputs.
     """
+    unseal_help_callback = 'callback to invoke on assets that change'
     unseal_help_verifier = 'path to public key for signature-verification'
     unseal_help_bundle = 'path prefix for asset files'
     unseal_help_output = 'prefix for the resulting output files'
     parser_a = subparsers.add_parser('unseal', help=unseal_help, epilog=unseal_epilog)
+    parser_a.add_argument('--callback', metavar='<PATH>',
+                        default=None, help=unseal_help_callback)
     parser_a.add_argument('verifier', help=unseal_help_verifier)
     parser_a.add_argument('bundle', help=unseal_help_bundle)
     parser_a.add_argument('output', help=unseal_help_output)
@@ -397,7 +413,7 @@ if __name__ == '__main__':
                                      requests_cert = requests_cert,
                                      timeout = args.timeout)
         elif args.func == 'unseal':
-            result = attest_unseal(args.bundle, args.output)
+            result = attest_unseal(args.bundle, args.output, args.callback)
         else:
             raise Exception("BUG")
     except Exception as e:
