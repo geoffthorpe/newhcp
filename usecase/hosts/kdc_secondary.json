@@ -34,9 +34,5 @@
         { "load": ".tpm", "path": "/usecase/proto/tpm_sidecar.json" },
 	{ "loadunion": ".env", "path": "/usecase/proto/env_tpm2tools.json" },
 	{ "loadunion": ".env", "path": "/usecase/proto/env_krb5.json" }
-    ],
-
-    "env": {
-        "set": { "KRB5_CONFIG": "/assets/krb5.conf" }
-    }
+    ]
 }
