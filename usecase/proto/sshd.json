@@ -4,5 +4,6 @@
     "tag": "{sshd_tag}",
     "port": "{sshd_port}",
     "hostname": "{sshd_fqdn}",
-    "xtra": "{sshd_xtra}"
+    "xtra": "{sshd_xtra}",
+    "until": "/run/sshd/started"
 }
