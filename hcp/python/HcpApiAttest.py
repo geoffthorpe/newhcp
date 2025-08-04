@@ -65,9 +65,9 @@ def tpm2_secret_session(_dir):
 # TODO: this code was copied from HcpApiEnroll.py and suffers from the same
 # akwardnesses. What's said there applies here.
 
-def requester_loop(args, request_fn):
-    debug(f"requester_loop: retries={args.retries}, pause={args.pause}")
-    retries = args.retries
+def requester_loop(request_fn, retries = 0, pause = 0):
+    debug(f"requester_loop: retries={retries}, pause={pause}")
+    retries = retries
     while True:
         try:
             debug("requester_loop: calling request_fn()")
@@ -77,7 +77,7 @@ def requester_loop(args, request_fn):
                 debug(f"requester_loop: caught exception, retries={retries}")
                 debug(f" - e: {e}")
                 retries -= 1
-                time.sleep(args.pause)
+                time.sleep(pause)
                 continue
             debug(f"requester_loop: caught exception, no retries")
             debug(f" - e: {e}")
@@ -89,7 +89,8 @@ def requester_loop(args, request_fn):
 # They all return a 2-tuple of {result,json}, where result is True iff the
 # operation was successful.
 
-def attest_initiate(args):
+def attest_initiate(api, output, requests_verify = True, requests_cert = False,
+                    retries = 0, timeout = 120):
     with tempfile.TemporaryDirectory() as tempdir:
         if not tpm2_flushall() or \
             not sr(['tpm2', 'createek',
@@ -105,15 +106,15 @@ def attest_initiate(args):
         'ekpubhash': (None, c.stdout[0:64])
     }
     debug("'initiate' handler about to call API")
-    debug(f" - url: {args.api + '/v1/initiate'}")
+    debug(f" - url: {api + '/v1/initiate'}")
     debug(f" - files: {form_data}")
-    myrequest = lambda: requests.post(args.api + '/v1/initiate',
-                             files=form_data,
-                             auth=auth,
-                             verify=args.requests_verify,
-                             cert=args.requests_cert,
-                             timeout=args.timeout)
-    response = requester_loop(args, myrequest)
+    myrequest = lambda: requests.post(api + '/v1/initiate',
+                                      files = form_data,
+                                      auth = auth,
+                                      verify = requests_verify,
+                                      cert = requests_cert,
+                                      timeout = timeout)
+    response = requester_loop(myrequest, retries = retries)
     debug(f" - response: {response}")
     debug(f" - response.content: {response.content}")
     if response.status_code != 200:
@@ -125,12 +126,12 @@ def attest_initiate(args):
         err(f"Error, JSON decoding of 'initiate' response failed: {e}")
         return False
     debug(f" - jr: {jr}")
-    with open(args.output, 'w') as fp:
+    with open(output, 'w') as fp:
         fp.write(json.dumps(jr))
     return True
 
-def attest_quote(args):
-    with open(args.initial, 'r') as fp:
+def attest_quote(initial, output):
+    with open(initial, 'r') as fp:
         initjson = fp.read()
     init = json.loads(initjson)
     with tempfile.TemporaryDirectory() as tempdir:
@@ -168,45 +169,46 @@ def attest_quote(args):
                 '--message', f"{tempdir}/quote.out",
                 '--signature', f"{tempdir}/quote.sig",
                 '--pcr', f"{tempdir}/quote.pcr"]) and \
-            sr(['tar', '-zcf', args.output,
+            sr(['tar', '-zcf', output,
                 '-C', tempdir,
                 'ek.pub', 'ak.pub', 'ak.ctx',
                 'quote.out', 'quote.sig', 'quote.pcr']):
             return True
     return False
 
-def attest_complete(args):
+def attest_complete(api, initial, quote, output, requests_verify = True,
+                    requests_cert = False, retries = 0, timeout = 120):
     form_data = {
-        'initial': ('initial', open(args.initial, 'r')),
-        'quote': ('quote', open(args.quote, 'rb'))
+        'initial': ('initial', open(initial, 'r')),
+        'quote': ('quote', open(quote, 'rb'))
     }
     debug("'complete' handler about to call API")
-    debug(f" - url: {args.api + '/v1/complete'}")
+    debug(f" - url: {api + '/v1/complete'}")
     debug(f" - files: {form_data}")
-    myrequest = lambda: requests.post(args.api + '/v1/complete',
-                             files=form_data,
-                             auth=auth,
-                             verify=args.requests_verify,
-                             cert=args.requests_cert,
-                             timeout=args.timeout)
-    response = requester_loop(args, myrequest)
+    myrequest = lambda: requests.post(api + '/v1/complete',
+                                      files = form_data,
+                                      auth = auth,
+                                      verify = requests_verify,
+                                      cert = requests_cert,
+                                      timeout = timeout)
+    response = requester_loop(myrequest, retries = retries)
     debug(f" - response: {response}")
     if response.status_code != 200:
         err(f"Error, 'complete' response status code was {response.status_code}")
         return False
-    with open(args.output, 'wb') as fp:
+    with open(output, 'wb') as fp:
         fp.write(response.content)
     return True
 
-def attest_unseal(args):
-    if not os.path.isfile(f"{args.bundle}"):
-        err(f"Error, no bundle at path '{args.bundle}'")
+def attest_unseal(bundle, output):
+    if not os.path.isfile(f"{bundle}"):
+        err(f"Error, no bundle at path '{bundle}'")
         return False
-    if not os.path.isdir(f"{args.output}"):
-        err(f"Error, no output path '{args.output}'")
+    if not os.path.isdir(f"{output}"):
+        err(f"Error, no output path '{output}'")
         return False
     with tempfile.TemporaryDirectory() as tempdir:
-        if not sr(['tar', '-zxf', args.bundle,
+        if not sr(['tar', '-zxf', bundle,
                    '-C', tempdir]):
             err("Error, failed to extract bundle")
             return False
@@ -217,16 +219,16 @@ def attest_unseal(args):
                    '-s',
                    '/enrollverifier/key.pem',
                    f"{tempdir}/manifest",
-                   f"{args.output}/manifest"]):
+                   f"{output}/manifest"]):
             err("Error, failed to verify the manifest")
             return False
-        with open(f"{args.output}/manifest", 'r') as fp:
+        with open(f"{output}/manifest", 'r') as fp:
             manifest = json.loads(fp.read())
         log(f"Unsealed manifest: {manifest}")
         for _tuple in manifest:
             d = _tuple[0]
             p = _tuple[1]
-            _makedir = os.path.dirname(f"{args.output}/{d}")
+            _makedir = os.path.dirname(f"{output}/{d}")
             if not os.path.isdir(_makedir):
                 os.makedirs(_makedir)
             if not p:
@@ -237,13 +239,13 @@ def attest_unseal(args):
                 if not sr(['/hcp/safeboot/api_unseal',
                            '/enrollverifier/key.pem',
                            f"{tempdir}/{d}",
-                           f"{args.output}/{d}"]):
+                           f"{output}/{d}"]):
                     return False
             else:
                 if not sr(['/hcp/safeboot/api_unseal', '-s',
                            '/enrollverifier/key.pem',
                            f"{tempdir}/{d}",
-                           f"{args.output}/{d}"]):
+                           f"{output}/{d}"]):
                     return False
             log(f"Unsealed asset: {d}")
     return True
@@ -314,7 +316,7 @@ if __name__ == '__main__':
     initiate_help_output = 'path for the resulting \'initial\' file'
     parser_a = subparsers.add_parser('initiate', help=initiate_help, epilog=initiate_epilog)
     parser_a.add_argument('output', help=initiate_help_output)
-    parser_a.set_defaults(func=attest_initiate)
+    parser_a.set_defaults(func='initiate')
 
     quote_help = 'Generate a TPM quote'
     quote_epilog = """
@@ -326,7 +328,7 @@ if __name__ == '__main__':
     parser_a = subparsers.add_parser('quote', help=quote_help, epilog=quote_epilog)
     parser_a.add_argument('initial', help=quote_help_initial)
     parser_a.add_argument('output', help=quote_help_output)
-    parser_a.set_defaults(func=attest_quote)
+    parser_a.set_defaults(func='quote')
 
     complete_help = 'Complete an attestation exchange'
     complete_epilog = """
@@ -341,7 +343,7 @@ if __name__ == '__main__':
     parser_a.add_argument('initial', help=complete_help_initial)
     parser_a.add_argument('quote', help=complete_help_quote)
     parser_a.add_argument('output', help=complete_help_output)
-    parser_a.set_defaults(func=attest_complete)
+    parser_a.set_defaults(func='complete')
 
     unseal_help = 'Unseal an attestation-returned asset bundle'
     unseal_epilog = """
@@ -355,7 +357,7 @@ if __name__ == '__main__':
     parser_a.add_argument('verifier', help=unseal_help_verifier)
     parser_a.add_argument('bundle', help=unseal_help_bundle)
     parser_a.add_argument('output', help=unseal_help_output)
-    parser_a.set_defaults(func=attest_unseal)
+    parser_a.set_defaults(func='unseal')
 
     # Process the command-line
     args = parser.parse_args()
@@ -364,28 +366,43 @@ if __name__ == '__main__':
     if not args.api:
         err("Error, no API URL was provided.")
         sys.exit(-1)
+    requests_verify = True
     if args.noverify:
-        args.requests_verify = False
+        requests_verify = False
     elif args.cacert:
-        args.requests_verify = args.cacert
-    else:
-        args.requests_verify = True
+        requests_verify = args.cacert
+    requests_cert = False
     if args.clientcert:
         if args.clientkey:
-            args.requests_cert = (args.clientcert,args.clientkey)
+            requests_cert = (args.clientcert,args.clientkey)
         else:
-            args.requests_cert = args.clientcert
-    else:
-        args.requests_cert = False
+            requests_cert = args.clientcert
 
     # Dispatch. Here, we are operating as a program with a parent process, not a library with
     # a caller. If we don't catch exceptions, they get handled by the runtime which will print
     # stack traces to stderr and exit, there is no concept of the exceptions reaching the
     # parent process. As such, catch them all here.
     try:
-        result = args.func(args)
+        if args.func == 'initiate':
+            result = attest_initiate(args.api, args.output,
+                                     requests_verify = requests_verify,
+                                     requests_cert = requests_cert,
+                                     timeout = args.timeout)
+        elif args.func == 'quote':
+            result = attest_quote(args.initial, args.output)
+        elif args.func == 'complete':
+            result = attest_complete(args.api, args.initial,
+                                     args.quote, args.output,
+                                     requests_verify = requests_verify,
+                                     requests_cert = requests_cert,
+                                     timeout = args.timeout)
+        elif args.func == 'unseal':
+            result = attest_unseal(args.bundle, args.output)
+        else:
+            raise Exception("BUG")
     except Exception as e:
-        print(f"Error, unable to hit API end-point: {e}", file = sys.stderr)
+        print(f"Error, unable to perform '{args.func}' function", file = sys.stderr)
+        print(f"Exception: {e}", file = sys.stderr)
         sys.exit(-1)
     log(f"handler returned: result={result}")
     if not result:
