@@ -25,7 +25,7 @@ def add_secret(enrollpath, _input, output):
                         _input,
                         output])
     if c.returncode != 0:
-        raise Exception("failed to seal secret", 400)
+        raise Exception("failed to seal secret")
 
 def add_public(enrollpath, _input, output):
     c = subprocess.run(['/hcp/safeboot/api_seal',
@@ -34,34 +34,37 @@ def add_public(enrollpath, _input, output):
                         _input,
                         output])
     if c.returncode != 0:
-        raise Exception("failed to seal secret", 400)
+        raise Exception("failed to seal public")
+
+class UnenrolledTPM(Exception):
+    pass
 
 def my_get_assets(ekpubhash, outdir):
     enrollpath = ekpubhash2path(ekpubhash)
     if not os.path.isdir(enrollpath):
-        raise Exception(f"attestation of un-enrolled TPM: {ekpubhash}")
+        raise UnenrolledTPM(f"attestation of un-enrolled TPM: {ekpubhash}")
     profile = {}
     if os.path.isfile(f"{enrollpath}/profile"):
         with open(f"{enrollpath}/profile") as fp:
             profile = json.loads(fp.read())
     result = []
     with tempfile.TemporaryDirectory() as tempdir:
-        certgen = []
-        if 'certgen' in profile:
-            certgen = profile['certgen']
-        basecmd = ['hxtool', 'issue-certificate',
+        certgen = profile['certgen'] if 'certgen' in profile else []
+        realm = profile['realm'] if 'realm' in profile else None
+        krb5conf = profile['krb5conf'] if 'krb5conf' in profile else None
+        hxcmd = ['hxtool', 'issue-certificate',
                    '--ca-certificate=FILE:/enrollcertissuer/CA.pem']
-        basecmd.append('--lifetime=' + str(profile['lifetime'] if 'lifetime' in profile else '1d'))
-        basecmd.append('--generate-key=' + (profile['key-type'] if 'key-type' in profile else 'rsa'))
-        basecmd.append('--key-bits=' + str(profile['key-bits'] if 'key-bits' in profile else '2048'))
+        hxcmd.append('--lifetime=' + str(profile['lifetime'] if 'lifetime' in profile else '1d'))
+        hxcmd.append('--generate-key=' + (profile['key-type'] if 'key-type' in profile else 'rsa'))
+        hxcmd.append('--key-bits=' + str(profile['key-bits'] if 'key-bits' in profile else '2048'))
         for certtype in certgen:
             if certtype == 'https-server':
                 hostnames = profile['https-server-hostnames'] if \
                     'https-server-hostnames' in profile else [profile['hostname']]
                 for hostname in hostnames:
-                    cmd = basecmd.copy()
-                    cmd = cmd + [ '--type=https-server', f"--hostname={hostname}",
-                                  f"--certificate=FILE:{tempdir}/https-server-{hostname}.pem" ]
+                    cmd = hxcmd.copy() + \
+                        [ '--type=https-server', f"--hostname={hostname}",
+                          f"--certificate=FILE:{tempdir}/https-server-{hostname}.pem" ]
                     c = subprocess.run(cmd)
                     if c.returncode != 0:
                         raise Exception(f"hxtool failed: {cmd}")
@@ -72,22 +75,61 @@ def my_get_assets(ekpubhash, outdir):
                 clients = profile['pkinit-clients'] if \
                     'pkinit-clients' in profile else ['nobody']
                 for client in clients:
-                    cmd = basecmd.copy()
-                    cmd = cmd + [ '--type=pkinit-client',
-                                  f"--pk-init-principal={client}@HCPHACKING.XYZ",
-                                  f"--certificate=FILE:{tempdir}/pkinit-client-{client}.pem" ]
+                    if not realm:
+                        raise Exception("No realm for pkinit-client")
+                    cmd = hxcmd.copy() + \
+                        [ '--type=pkinit-client',
+                          f"--pk-init-principal={client}@HCPHACKING.XYZ",
+                          f"--certificate=FILE:{tempdir}/pkinit-client-{client}.pem" ]
                     c = subprocess.run(cmd)
                     if c.returncode != 0:
                         raise Exception(f"hxtool failed: {cmd}")
                     add_secret(enrollpath, f"{tempdir}/pkinit-client-{client}.pem",
                                f"{outdir}/pkinit-client-{client}.pem")
                     result.append([f"pkinit-client-{client}.pem", False])
+            elif certtype == 'pkinit-kdc':
+                if not realm:
+                    raise Exception("No realm for pkinit-kdc")
+                cmd = hxcmd.copy() + \
+                    [ '--type=pkinit-kdc',
+                      f"--pk-init-principal=krbtgt/{realm}@{realm}",
+                      f"--certificate=FILE:{tempdir}/pkinit-kdc-{realm}.pem" ]
+                c = subprocess.run(cmd)
+                if c.returncode != 0:
+                    raise Exception(f"hxtool failed: {cmd}")
+                add_secret(enrollpath, f"{tempdir}/pkinit-kdc-{realm}.pem",
+                           f"{outdir}/pkinit-kdc-{realm}.pem")
+                result.append([f"pkinit-kdc-{realm}.pem", False])
             else:
                 raise Exception(f"unrecognized certtype: {certtype}")
+        if krb5conf:
+            with open(f"{tempdir}/krb5.conf", 'w') as fp:
+                fp.write('# Generated by /hcp/example1/attestsvc.py\n')
+                for sectionname in krb5conf:
+                    if sectionname == 'realms':
+                        # We handle the realms section differently, see below
+                        continue
+                    section = krb5conf[sectionname]
+                    if not isinstance(section, dict) or len(section) == 0:
+                        continue
+                    fp.write(f"[{sectionname}]\n")
+                    for key in section:
+                        v = section[key]
+                        if isinstance(v, str):
+                            fp.write(f"    {key} = {v}\n")
+                        elif isinstance(v, list):
+                            for i in v:
+                                fp.write(f"    {key} = {i}\n")
+                        else:
+                            raise Exception(f"unhandled value type: {type(v)}")
+            add_public(enrollpath, f"{tempdir}/krb5.conf",
+                       f"{outdir}/krb5.conf")
+            result.append([f"krb5.conf", True])
         return result
 
 # Connect our hooks to the attestsvc
 attestsvc.backend_get_assets = my_get_assets
+attestsvc.backend_exception_unenrolled = UnenrolledTPM
 
 if __name__ == "__main__":
     app.run()

@@ -30,6 +30,12 @@ app.config["DEBUG"] = False
 # (False).
 backend_get_assets = None
 
+# exception_unenrolled: this is an exception class that we can catch when
+# calling the backend's 'get_assets' handler. We'll detect this exception to
+# mean that the backend doesn't recognize the TPM and we'll return a '401
+# Unauthorized' in that case.
+backend_exception_unenrolled = None
+
 # TODO: configure
 PCRs='0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16'
 MAX_TICKET_AGE=120
@@ -177,7 +183,13 @@ def my_complete():
         with tempfile.TemporaryDirectory() as outdir:
             manifest = []
             if backend_get_assets:
-                manifest = backend_get_assets(ticket['ekpubhash'], outdir)
+                if backend_exception_unenrolled:
+                    try:
+                        manifest = backend_get_assets(ticket['ekpubhash'], outdir)
+                    except backend_exception_unenrolled:
+                        return make_response("Error: unrecognized TPM", 401)
+                else:
+                    manifest = backend_get_assets(ticket['ekpubhash'], outdir)
             with open(f"{tempdir}/manifest", 'w') as fp:
                 fp.write(json.dumps(manifest))
             c = subprocess.run(['/hcp/safeboot/api_seal',

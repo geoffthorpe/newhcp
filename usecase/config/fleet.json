@@ -4,10 +4,46 @@
 		"tpm_enroll": true,
 		"enroll_api": "https://enrollsvc.hcphacking.xyz",
 		"enroll_profile": {
-			"certgen": ["https-server"],
+			"certgen": [ "https-server", "pkinit-client" ],
+			"pkinit-clients": [ "nobody" ],
+			"realm": "HCPHACKING.XYZ",
 			"lifetime": "2h",
 			"key-type": "rsa",
-			"key-bits": 2048
+			"key-bits": 2048,
+			"krb5conf": {
+				"logging": {
+					"default": "STDERR"
+				},
+				"libdefaults": {
+					"default_realm": "HCPHACKING.XYZ",
+					"dns_lookup_kdc": "no",
+					"dns_lookup_realm": "no",
+					"ignore_acceptor_hostname": "yes",
+					"dns_canonicalize_hostname": "no",
+					"rdns": "no",
+					"forwardable": "true",
+					"kuserok": [
+						"SYSTEM-K5LOGIN:/etc/k5login.d",
+						"USER-K5LOGIN",
+						"SIMPLE"
+					]
+				},
+				"appdefaults": {
+					"pkinit_anchors": "FILE:/enrollcertchecker/CA.cert"
+				},
+				"domain_realm": {
+					".hcphacking.xyz": "HCPHACKING.XYZ"
+				},
+				"realms": {
+					"HCPHACKING.XYZ": {
+						"kdc": "secondary.kdc.hcphacking.xyz:3088",
+						"pkinit_require_eku": "true",
+						"pkinit_require_krbtgt_otherName": "true",
+						"pkinit_win2k": "no",
+						"pkinit_win2k_require_binding": "yes"
+					}
+				}
+			}
 		}
 	},
 	"fleet": [
@@ -15,30 +51,23 @@
 			"name": "host1",
 			"tpm_path": "/tpm_host1",
 			"enroll_profile": {
-				"hostname": "host1.hcphacking.xyz",
-				"certgen": ["https-server", "pkinit-client"],
-				"https-server-hostnames": [
-					"host1.hcphacking.xyz",
-					"www.hcphacking.com"
-				],
-				"pkinit-clients": [
-					"nobody",
-					"alicia"
-				]
+				"hostname": "host1.hcphacking.xyz"
 			}
 		},
 		{
 			"name": "kdc_primary",
 			"tpm_path": "/tpm_primary.kdc",
 			"enroll_profile": {
-				"hostname": "primary.kdc.hcphacking.xyz"
+				"hostname": "primary.kdc.hcphacking.xyz",
+				"certgen": [ "https-server", "pkinit-kdc" ]
 			}
 		},
 		{
 			"name": "kdc_secondary",
 			"tpm_path": "/tpm_secondary.kdc",
 			"enroll_profile": {
-				"hostname": "secondary.kdc.hcphacking.xyz"
+				"hostname": "secondary.kdc.hcphacking.xyz",
+				"certgen": [ "https-server", "pkinit-kdc" ]
 			}
 		},
 		{
