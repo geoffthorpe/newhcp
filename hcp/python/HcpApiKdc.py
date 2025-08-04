@@ -52,6 +52,7 @@ import sys
 import argparse
 import time
 import subprocess
+import tempfile
 
 loglevel = 0
 def set_loglevel(v):
@@ -81,9 +82,8 @@ auth = None
 # thrown in the 'request_fn'. If 'request_fn' returns without exception, we
 # pass along whatever it returned rather than retrying. (If the response
 # contains a non-2xx http status code, that's not our business.)
-def requester_loop(args, request_fn):
-    debug(f"requester_loop: retries={args.retries}, pause={args.pause}")
-    retries = args.retries
+def requester_loop(request_fn, retries = 0, pause = 0):
+    debug(f"requester_loop: retries={retries}, pause={pause}")
     while True:
         try:
             debug("requester_loop: calling request_fn()")
@@ -93,7 +93,7 @@ def requester_loop(args, request_fn):
                 debug(f"requester_loop: caught exception, retries={retries}")
                 debug(f" - e: {e}")
                 retries -= 1
-                time.sleep(args.pause)
+                time.sleep(pause)
                 continue
             debug(f"requester_loop: caught exception, no retries")
             debug(f" - e: {e}")
@@ -105,20 +105,21 @@ def requester_loop(args, request_fn):
 # They all return a 2-tuple of {result,json}, where result is True iff the
 # operation was successful.
 
-def kdc_add(args):
-    form_data = { 'principals': (None, json.dumps(args.principals)) }
-    if args.profile is not None:
-        form_data['profile'] = (None, args.profile)
+def kdc_add(api, principals, profile = None, requests_verify = True,
+            requests_cert = False, retries = 0, timeout = 120):
+    form_data = { 'principals': (None, json.dumps(principals)) }
+    if profile is not None:
+        form_data['profile'] = (None, profile)
     debug("'add' handler about to call API")
-    debug(f" - url: {args.api + '/v1/add'}")
+    debug(f" - url: {api + '/v1/add'}")
     debug(f" - files: {form_data}")
-    myrequest = lambda: requests.post(args.api + '/v1/add',
-                             files=form_data,
-                             auth=auth,
-                             verify=args.requests_verify,
-                             cert=args.requests_cert,
-                             timeout=args.timeout)
-    response = requester_loop(args, myrequest)
+    myrequest = lambda: requests.post(api + '/v1/add',
+                                      files = form_data,
+                                      auth = auth,
+                                      verify = requests_verify,
+                                      cert = requests_cert,
+                                      timeout = timeout)
+    response = requester_loop(myrequest, retries = retries)
     debug(f" - response: {response}")
     debug(f" - response.content: {response.content}")
     if response.status_code != 200:
@@ -132,20 +133,21 @@ def kdc_add(args):
     debug(f" - jr: {jr}")
     return True, jr
 
-def kdc_add_ns(args):
-    form_data = { 'principals': (None, json.dumps(args.principals)) }
-    if args.profile is not None:
-        form_data['profile'] = (None, args.profile)
+def kdc_add_ns(api, principals, profile = None, requests_verify = True,
+               requests_cert = False, retries = 0, timeout = 120):
+    form_data = { 'principals': (None, json.dumps(principals)) }
+    if profile is not None:
+        form_data['profile'] = (None, profile)
     debug("'add_ns' handler about to call API")
-    debug(f" - url: {args.api + '/v1/add_ns'}")
+    debug(f" - url: {api + '/v1/add_ns'}")
     debug(f" - files: {form_data}")
-    myrequest = lambda: requests.post(args.api + '/v1/add_ns',
-                             files=form_data,
-                             auth=auth,
-                             verify=args.requests_verify,
-                             cert=args.requests_cert,
-                             timeout=args.timeout)
-    response = requester_loop(args, myrequest)
+    myrequest = lambda: requests.post(api + '/v1/add_ns',
+                                      files = form_data,
+                                      auth = auth,
+                                      verify = requests_verify,
+                                      cert = requests_cert,
+                                      timeout = timeout)
+    response = requester_loop(myrequest, retries = retries)
     debug(f" - response: {response}")
     debug(f" - response.content: {response.content}")
     if response.status_code != 200:
@@ -159,20 +161,21 @@ def kdc_add_ns(args):
     debug(f" - jr: {jr}")
     return True, jr
 
-def kdc_get(args):
-    form_data = { 'principals': (None, json.dumps(args.principals)) }
-    if args.profile is not None:
-        form_data['profile'] = (None, args.profile)
+def kdc_get(api, principals, profile = None, requests_verify = True,
+            requests_cert = False, retries = 0, timeout = 120):
+    form_data = { 'principals': (None, json.dumps(principals)) }
+    if profile is not None:
+        form_data['profile'] = (None, profile)
     debug("'get' handler about to call API")
-    debug(f" - url: {args.api + '/v1/get'}")
+    debug(f" - url: {api + '/v1/get'}")
     debug(f" - files: {form_data}")
-    myrequest = lambda: requests.get(args.api + '/v1/get',
-                            params=form_data,
-                            auth=auth,
-                            verify=args.requests_verify,
-                            cert=args.requests_cert,
-                            timeout=args.timeout)
-    response = requester_loop(args, myrequest)
+    myrequest = lambda: requests.get(api + '/v1/get',
+                                     params = form_data,
+                                     auth = auth,
+                                     verify = requests_verify,
+                                     cert = requests_cert,
+                                     timeout = timeout)
+    response = requester_loop(myrequest, retries = retries)
     debug(f" - response: {response}")
     debug(f" - response.content: {response.content}")
     if response.status_code != 200:
@@ -186,20 +189,21 @@ def kdc_get(args):
     debug(f" - jr: {jr}")
     return True, jr
 
-def kdc_del(args):
-    form_data = { 'principals': (None, json.dumps(args.principals)) }
-    if args.profile is not None:
-        form_data['profile'] = (None, args.profile)
+def kdc_del(api, principals, profile = None, requests_verify = True,
+            requests_cert = False, retries = 0, timeout = 120):
+    form_data = { 'principals': (None, json.dumps(principals)) }
+    if profile is not None:
+        form_data['profile'] = (None, profile)
     debug("'del' handler about to call API")
-    debug(f" - url: {args.api + '/v1/del'}")
+    debug(f" - url: {api + '/v1/del'}")
     debug(f" - files: {form_data}")
-    myrequest = lambda: requests.post(args.api + '/v1/del',
-                             files=form_data,
-                             auth=auth,
-                             verify=args.requests_verify,
-                             cert=args.requests_cert,
-                             timeout=args.timeout)
-    response = requester_loop(args, myrequest)
+    myrequest = lambda: requests.post(api + '/v1/del',
+                                      files = form_data,
+                                      auth = auth,
+                                      verify = requests_verify,
+                                      cert = requests_cert,
+                                      timeout = timeout)
+    response = requester_loop(myrequest, retries = retries)
     debug(f" - response: {response}")
     debug(f" - response.content: {response.content}")
     if response.status_code != 200:
@@ -213,20 +217,21 @@ def kdc_del(args):
     debug(f" - jr: {jr}")
     return True, jr
 
-def kdc_del_ns(args):
-    form_data = { 'principals': (None, json.dumps(args.principals)) }
-    if args.profile is not None:
-        form_data['profile'] = (None, args.profile)
+def kdc_del_ns(api, principals, profile = None, requests_verify = True,
+               requests_cert = False, retries = 0, timeout = 120):
+    form_data = { 'principals': (None, json.dumps(principals)) }
+    if profile is not None:
+        form_data['profile'] = (None, profile)
     debug("'add' handler about to call API")
-    debug(f" - url: {args.api + '/v1/del_ns'}")
+    debug(f" - url: {api + '/v1/del_ns'}")
     debug(f" - files: {form_data}")
-    myrequest = lambda: requests.post(args.api + '/v1/del_ns',
-                             files=form_data,
-                             auth=auth,
-                             verify=args.requests_verify,
-                             cert=args.requests_cert,
-                             timeout=args.timeout)
-    response = requester_loop(args, myrequest)
+    myrequest = lambda: requests.post(api + '/v1/del_ns',
+                                      files = form_data,
+                                      auth = auth,
+                                      verify = requests_verify,
+                                      cert = requests_cert,
+                                      timeout = timeout)
+    response = requester_loop(myrequest, retries = retries)
     debug(f" - response: {response}")
     debug(f" - response.content: {response.content}")
     if response.status_code != 200:
@@ -240,49 +245,62 @@ def kdc_del_ns(args):
     debug(f" - jr: {jr}")
     return True, jr
 
-def kdc_ext_keytab(args):
-    if args.kerberos:
+def kdc_ext_keytab(api, principals, kerberos, raw, profile = None,
+                   requests_verify = True, requests_cert = False,
+                   retries = 0, timeout = 120):
+    if kerberos:
         # Special handling. python-requests-kerberos' seems to be broken on
         # debian, so we use "curl --negotiate" instead.
         myrequest = lambda: subprocess.run([
                 'curl', '-F', 'principals="[]"',
-                '--cacert', args.requests_verify,
+                '--cacert', requests_verify,
                 '--negotiate', '-u', ':',
-                args.api + '/v1/ext_keytab' ],
+                api + '/v1/ext_keytab' ],
             stdout = subprocess.PIPE,
             stderr = subprocess.PIPE)
-        response = requester_loop(args, myrequest)
+        response = requester_loop(myrequest, retries = retries)
         if response.returncode != 0:
             err(f"Error, 'ext_keytab' curl exit code was {response.returncode}")
             return False, None
-        myjson = response.stdout
+        myoutput = response.stdout
     else:
-        form_data = { 'principals': (None, json.dumps(args.principals)) }
-        if args.profile is not None:
-            form_data['profile'] = (None, args.profile)
+        form_data = { 'principals': (None, json.dumps(principals)) }
+        if profile is not None:
+            form_data['profile'] = (None, profile)
         debug("'add' handler about to call API")
-        debug(f" - url: {args.api + '/v1/ext_keytab'}")
+        debug(f" - url: {api + '/v1/ext_keytab'}")
         debug(f" - files: {form_data}")
-        myrequest = lambda: requests.post(
-                args.api + '/v1/ext_keytab',
-                files=form_data,
-                auth=auth,
-                verify=args.requests_verify,
-                cert=args.requests_cert,
-                timeout=args.timeout)
-        response = requester_loop(args, myrequest)
+        myrequest = lambda: requests.post(api + '/v1/ext_keytab',
+                                          files = form_data,
+                                          auth = auth,
+                                          verify = requests_verify,
+                                          cert = requests_cert,
+                                          timeout = timeout)
+        response = requester_loop(myrequest, retries = retries)
         debug(f" - response: {response}")
         debug(f" - response.content: {response.content}")
         if response.status_code != 200:
             err(f"Error, 'ext_keytab' response status code was {response.status_code}")
             return False, None
-        myjson = response.content
+        myoutput = response.content
     try:
-        jr = json.loads(myjson)
+        jr = json.loads(myoutput)
     except Exception as e:
         err(f"Error, JSON decoding of 'ext_keytab' response failed: {e}")
         return False, None
     debug(f" - jr: {jr}")
+    # Special case
+    if raw:
+        with tempfile.TemporaryDirectory() as tempdir:
+            with open(f"{tempdir}/b64", 'w') as fp:
+                fp.write(jr['stdout'])
+            c = subprocess.run(['base64', '-d', f"{tempdir}/b64"],
+                               capture_output = True, text = False)
+            if c.returncode != 0:
+                err('Error, could not base64 decode the keytab')
+                return False, None
+            with open(raw, 'wb') as fp:
+                fp.write(c.stdout)
     return True, jr
 
 
@@ -359,7 +377,7 @@ if __name__ == '__main__':
     add_help_principals = 'principals to be registered in the KDC'
     parser_a = subparsers.add_parser('add', help=add_help, epilog=add_epilog)
     parser_a.add_argument('principals', help=add_help_principals, nargs='*')
-    parser_a.set_defaults(func=kdc_add, fname='add')
+    parser_a.set_defaults(func='add', fname='add')
 
     add_ns_help = 'Register new namespace principals with the KDC'
     add_ns_epilog = """
@@ -372,7 +390,7 @@ if __name__ == '__main__':
     add_ns_help_principals = 'namespace principals to be registered in the KDC'
     parser_a = subparsers.add_parser('add_ns', help=add_ns_help, epilog=add_ns_epilog)
     parser_a.add_argument('principals', help=add_ns_help_principals, nargs='*')
-    parser_a.set_defaults(func=kdc_add_ns, fname='add_ns')
+    parser_a.set_defaults(func='add_ns', fname='add_ns')
 
     get_help = 'Retrieve/list principals on the KDC'
     get_epilog = """
@@ -386,7 +404,7 @@ if __name__ == '__main__':
     get_help_principals = 'principals to be queried for on the KDC'
     parser_a = subparsers.add_parser('get', help=get_help, epilog=get_epilog)
     parser_a.add_argument('principals', help=get_help_principals, nargs='*')
-    parser_a.set_defaults(func=kdc_get, fname='get')
+    parser_a.set_defaults(func='get', fname='get')
 
     del_help = 'Delete principals from the KDC'
     del_epilog = """
@@ -398,7 +416,7 @@ if __name__ == '__main__':
     del_help_principals = 'principals to be removed from the KDC'
     parser_a = subparsers.add_parser('del', help=del_help, epilog=del_epilog)
     parser_a.add_argument('principals', help=del_help_principals, nargs='*')
-    parser_a.set_defaults(func=kdc_del, fname='del')
+    parser_a.set_defaults(func='del', fname='del')
 
     del_ns_help = 'Delete namespace principals from the KDC'
     del_ns_epilog = """
@@ -411,34 +429,38 @@ if __name__ == '__main__':
     del_ns_help_principals = 'namespace principals to be removed from the KDC'
     parser_a = subparsers.add_parser('del_ns', help=del_ns_help, epilog=del_ns_epilog)
     parser_a.add_argument('principals', help=del_ns_help_principals, nargs='*')
-    parser_a.set_defaults(func=kdc_del_ns, fname='del_ns')
+    parser_a.set_defaults(func='del_ns', fname='del_ns')
 
     ext_keytab_help = 'Extract keytab with service principals from the KDC'
     ext_keytab_epilog = """
-    The 'ext_keytab' subcommand invokes the '/v1/ext_keytab' handler of the KDC Service's
-    management API, to extract a current keytab for the given service
-    principals.
-    Control over the extraction is passed as a JSON string via the --profile
-    argument.
+    The 'ext_keytab' subcommand invokes the '/v1/ext_keytab' handler of the KDC
+    Service's management API, to extract a current keytab for the given service
+    principals. By default, the returned data is a JSON structure, within which
+    the 'stdout' field contains a base64-encoded keytab. If the '--raw'
+    argument is provided, the program instead writes the raw keytab file to
+    stdout.
+    Control over the extraction is passed as a JSON string via the
+    --profile argument.
     """
+    ext_keytab_help_raw = 'Path to output the raw keytab (extracted from JSON struct)'
     ext_keytab_help_principals = 'namespace principals to be removed from the KDC'
     parser_a = subparsers.add_parser('ext_keytab', help=ext_keytab_help, epilog=ext_keytab_epilog)
+    parser_a.add_argument('--raw', type=str, metavar='<path>', default=None, help=ext_keytab_help_raw)
     parser_a.add_argument('principals', help=ext_keytab_help_principals, nargs='*')
-    parser_a.set_defaults(func=kdc_ext_keytab, fname='ext_keytab')
+    parser_a.set_defaults(func='ext_keytab', fname='ext_keytab')
 
     # Process the command-line
     args = parser.parse_args()
     set_loglevel(args.verbosity)
     log(f"verbosity={args.verbosity}")
+    requests_verify = True
     if not args.api:
         err("Error, no API URL was provided.")
         sys.exit(-1)
     if args.noverify:
-        args.requests_verify = False
+        requests_verify = False
     elif args.cacert:
-        args.requests_verify = args.cacert
-    else:
-        args.requests_verify = True
+        requests_verify = args.cacert
     if args.kerberos:
         if args.clientcert:
             err("Error, we don't support clientcert + kerberos")
@@ -446,13 +468,12 @@ if __name__ == '__main__':
         if args.fname != 'ext_keytab':
             err("Error, we only support kerberos for 'ext_keytab'")
             sys.exit(-1)
+    requests_cert = False
     if args.clientcert:
         if args.clientkey:
-            args.requests_cert = (args.clientcert,args.clientkey)
+            requests_cert = (args.clientcert,args.clientkey)
         else:
-            args.requests_cert = args.clientcert
-    else:
-        args.requests_cert = False
+            requests_cert = args.clientcert
 
     # Dispatch. Here, we are operating as a program with a parent process, not
     # a library with a caller. If we don't catch exceptions, they get handled
@@ -460,7 +481,39 @@ if __name__ == '__main__':
     # no concept of the exceptions reaching the parent process. As such, catch
     # them all here.
     try:
-        result, j = args.func(args)
+        if args.func == 'add':
+            result, j = kdc_add(args.api, args.principals, args.profile,
+                                requests_verify = requests_verify,
+                                requests_cert = requests_cert,
+                                timeout = args.timeout)
+        elif args.func == 'add_ns':
+            result, j = kdc_add_ns(args.api, args.principals, args.profile,
+                                requests_verify = requests_verify,
+                                requests_cert = requests_cert,
+                                timeout = args.timeout)
+        elif args.func == 'get':
+            result, j = kdc_get(args.api, args.principals, args.profile,
+                                requests_verify = requests_verify,
+                                requests_cert = requests_cert,
+                                timeout = args.timeout)
+        elif args.func == 'del':
+            result, j = kdc_del(args.api, args.principals, args.profile,
+                                requests_verify = requests_verify,
+                                requests_cert = requests_cert,
+                                timeout = args.timeout)
+        elif args.func == 'del_ns':
+            result, j = kdc_del_ns(args.api, args.principals, args.profile,
+                                requests_verify = requests_verify,
+                                requests_cert = requests_cert,
+                                timeout = args.timeout)
+        elif args.func == 'ext_keytab':
+            result, j = kdc_ext_keytab(args.api, args.principals, args.kerberos,
+                                args.raw, args.profile,
+                                requests_verify = requests_verify,
+                                requests_cert = requests_cert,
+                                timeout = args.timeout)
+        else:
+            raise Exception("BUG")
     except Exception as e:
         print(f"Error, API failed: {e}", file = sys.stderr)
         sys.exit(-1)
