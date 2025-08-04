@@ -40,8 +40,9 @@ cat > $HCP_KDCSVC_STATE/etc/kdc.conf << EOF
 	enable_synthetic_clients = true
 	synthetic_clients_forwardable = true
 EOF
-if [[ ! -n $KRB5_CONFIG ]]; then
-	export KRB5_CONFIG=/etc/hcp/$HCP_ID/krb5.conf
+if [[ ! -f $KRB5_CONFIG ]]; then
+	echo "Error, no config file at '$KRB5_CONFIG'" >&2
+	exit 1
 fi
 cat $KRB5_CONFIG >> $HCP_KDCSVC_STATE/etc/kdc.conf
 

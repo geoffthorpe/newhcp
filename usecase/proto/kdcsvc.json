@@ -6,7 +6,7 @@
         }, {
             "tag": "local",
             "exec": "/hcp/kdcsvc/setup_local.sh",
-            "touchfile": "/etc/hcp/{id}/touch-kdcsvc-local-setup"
+            "touchfile": "/tmp/touch-kdcsvc-local-setup-{kdcsvc_realm}"
         } ],
     "state": "{kdcsvc_dir}",
     "mode": "{kdcsvc_mode}",
