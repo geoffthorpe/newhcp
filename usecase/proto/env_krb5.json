@@ -1,0 +1,3 @@
+{
+    "set": { "KRB5_CONFIG": "/assets/krb5.conf" }
+}
