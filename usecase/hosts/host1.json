@@ -1,10 +1,10 @@
 {
     "vars": {
         "id": "host1",
-        "services": [ "nada" ],
-        "default_targets": [ "start-services" ]
+        "services": [ "attester" ],
+        "default_targets": [ "start-attester", "start-services" ]
     },
-    "args_for": "nada",
+    "args_for": "attester",
 
     "scope": [
         { "load": ".defaults", "path": "/usecase/proto/defaults.json" },
@@ -12,7 +12,7 @@
         { "import": ".", "source": "." },
         { "vars": ".vars" },
         { "loadunion": ".", "path": "/usecase/proto/root.json" },
-        { "load": ".nada", "path": "/usecase/proto/do_nothing.json" },
+        { "load": ".attester", "path": "/usecase/proto/attester.json" },
         { "load": ".tpm", "path": "/usecase/proto/tpm_sidecar.json" }
     ],
 

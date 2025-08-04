@@ -8,6 +8,7 @@ import time
 from HcpCommon import log, bail, current_tracefile, hcp_config_extract
 
 _period = hcp_config_extract('.attester.period', must_exist = True)
+_tool = hcp_config_extract('.attester.tool', must_exist = True)
 _retry = hcp_config_extract('.attester.retry', or_default = True, default = _period)
 _until = hcp_config_extract('.attester.until', or_default = True)
 try:
@@ -17,7 +18,7 @@ except ValueError as e:
 	log(f"ERROR: .attester.{period,retry} ({_period},{_retry}) must be numbers")
 	log(f"{e}")
 	sys.exit(1)
-cmd_args = [ '/hcp/tools/run_attestclient.sh' ]
+cmd_args = _tool
 
 log(f"Starting attester")
 log(f" - period={period}")

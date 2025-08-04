@@ -1,0 +1,12 @@
+{
+    "exec": "/hcp/python/HcpSvcAttester.py",
+    "__TODO_healthcheck": null,
+    "tag": "{attester_tag}",
+    "period": "{attester_period}",
+    "retry": "{attester_retry}",
+    "tool": "{attester_tool}",
+    "api": "{attester_api}",
+    "verifier": "{attester_verifier}",
+    "assetdir": "{attester_assetdir}",
+    "cacert": "{attester_cacert}"
+}
