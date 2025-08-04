@@ -8,5 +8,6 @@
     "api": "{attester_api}",
     "verifier": "{attester_verifier}",
     "assetdir": "{attester_assetdir}",
-    "cacert": "{attester_cacert}"
+    "cacert": "{attester_cacert}",
+    "until": "{attester_assetdir}/touch"
 }
