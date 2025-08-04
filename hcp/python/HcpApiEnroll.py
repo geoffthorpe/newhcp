@@ -54,12 +54,6 @@ if os.environ.get('HCP_GSSAPI'):
         except ModuleNotFoundError:
             log("'requests-kerberos' unavailable, falling back to no authentication")
 
-# TODO: make this interface more import-friendly and less cmd-line-specific.
-# I.e. the enroll_*() functions tag an 'args' structure for all parameters,
-# direct from the argparse output. Should probably add an intermediate layer to
-# unpack those and pass the parameters into a more API-like interface for the
-# actual implementations.
-
 # This internal function is used as a wrapper to deal with exceptions and
 # retries. 'args' specifies whether retries' should be attempted and how many
 # times, how long to pause between those retries, etc. 'request_fn' is a
