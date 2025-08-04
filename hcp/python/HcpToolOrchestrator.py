@@ -15,6 +15,7 @@ from HcpCommon import bail, log, hlog, \
     hcp_config_scope_shrink
 from HcpRecursiveUnion import union
 import HcpApiEnroll
+from HcpJsonExpander import _load as expandload
 
 fleetconfpath = hcp_config_extract('.orchestrator.fleet', must_exist = True)
 if not os.path.isfile(fleetconfpath):
@@ -46,7 +47,7 @@ class FleetHost:
         if name not in fleet:
             raise Exception(f"Unknown fleet host '{name}'")
         self.name = name
-        self.profile = union(fleetdefaults, fleet[name])
+        self.profile = expandload(union(fleetdefaults, fleet[name]))
         self.api = self.profile['enroll_api']
         self.api_cacert = self.profile['enroll_api_cacert']
         self.api_clientcert = self.profile['enroll_api_clientcert'] \
