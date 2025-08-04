@@ -13,8 +13,6 @@ volumes:
     tpmsocket_kdc_primary:
     tpm_kdc_secondary:
     tpmsocket_kdc_secondary:
-    tpm_kdc_keytab:
-    tpmsocket_kdc_keytab:
     x1_kdc:
     x1_backdoor:
 
@@ -62,7 +60,6 @@ services:
           - tpm_host1:/tpm_host1
           - tpm_kdc_primary:/tpm_primary.kdc
           - tpm_kdc_secondary:/tpm_secondary.kdc
-          - tpm_kdc_keytab:/tpm_keytab.kdc
         environment:
           - HCP_CONFIG_FILE=/usecase/hosts/orchestrator.json
 
@@ -140,24 +137,6 @@ services:
           - tpmsocket_kdc_secondary:/tpmsocket_secondary.kdc
         environment:
           - HCP_CONFIG_FILE=/usecase/hosts/kdc_secondary.json
-
-    kdc_keytab:
-        extends: common_nontpm
-        hostname: keytab.kdc.hcphacking.xyz
-        volumes:
-          - tpmsocket_kdc_keytab:/tpmsocket_keytab.kdc
-          - ./_testcreds/enrollclient:/enrollclient:ro
-        environment:
-          - HCP_CONFIG_FILE=/usecase/hosts/kdc_keytab.json
-
-    kdc_keytab_tpm:
-        extends: common_tpm
-        hostname: kdc_keytab_tpm.hcphacking.xyz
-        volumes:
-          - tpm_kdc_keytab:/tpm_keytab.kdc
-          - tpmsocket_kdc_keytab:/tpmsocket_keytab.kdc
-        environment:
-          - HCP_CONFIG_FILE=/usecase/hosts/kdc_keytab.json
 
 #### X1 hosts
 

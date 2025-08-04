@@ -89,10 +89,6 @@
                     }
                 }
             }
-        },
-        "kdc_keytab": {
-            "vars": { "hostname": "keytab.kdc.hcphacking.xyz" },
-            "tpm_path": "/tpm_keytab.kdc"
         }
     }
 }

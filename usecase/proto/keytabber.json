@@ -1,9 +1,0 @@
-{
-    "exec": "/hcp/python/HcpSvcKeytabber.py",
-    "__TODO_healthcheck": null,
-    "until": "/etc/hcp/{id}/touch-keytabbed",
-    "nowait": 1,
-    "tag": "{keytabber_tag}",
-    "period": "{keytabber_period}",
-    "retry": "{keytabber_retry}"
-}
