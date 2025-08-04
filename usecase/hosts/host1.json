@@ -14,6 +14,6 @@
         { "loadunion": ".", "path": "/usecase/proto/root.json" },
         { "load": ".attester", "path": "/usecase/proto/attester.json" },
         { "load": ".tpm", "path": "/usecase/proto/tpm_sidecar.json" },
-	{ "loadunion": ".env", "path": "/usecase/proto/tpm2tools.json" }
+	{ "loadunion": ".env", "path": "/usecase/proto/env_tpm2tools.json" }
     ]
 }
