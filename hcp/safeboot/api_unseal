@@ -81,11 +81,11 @@ tmp=$(mktemp -d)
 	exit 1
 
 if [[ "x$signonly" == "xno" ]]; then
-	# TODO: what is the purpose of $input.policy in this unsealing
+	# TODO: what is the purpose of $input/policy in this unsealing
 	# process? Did we have a reason to write it in the first place?
 	tpm2-recv "$input/symkeyenc" \
 		"$tmp/symkey" \
-		tpm2 policypcr '--pcr-list=sha256:11'
+		tpm2 policypcr '--pcr-list=sha256:11' 2> /dev/null
 	aead_decrypt "$input/enc" \
 		"$tmp/symkey" \
 		"$tmp/output"
