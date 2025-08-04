@@ -5,6 +5,8 @@ version: "2.4"
 
 volumes:
     example:
+    tpm_alicia:
+    tpmsocket_alicia:
     tpm_host1:
     tpmsocket_host1:
     kdc_primary:
@@ -57,11 +59,29 @@ services:
         hostname: orchestrator.hcphacking.xyz
         volumes:
           - ./_testcreds/enrollclient:/enrollclient:ro
+          - tpm_alicia:/tpm_alicia
           - tpm_host1:/tpm_host1
           - tpm_kdc_primary:/tpm_primary.kdc
           - tpm_kdc_secondary:/tpm_secondary.kdc
         environment:
           - HCP_CONFIG_FILE=/usecase/hosts/orchestrator.json
+
+    alicia:
+        extends: common_nontpm
+        hostname: alicia.hcphacking.xyz
+        volumes:
+          - tpmsocket_alicia:/tpmsocket_alicia
+        environment:
+          - HCP_CONFIG_FILE=/usecase/hosts/alicia.json
+
+    alicia_tpm:
+        extends: common_tpm
+        hostname: alicia_tpm.hcphacking.xyz
+        volumes:
+          - tpm_alicia:/tpm_alicia
+          - tpmsocket_alicia:/tpmsocket_alicia
+        environment:
+          - HCP_CONFIG_FILE=/usecase/hosts/alicia.json
 
     host1:
         extends: common_nontpm

@@ -1,0 +1,24 @@
+{
+    "vars": {
+        "id": "alicia",
+        "services": [ "attester", "sshd" ],
+        "default_targets": [ "start-attester", "start-services" ],
+	"sshd_fqdn": "alicia.hcphacking.xyz",
+	"sshd_port": 22
+    },
+    "args_for": "attester",
+
+    "scope": [
+        { "load": ".defaults", "path": "/usecase/proto/defaults.json" },
+        { "vars": ".defaults" },
+        { "import": ".", "source": "." },
+        { "vars": ".vars" },
+        { "loadunion": ".", "path": "/usecase/proto/root.json" },
+        { "load": ".attester", "path": "/usecase/proto/attester.json" },
+        { "load": ".sshd", "path": "/usecase/proto/sshd.json" },
+        { "load": ".tpm", "path": "/usecase/proto/tpm_sidecar.json" },
+	{ "loadunion": ".env", "path": "/usecase/proto/env_tpm2tools.json" },
+	{ "loadunion": ".env", "path": "/usecase/proto/env_krb5.json" },
+	{ "loadunion": ".env", "path": "/usecase/proto/env_sshd.json" }
+    ]
+}

@@ -59,6 +59,13 @@
         }
     },
     "fleet": {
+        "alicia": {
+            "vars": { "hostname": "alicia.hcphacking.xyz" },
+            "tpm_path": "/tpm_alicia",
+            "enroll_profile": {
+                "pkinit-clients": [ "alicia" ]
+            }
+        },
         "host1": {
             "vars": { "hostname": "host1.hcphacking.xyz" },
             "tpm_path": "/tpm_host1"
