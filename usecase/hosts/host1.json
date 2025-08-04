@@ -13,10 +13,7 @@
         { "vars": ".vars" },
         { "loadunion": ".", "path": "/usecase/proto/root.json" },
         { "load": ".attester", "path": "/usecase/proto/attester.json" },
-        { "load": ".tpm", "path": "/usecase/proto/tpm_sidecar.json" }
-    ],
-
-    "env": {
-        "set": { "TPM2TOOLS_TCTI": "swtpm:path=/tpmsocket_host1/tpm" }
-    }
+        { "load": ".tpm", "path": "/usecase/proto/tpm_sidecar.json" },
+	{ "loadunion": ".env", "path": "/usecase/proto/tpm2tools.json" }
+    ]
 }

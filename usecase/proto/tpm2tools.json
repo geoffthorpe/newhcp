@@ -1,0 +1,3 @@
+{
+    "set": { "TPM2TOOLS_TCTI": "swtpm:path=/tpmsocket_{id}/tpm" }
+}
