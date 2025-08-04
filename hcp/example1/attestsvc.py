@@ -100,6 +100,20 @@ def my_get_assets(ekpubhash, outdir):
                 add_secret(enrollpath, f"{tempdir}/pkinit-kdc-{realm}.pem",
                            f"{outdir}/pkinit-kdc-{realm}.pem")
                 result.append([f"pkinit-kdc-{realm}.pem", False])
+            elif certtype == 'pkinit-iprop':
+                if not realm:
+                    raise Exception("No realm for pkinit-iprop")
+                cmd = hxcmd.copy() + \
+                    [ '--type=pkinit-client',
+                      f"--pk-init-principal=iprop/{hostname}@{realm}",
+                      f"--subject=CN=iprop",
+                      f"--certificate=FILE:{tempdir}/pkinit-iprop-{realm}.pem" ]
+                c = subprocess.run(cmd)
+                if c.returncode != 0:
+                    raise Exception(f"hxtool failed: {cmd}")
+                add_secret(enrollpath, f"{tempdir}/pkinit-iprop-{realm}.pem",
+                           f"{outdir}/pkinit-iprop-{realm}.pem")
+                result.append([f"pkinit-iprop-{realm}.pem", False])
             else:
                 raise Exception(f"unrecognized certtype: {certtype}")
         if krb5conf:
@@ -122,6 +136,16 @@ def my_get_assets(ekpubhash, outdir):
                                 fp.write(f"    {key} = {i}\n")
                         else:
                             raise Exception(f"unhandled value type: {type(v)}")
+                if 'realms' in krb5conf:
+                    section = krb5conf['realms']
+                    if isinstance(section, dict) and len(section) > 0:
+                        fp.write('[realms]\n')
+                        for realm in section:
+                            fp.write(f"    {realm} = {{\n")
+                            realmvals = section[realm]
+                            for key in realmvals:
+                                fp.write(f"        {key} = {realmvals[key]}\n")
+                            fp.write('    }\n')
             add_public(enrollpath, f"{tempdir}/krb5.conf",
                        f"{outdir}/krb5.conf")
             result.append([f"krb5.conf", True])
