@@ -61,7 +61,7 @@ def my_get_assets(ekpubhash, outdir):
         if ktgen:
             ktgenapi = ktgen.pop('api')
         hxcmd = ['hxtool', 'issue-certificate',
-                   '--ca-certificate=FILE:/caprivate/CA.pem']
+                   '--ca-certificate=FILE:/ca_root_private/CA.pem']
         hxcmd.append('--lifetime=' + str(profile['lifetime'] if 'lifetime' in profile else '1d'))
         hxcmd.append('--generate-key=' + (profile['key-type'] if 'key-type' in profile else 'rsa'))
         hxcmd.append('--key-bits=' + str(profile['key-bits'] if 'key-bits' in profile else '2048'))

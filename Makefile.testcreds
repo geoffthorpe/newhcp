@@ -2,10 +2,10 @@
 
 TESTCREDS_OUT := $(TOP)/_testcreds
 TESTCREDS_DONE :=
-TESTCREDS_CAPRIVATE := $(TESTCREDS_OUT)/caprivate
-TESTCREDS_DONE += $(TESTCREDS_CAPRIVATE)/CA.cert
-TESTCREDS_CAPUBLIC := $(TESTCREDS_OUT)/capublic
-TESTCREDS_DONE += $(TESTCREDS_CAPUBLIC)/CA.cert
+TESTCREDS_CA_ROOT_PRIVATE := $(TESTCREDS_OUT)/ca_root_private
+TESTCREDS_DONE += $(TESTCREDS_CA_ROOT_PRIVATE)/CA.cert
+TESTCREDS_CA_ROOT := $(TESTCREDS_OUT)/ca_root
+TESTCREDS_DONE += $(TESTCREDS_CA_ROOT)/CA.cert
 TESTCREDS_ENROLLSVC := $(TESTCREDS_OUT)/enrollsvc
 TESTCREDS_DONE += $(TESTCREDS_ENROLLSVC)/server.pem
 TESTCREDS_ATTESTSVC := $(TESTCREDS_OUT)/attestsvc
@@ -21,8 +21,8 @@ TESTCREDS_DONE += $(TESTCREDS_ENROLLHEALTHCLIENT)/client.pem
 TESTCREDS_ATTESTNONCER := $(TESTCREDS_OUT)/attestnoncer
 TESTCREDS_DONE += $(TESTCREDS_ATTESTNONCER)/key
 TESTCREDS_CHILDREN := \
-	$(TESTCREDS_CAPRIVATE) \
-	$(TESTCREDS_CAPUBLIC) \
+	$(TESTCREDS_CA_ROOT_PRIVATE) \
+	$(TESTCREDS_CA_ROOT) \
 	$(TESTCREDS_ENROLLSVC) \
 	$(TESTCREDS_ATTESTSVC) \
 	$(TESTCREDS_ASSETSIGNER) \
@@ -34,30 +34,30 @@ $(TESTCREDS_CHILDREN): | $(TESTCREDS_OUT)
 $(TESTCREDS_OUT) $(TESTCREDS_CHILDREN):
 	$Qmkdir $@
 
-$(TESTCREDS_CAPRIVATE)/CA.cert: | $(TESTCREDS_CAPRIVATE)
-	$Qcd $(TESTCREDS_CAPRIVATE) && \
+$(TESTCREDS_CA_ROOT_PRIVATE)/CA.cert: | $(TESTCREDS_CA_ROOT_PRIVATE)
+	$Qcd $(TESTCREDS_CA_ROOT_PRIVATE) && \
 		hxtool issue-certificate --self-signed --issue-ca \
 		--generate-key=rsa --subject="CN=CA,DC=hcphacking,DC=xyz" \
 		--lifetime=10years --certificate="FILE:CA.pem" && \
 		openssl x509 -in CA.pem -outform PEM -out "CA.cert"
-$(TESTCREDS_CAPUBLIC)/CA.cert: | $(TESTCREDS_CAPUBLIC)
-$(TESTCREDS_CAPUBLIC)/CA.cert: $(TESTCREDS_CAPRIVATE)/CA.cert
+$(TESTCREDS_CA_ROOT)/CA.cert: | $(TESTCREDS_CA_ROOT)
+$(TESTCREDS_CA_ROOT)/CA.cert: $(TESTCREDS_CA_ROOT_PRIVATE)/CA.cert
 	$Qcp $< $@
 $(TESTCREDS_ENROLLSVC)/server.pem: | $(TESTCREDS_ENROLLSVC)
-$(TESTCREDS_ENROLLSVC)/server.pem: $(TESTCREDS_CAPRIVATE)/CA.cert
+$(TESTCREDS_ENROLLSVC)/server.pem: $(TESTCREDS_CA_ROOT_PRIVATE)/CA.cert
 	$Qcd $(TESTCREDS_ENROLLSVC) && \
 		hxtool issue-certificate \
-		--ca-certificate="FILE:$(TESTCREDS_CAPRIVATE)/CA.pem" \
+		--ca-certificate="FILE:$(TESTCREDS_CA_ROOT_PRIVATE)/CA.pem" \
 		--type=https-server \
 		--hostname="enrollsvc.hcphacking.xyz" \
 		--subject="UID=emgmt,DC=hcphacking,DC=xyz" \
 		--generate-key=rsa --key-bits=2048 \
 		--certificate="FILE:server.pem"
 $(TESTCREDS_ATTESTSVC)/server.pem: | $(TESTCREDS_ATTESTSVC)
-$(TESTCREDS_ATTESTSVC)/server.pem: $(TESTCREDS_CAPRIVATE)/CA.cert
+$(TESTCREDS_ATTESTSVC)/server.pem: $(TESTCREDS_CA_ROOT_PRIVATE)/CA.cert
 	$Qcd $(TESTCREDS_ATTESTSVC) && \
 		hxtool issue-certificate \
-		--ca-certificate="FILE:$(TESTCREDS_CAPRIVATE)/CA.pem" \
+		--ca-certificate="FILE:$(TESTCREDS_CA_ROOT_PRIVATE)/CA.pem" \
 		--type=https-server \
 		--hostname="attestsvc.hcphacking.xyz" \
 		--subject="UID=emgmt,DC=hcphacking,DC=xyz" \
@@ -71,10 +71,10 @@ $(TESTCREDS_ASSETVERIFIER)/key.pem: | $(TESTCREDS_ASSETVERIFIER)
 $(TESTCREDS_ASSETVERIFIER)/key.pem: $(TESTCREDS_ASSETSIGNER)/key.pem
 	$Qcp $< $@
 $(TESTCREDS_ENROLLCLIENT)/client.pem: | $(TESTCREDS_ENROLLCLIENT)
-$(TESTCREDS_ENROLLCLIENT)/client.pem: $(TESTCREDS_CAPRIVATE)/CA.cert
+$(TESTCREDS_ENROLLCLIENT)/client.pem: $(TESTCREDS_CA_ROOT_PRIVATE)/CA.cert
 	$Qcd $(TESTCREDS_ENROLLCLIENT) && \
 		hxtool issue-certificate \
-		--ca-certificate="FILE:$(TESTCREDS_CAPRIVATE)/CA.pem" \
+		--ca-certificate="FILE:$(TESTCREDS_CA_ROOT_PRIVATE)/CA.pem" \
 		--type=https-client \
 		--hostname="orchestrator.hcphacking.xyz" \
 		--subject="UID=orchestrator,DC=hcphacking,DC=xyz" \
@@ -82,10 +82,10 @@ $(TESTCREDS_ENROLLCLIENT)/client.pem: $(TESTCREDS_CAPRIVATE)/CA.cert
 		--generate-key=rsa --key-bits=2048 \
 		--certificate="FILE:client.pem"
 $(TESTCREDS_ENROLLHEALTHCLIENT)/client.pem: | $(TESTCREDS_ENROLLHEALTHCLIENT)
-$(TESTCREDS_ENROLLHEALTHCLIENT)/client.pem: $(TESTCREDS_CAPRIVATE)/CA.cert
+$(TESTCREDS_ENROLLHEALTHCLIENT)/client.pem: $(TESTCREDS_CA_ROOT_PRIVATE)/CA.cert
 	$Qcd $(TESTCREDS_ENROLLHEALTHCLIENT) && \
 		hxtool issue-certificate \
-		--ca-certificate="FILE:$(TESTCREDS_CAPRIVATE)/CA.pem" \
+		--ca-certificate="FILE:$(TESTCREDS_CA_ROOT_PRIVATE)/CA.pem" \
 		--type=https-client \
 		--hostname="orchestrator.hcphacking.xyz" \
 		--subject="UID=healthclient,DC=hcphacking,DC=xyz" \
