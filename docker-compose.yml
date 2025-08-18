@@ -55,7 +55,7 @@ services:
           - hcpnetwork
         volumes:
           - ./_testcreds/capublic:/capublic:ro
-          - ./_testcreds/enrollverifier:/enrollverifier:ro
+          - ./_testcreds/assetverifier:/assetverifier:ro
           - ./_testcreds/enrollhealthclient:/enrollhealthclient:ro
 
     orchestrator:
@@ -88,7 +88,7 @@ services:
           - example:/example
           - ./_testcreds/attestsvc:/attestsvc:ro
           - ./_testcreds/attestnoncer:/attestnoncer:ro
-          - ./_testcreds/enrollsigner:/enrollsigner:ro
+          - ./_testcreds/assetsigner:/assetsigner:ro
           - ./_testcreds/enrollclient:/enrollclient:ro
           - ./_testcreds/caprivate:/caprivate:ro
         environment:

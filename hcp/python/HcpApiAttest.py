@@ -218,7 +218,7 @@ def attest_unseal(bundle, output, callback = None):
             return False
         if not sr(['/hcp/safeboot/api_unseal',
                    '-s',
-                   '/enrollverifier/key.pem',
+                   '/assetverifier/key.pem',
                    f"{tempdir}/manifest",
                    f"{output}/manifest"]):
             err("Error, failed to verify the manifest")
@@ -238,13 +238,13 @@ def attest_unseal(bundle, output, callback = None):
                     err(f"Error, encrypted asset incomplete ({d})")
                     return False
                 if not sr(['/hcp/safeboot/api_unseal',
-                           '/enrollverifier/key.pem',
+                           '/assetverifier/key.pem',
                            f"{tempdir}/{d}",
                            f"{output}/{d}.tmp"]):
                     return False
             else:
                 if not sr(['/hcp/safeboot/api_unseal', '-s',
-                           '/enrollverifier/key.pem',
+                           '/assetverifier/key.pem',
                            f"{tempdir}/{d}",
                            f"{output}/{d}.tmp"]):
                     return False
