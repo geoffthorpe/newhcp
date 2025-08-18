@@ -1,10 +1,12 @@
 {
     "setup": { "touchfile": "/tmp/touch-kdcsvc-local-setup-{kdcsvc_realm}" },
-    "exec": "/install-heimdal/libexec/kdc",
-	"__TODO_healthcheck": null,
+    "exec": "/hcp/python/HcpSvcRestarter.py",
+    "__TODO_healthcheck": null,
     "args": [
-    	"--config-file={kdcsvc_dir}/etc/kdc.conf",
-	"--ports={kdcsvc_TGS_port}"
+        "-t", "0",
+        "/install-heimdal/libexec/kdc",
+        "--config-file={kdcsvc_dir}/etc/kdc.conf",
+        "--ports={kdcsvc_TGS_port}"
     ],
     "tag": "{kdcsvc_TGS_tag}"
 }
