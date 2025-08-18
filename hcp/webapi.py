@@ -171,11 +171,10 @@ if myhttps:
                     'on' if myauthentication == 'kerberos' else 'off')) > 0:
                 pass
     if myauthentication == 'kerberos':
-        keytab = f"/etc/krb5.HTTP.{myservername}.keytab"
+        # TBD: this should be configurable!
+        keytab = f"/assets/keytab-http"
         if not os.path.exists(keytab):
             h.bail(f"FAIL: keytab ({keytab}) doesn't exist")
-        subprocess.run([ 'chgrp', 'www-data', keytab])
-        subprocess.run([ 'chmod', '0640', keytab])
     # Create log directory
     h.hlog(1, f"Creating nginx log dir: {lognginx}")
     os.makedirs(lognginx, exist_ok = True)
