@@ -1,0 +1,4 @@
+{
+    "set": { "KRB5_KTNAME": "/assets/keytab-http" }
+}
+
