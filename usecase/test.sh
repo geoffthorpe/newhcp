@@ -82,12 +82,12 @@ do_run up shell shell_tpm alicia alicia_tpm
 
 # Now we can't cheat, we have to wait. NB, by waiting for sshd launch, we
 # implicitly wait for attestation.
-echo "Waiting for shell to be attested and sshd running"
-do_run exec shell \
-	/hcp/python/HcpToolWaitTouchfile.py /run/sshd/started
 echo "Waiting for alicia to be attested"
 do_run exec alicia \
 	/hcp/python/HcpToolWaitTouchfile.py /assets/pkinit-client-alicia.pem
+echo "Waiting for shell to be attested and sshd running"
+do_run exec shell \
+	/hcp/python/HcpToolWaitTouchfile.py /run/sshd/started
 
 # The next little blob of script requires some explanation.
 # - we start a bash instance on 'alicia' and feed commands to it.
