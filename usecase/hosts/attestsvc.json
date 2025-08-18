@@ -7,7 +7,7 @@
         "webapi_fqdn": "attestsvc.hcphacking.xyz",
         "webapi_port": 443,
         "webapi_https_authentication": "none",
-        "webapi_https_certificate": "/attestserver/server.pem"
+        "webapi_https_certificate": "/attestsvc/server.pem"
     },
     "args_for": "attestsvc",
 

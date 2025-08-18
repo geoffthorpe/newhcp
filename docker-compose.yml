@@ -77,7 +77,7 @@ services:
         hostname: enrollsvc.hcphacking.xyz
         volumes:
           - example:/example
-          - ./_testcreds/enrollserver:/enrollserver:ro
+          - ./_testcreds/enrollsvc:/enrollsvc:ro
         environment:
           - HCP_CONFIG_FILE=/usecase/hosts/enrollsvc.json
 
@@ -86,7 +86,7 @@ services:
         hostname: attestsvc.hcphacking.xyz
         volumes:
           - example:/example
-          - ./_testcreds/attestserver:/attestserver:ro
+          - ./_testcreds/attestsvc:/attestsvc:ro
           - ./_testcreds/attestnoncer:/attestnoncer:ro
           - ./_testcreds/enrollsigner:/enrollsigner:ro
           - ./_testcreds/enrollclient:/enrollclient:ro
