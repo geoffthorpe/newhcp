@@ -248,15 +248,20 @@ def attest_unseal(bundle, output, callback = None):
                            f"{tempdir}/{d}",
                            f"{output}/{d}.tmp"]):
                     return False
-            if callback:
-                if not os.path.isfile(f"{output}/{d}") or \
+            notify = callback and (not os.path.isfile(f"{output}/{d}") or \
                     not filecmp.cmp(f"{output}/{d}", f"{output}/{d}.tmp",
-                                    shallow = False):
-                    c = subprocess.run([callback, d], cwd = output)
-                    if c.returncode != 0:
-                        err(f"Error, callback failed ({d})")
-                        return False
+                                    shallow = False))
+            if notify:
+                c = subprocess.run([callback, 'pre', d, f"{d}.tmp"], cwd = output)
+                if c.returncode != 0:
+                    err(f"Error, pre callback failed ({d})")
+                    return False
             shutil.move(f"{output}/{d}.tmp", f"{output}/{d}")
+            if notify:
+                c = subprocess.run([callback, 'post', d, d], cwd = output)
+                if c.returncode != 0:
+                    err(f"Error, post callback failed ({d})")
+                    return False
             log(f"Unsealed asset: {d}")
     return True
 
@@ -361,7 +366,19 @@ if __name__ == '__main__':
     that was returned from the Attestation Service. If '--callback' is used to set
     an update callback, it will be invoked each and every time an asset is unbundled
     and is not replacing an identical existing asset. This hook can be used to
-    restart or HUP services that need to re-read asset inputs.
+    restart or HUP services that need to re-read asset inputs. It will be invoked two
+    times, with the following arguments;
+
+    callback  <pre|post> <asset-name> <file>
+
+    The first time the callback is invoked (with 'pre'), <file> will refer to a
+    temporary instance of the file before it is moved into place. The second
+    time the callback is invoked (with 'post'), <file> will refer to the file
+    once it has been moved into place. The former provides an opportunity for
+    making necessary changes to the file before it can be consumed by its
+    application/service, such as changing file-ownership. The latter provides
+    an opportunity to notify apps/services that consume the asset that they can
+    now reload the asset.
     """
     unseal_help_callback = 'callback to invoke on assets that change'
     unseal_help_verifier = 'path to public key for signature-verification'
