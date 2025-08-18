@@ -39,7 +39,7 @@
 
     "example1": {
         "_": "The hooks in hcp/example1/attestsvc will consume these.",
-        "cacert": "/enrollcertchecker/CA.cert",
+        "cacert": "/capublic/CA.cert",
         "clientcert": "/enrollclient/client.pem"
     }
 }
