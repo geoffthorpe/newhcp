@@ -86,9 +86,9 @@
                 }
             }
         },
-        "host1": {
-            "vars": { "hostname": "host1.hcphacking.xyz" },
-            "tpm_path": "/tpm_host1"
+        "shell": {
+            "vars": { "hostname": "shell.hcphacking.xyz" },
+            "tpm_path": "/tpm_shell"
         },
         "alicia": {
             "vars": { "hostname": "alicia.hcphacking.xyz" },

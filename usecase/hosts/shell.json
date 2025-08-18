@@ -1,9 +1,9 @@
 {
     "vars": {
-        "id": "host1",
+        "id": "shell",
         "services": [ "attester", "sshd" ],
         "default_targets": [ "start-attester", "start-services" ],
-	"sshd_fqdn": "host1.hcphacking.xyz",
+	"sshd_fqdn": "shell.hcphacking.xyz",
 	"sshd_port": 22
     },
     "args_for": "attester",

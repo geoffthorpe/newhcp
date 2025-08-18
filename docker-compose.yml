@@ -11,8 +11,8 @@ volumes:
     tpmsocket_kdc_primary:
     tpm_kdc_secondary:
     tpmsocket_kdc_secondary:
-    tpm_host1:
-    tpmsocket_host1:
+    tpm_shell:
+    tpmsocket_shell:
     tpm_alicia:
     tpmsocket_alicia:
     tpm_auth_certificate:
@@ -65,7 +65,7 @@ services:
           - ./_testcreds/enrollclient:/enrollclient:ro
           - tpm_kdc_primary:/tpm_primary.kdc
           - tpm_kdc_secondary:/tpm_secondary.kdc
-          - tpm_host1:/tpm_host1
+          - tpm_shell:/tpm_shell
           - tpm_alicia:/tpm_alicia
           - tpm_auth_certificate:/tpm_auth_certificate
           - tpm_auth_kerberos:/tpm_auth_kerberos
@@ -130,22 +130,22 @@ services:
         environment:
           - HCP_CONFIG_FILE=/usecase/hosts/kdc_secondary.json
 
-    host1:
+    shell:
         extends: common_nontpm
-        hostname: host1.hcphacking.xyz
+        hostname: shell.hcphacking.xyz
         volumes:
-          - tpmsocket_host1:/tpmsocket_host1
+          - tpmsocket_shell:/tpmsocket_shell
         environment:
-          - HCP_CONFIG_FILE=/usecase/hosts/host1.json
+          - HCP_CONFIG_FILE=/usecase/hosts/shell.json
 
-    host1_tpm:
+    shell_tpm:
         extends: common_tpm
-        hostname: host1_tpm.hcphacking.xyz
+        hostname: shell_tpm.hcphacking.xyz
         volumes:
-          - tpm_host1:/tpm_host1
-          - tpmsocket_host1:/tpmsocket_host1
+          - tpm_shell:/tpm_shell
+          - tpmsocket_shell:/tpmsocket_shell
         environment:
-          - HCP_CONFIG_FILE=/usecase/hosts/host1.json
+          - HCP_CONFIG_FILE=/usecase/hosts/shell.json
 
     alicia:
         extends: common_nontpm

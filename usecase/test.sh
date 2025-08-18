@@ -78,12 +78,12 @@ echo "Enrolling the other TPMs"
 do_run run orchestrator -e
 
 echo "Starting other hosts"
-do_run up host1 host1_tpm alicia alicia_tpm
+do_run up shell shell_tpm alicia alicia_tpm
 
 # Now we can't cheat, we have to wait. NB, by waiting for sshd launch, we
 # implicitly wait for attestation.
-echo "Waiting for host1 to be attested and sshd running"
-do_run exec host1 \
+echo "Waiting for shell to be attested and sshd running"
+do_run exec shell \
 	/hcp/python/HcpToolWaitTouchfile.py /run/sshd/started
 echo "Waiting for alicia to be attested"
 do_run exec alicia \
@@ -99,25 +99,25 @@ do_run exec alicia \
 #       running.
 #     - kinit will reauthenticate over time, as required to update the TGT,
 #       using newer client certs as they get updated by attestation.
-#     - the subcommand run by kinit is an ssh connection to 'host1';
+#     - the subcommand run by kinit is an ssh connection to 'shell';
 #       - the ssh-connection authenticates automatically using the TGT in
 #         kinit, hence SSO.
-#       - once authenticated, the ssh connection starts a bash shell on 'host1'
+#       - once authenticated, the ssh connection starts a bash shell on 'shell'
 #         and we feed commands to it.
 #         - Run 'hostname', the output will return through the ssh shell.
 # - pass the output through 'xargs' (a trick to strip whitespace)
-# - we confirm that all of the above generated "host1.hcphacking.xyz".
+# - we confirm that all of the above generated "shell.hcphacking.xyz".
 echo "Running an SSO ssh session to confirm all is well"
 result=$(do_run execT alicia bash <<EOF
 source /hcp/common/hcp.sh
 kinit -C FILE:/assets/pkinit-client-alicia.pem alicia \
-	ssh -l alicia host1.hcphacking.xyz bash <<DONE
+	ssh -l alicia shell.hcphacking.xyz bash <<DONE
 hostname
 DONE
 EOF
 )
 result=$(echo $result|xargs)
-if [[ $result != 'host1.hcphacking.xyz' ]]; then
+if [[ $result != 'shell.hcphacking.xyz' ]]; then
 	echo "Error, unexpected output: $result" >&2
 	exit 1
 fi
