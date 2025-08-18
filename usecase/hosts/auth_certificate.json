@@ -1,0 +1,27 @@
+{
+    "vars": {
+        "id": "auth_certificate",
+        "services": [ "attester", "webapi" ],
+        "default_targets": [ "start-attester", "start-services" ],
+        "webapi_app": "/hcp/python/HcpFlaskDummy.py",
+        "webapi_fqdn": "certificate.auth.hcphacking.xyz",
+        "webapi_port": 443,
+        "webapi_https_certificate": "/assets/https-server-certificate.auth.hcphacking.xyz.pem",
+        "webapi_https_authentication": "clientcert",
+        "webapi_setup": { "touchfile": "/assets/https-server-certificate.auth.hcphacking.xyz.pem" }
+    },
+    "args_for": "attester",
+
+    "scope": [
+        { "load": ".defaults", "path": "/usecase/proto/defaults.json" },
+        { "vars": ".defaults" },
+        { "import": ".", "source": "." },
+        { "vars": ".vars" },
+        { "loadunion": ".", "path": "/usecase/proto/root.json" },
+        { "load": ".attester", "path": "/usecase/proto/attester.json" },
+        { "load": ".webapi", "path": "/usecase/proto/webapi.json" },
+        { "load": ".tpm", "path": "/usecase/proto/tpm_sidecar.json" },
+	{ "loadunion": ".env", "path": "/usecase/proto/env_tpm2tools.json" },
+	{ "loadunion": ".env", "path": "/usecase/proto/env_krb5.json" }
+    ]
+}

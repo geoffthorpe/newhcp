@@ -5,16 +5,20 @@ version: "2.4"
 
 volumes:
     example:
-    tpm_alicia:
-    tpmsocket_alicia:
-    tpm_host1:
-    tpmsocket_host1:
     kdc_primary:
     kdc_secondary:
     tpm_kdc_primary:
     tpmsocket_kdc_primary:
     tpm_kdc_secondary:
     tpmsocket_kdc_secondary:
+    tpm_host1:
+    tpmsocket_host1:
+    tpm_alicia:
+    tpmsocket_alicia:
+    tpm_auth_certificate:
+    tpmsocket_auth_certificate:
+    tpm_auth_kerberos:
+    tpmsocket_auth_kerberos:
     x1_kdc:
     x1_backdoor:
 
@@ -59,46 +63,14 @@ services:
         hostname: orchestrator.hcphacking.xyz
         volumes:
           - ./_testcreds/enrollclient:/enrollclient:ro
-          - tpm_alicia:/tpm_alicia
-          - tpm_host1:/tpm_host1
           - tpm_kdc_primary:/tpm_primary.kdc
           - tpm_kdc_secondary:/tpm_secondary.kdc
+          - tpm_host1:/tpm_host1
+          - tpm_alicia:/tpm_alicia
+          - tpm_auth_certificate:/tpm_auth_certificate
+          - tpm_auth_kerberos:/tpm_auth_kerberos
         environment:
           - HCP_CONFIG_FILE=/usecase/hosts/orchestrator.json
-
-    alicia:
-        extends: common_nontpm
-        hostname: alicia.hcphacking.xyz
-        volumes:
-          - tpmsocket_alicia:/tpmsocket_alicia
-        environment:
-          - HCP_CONFIG_FILE=/usecase/hosts/alicia.json
-
-    alicia_tpm:
-        extends: common_tpm
-        hostname: alicia_tpm.hcphacking.xyz
-        volumes:
-          - tpm_alicia:/tpm_alicia
-          - tpmsocket_alicia:/tpmsocket_alicia
-        environment:
-          - HCP_CONFIG_FILE=/usecase/hosts/alicia.json
-
-    host1:
-        extends: common_nontpm
-        hostname: host1.hcphacking.xyz
-        volumes:
-          - tpmsocket_host1:/tpmsocket_host1
-        environment:
-          - HCP_CONFIG_FILE=/usecase/hosts/host1.json
-
-    host1_tpm:
-        extends: common_tpm
-        hostname: host1_tpm.hcphacking.xyz
-        volumes:
-          - tpm_host1:/tpm_host1
-          - tpmsocket_host1:/tpmsocket_host1
-        environment:
-          - HCP_CONFIG_FILE=/usecase/hosts/host1.json
 
     enrollsvc:
         extends: common_nontpm
@@ -157,6 +129,74 @@ services:
           - tpmsocket_kdc_secondary:/tpmsocket_secondary.kdc
         environment:
           - HCP_CONFIG_FILE=/usecase/hosts/kdc_secondary.json
+
+    host1:
+        extends: common_nontpm
+        hostname: host1.hcphacking.xyz
+        volumes:
+          - tpmsocket_host1:/tpmsocket_host1
+        environment:
+          - HCP_CONFIG_FILE=/usecase/hosts/host1.json
+
+    host1_tpm:
+        extends: common_tpm
+        hostname: host1_tpm.hcphacking.xyz
+        volumes:
+          - tpm_host1:/tpm_host1
+          - tpmsocket_host1:/tpmsocket_host1
+        environment:
+          - HCP_CONFIG_FILE=/usecase/hosts/host1.json
+
+    alicia:
+        extends: common_nontpm
+        hostname: alicia.hcphacking.xyz
+        volumes:
+          - tpmsocket_alicia:/tpmsocket_alicia
+        environment:
+          - HCP_CONFIG_FILE=/usecase/hosts/alicia.json
+
+    alicia_tpm:
+        extends: common_tpm
+        hostname: alicia_tpm.hcphacking.xyz
+        volumes:
+          - tpm_alicia:/tpm_alicia
+          - tpmsocket_alicia:/tpmsocket_alicia
+        environment:
+          - HCP_CONFIG_FILE=/usecase/hosts/alicia.json
+
+    auth_certificate:
+        extends: common_nontpm
+        hostname: certificate.auth.hcphacking.xyz
+        volumes:
+          - tpmsocket_auth_certificate:/tpmsocket_auth_certificate
+        environment:
+          - HCP_CONFIG_FILE=/usecase/hosts/auth_certificate.json
+
+    auth_certificate_tpm:
+        extends: common_tpm
+        hostname: auth_certificate_tpm.hcphacking.xyz
+        volumes:
+          - tpm_auth_certificate:/tpm_auth_certificate
+          - tpmsocket_auth_certificate:/tpmsocket_auth_certificate
+        environment:
+          - HCP_CONFIG_FILE=/usecase/hosts/auth_certificate.json
+
+    auth_kerberos:
+        extends: common_nontpm
+        hostname: kerberos.auth.hcphacking.xyz
+        volumes:
+          - tpmsocket_auth_kerberos:/tpmsocket_auth_kerberos
+        environment:
+          - HCP_CONFIG_FILE=/usecase/hosts/auth_kerberos.json
+
+    auth_kerberos_tpm:
+        extends: common_tpm
+        hostname: auth_kerberos_tpm.hcphacking.xyz
+        volumes:
+          - tpm_auth_kerberos:/tpm_auth_kerberos
+          - tpmsocket_auth_kerberos:/tpmsocket_auth_kerberos
+        environment:
+          - HCP_CONFIG_FILE=/usecase/hosts/auth_kerberos.json
 
 #### X1 hosts
 

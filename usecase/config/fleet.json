@@ -59,17 +59,6 @@
         }
     },
     "fleet": {
-        "alicia": {
-            "vars": { "hostname": "alicia.hcphacking.xyz" },
-            "tpm_path": "/tpm_alicia",
-            "enroll_profile": {
-                "pkinit-clients": [ "alicia" ]
-            }
-        },
-        "host1": {
-            "vars": { "hostname": "host1.hcphacking.xyz" },
-            "tpm_path": "/tpm_host1"
-        },
         "kdc_primary": {
             "vars": { "hostname": "primary.kdc.hcphacking.xyz" },
             "tpm_path": "/tpm_primary.kdc",
@@ -94,6 +83,30 @@
                             "kdc": "primary.kdc.hcphacking.xyz:3089"
                         }
                     }
+                }
+            }
+        },
+        "host1": {
+            "vars": { "hostname": "host1.hcphacking.xyz" },
+            "tpm_path": "/tpm_host1"
+        },
+        "alicia": {
+            "vars": { "hostname": "alicia.hcphacking.xyz" },
+            "tpm_path": "/tpm_alicia",
+            "enroll_profile": {
+                "pkinit-clients": [ "alicia" ]
+            }
+        },
+        "auth_certificate": {
+            "vars": { "hostname": "certificate.auth.hcphacking.xyz" },
+            "tpm_path": "/tpm_auth_certificate"
+        },
+        "auth_kerberos": {
+            "vars": { "hostname": "kerberos.auth.hcphacking.xyz" },
+            "tpm_path": "/tpm_auth_kerberos",
+            "enroll_profile": {
+                "ktgen": {
+                    "http": [ "HTTP/{hostname}" ]
                 }
             }
         }

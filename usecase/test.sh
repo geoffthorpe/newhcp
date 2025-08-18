@@ -18,6 +18,7 @@ do_run() {
 	_command=$1
 	shift
 	BACKQ=$Q
+	BACKOUT=$OUT
 	if [[ $_command == "up" ]]; then
 		FLAGS="$FLAGS -d"
 	elif [[ $_command == "run" ]]; then
@@ -30,6 +31,7 @@ do_run() {
 		_command="exec"
 		FLAGS="$FLAGS -T"
 		Q=yes
+		OUT=/dev/stdout
 	else
 		echo "Error: unknown cmd: $_command" >&2
 		exit 1
@@ -40,6 +42,7 @@ do_run() {
 		([[ -n $Q ]] || echo "--> SUCCESS") || \
 		exit 1
 	Q=$BACKQ
+	OUT=$BACKOUT
 }
 
 do_exit() {
@@ -118,5 +121,9 @@ if [[ $result != 'host1.hcphacking.xyz' ]]; then
 	echo "Error, unexpected output: $result" >&2
 	exit 1
 fi
+
+echo "Start up auth_{certificate,kerberos} servers"
+do_run up auth_certificate auth_certificate_tpm \
+	  auth_kerberos auth_kerberos_tpm
 
 echo "Success"
