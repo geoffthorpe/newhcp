@@ -11,14 +11,15 @@ import gson.path as p
 # list, then expanding the string "{somevar}" will actually expand to that
 # non-string value.
 def expand_str(s, env):
-    for k in env:
-        keystr = '{' + k + '}'
-        v = env[k]
-        if isinstance(v, str):
-            s = s.replace(keystr, v)
-        else:
-            if s == keystr:
-                return v
+    if env:
+        for k in env:
+            keystr = '{' + k + '}'
+            v = env[k]
+            if isinstance(v, str):
+                s = s.replace(keystr, v)
+            else:
+                if s == keystr:
+                    return v
     return s
 
 # Augment an environment using the given variables
