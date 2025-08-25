@@ -7,24 +7,24 @@
         },
         "tpm_create": true,
         "tpm_enroll": true,
-        "enroll_api": "https://enrollsvc.hcphacking.xyz",
+        "enroll_api": "https://enrollsvc.{domain}",
         "enroll_api_cacert": "/ca_default",
         "enroll_api_clientcert": "/cred_enrollclient",
         "enroll_profile": {
             "hostname": "{hostname}",
             "certgen": [ "https-server" ],
             "pkinit-clients": [],
-            "realm": "HCPHACKING.XYZ",
+            "realm": "{realm}",
             "lifetime": "2h",
             "key-type": "rsa",
             "key-bits": 2048,
             "ktgen": {
-                "api": "https://kdc_secondary.hcphacking.xyz"
+                "api": "https://kdc_secondary.{domain}"
             },
             "krb5conf": {
                 "pkinit_anchors": "/ca_default",
-                "dotdomain": ".hcphacking.xyz",
-                "kdchost": "kdc_secondary.hcphacking.xyz",
+                "dotdomain": ".{domain}",
+                "kdchost": "kdc_secondary.{domain}",
                 "kdcport": "3088"
             }
         }
@@ -71,7 +71,7 @@
                     "_": ["The point here is that kdc_secondary is the only host",
                           "that doesn't have kdc_secondary as its KDC, so we",
                           "override the setting in this one case."],
-                    "kdchost": "kdc_primary.hcphacking.xyz:3089"
+                    "kdchost": "kdc_primary.{domain}:3089"
                 }
             },
             "volumes": [
