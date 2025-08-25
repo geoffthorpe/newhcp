@@ -8,16 +8,13 @@ define add_CA
 $(eval name := $(strip $1))
 $(eval TESTCREDS_CA_$(name) := $(TESTCREDS_OUT)/ca_$(name))
 $(eval TESTCREDS_CA_$(name)_PRIVATE := $(TESTCREDS_OUT)/ca_$(name)_private)
-$(eval TESTCREDS_DONE += $(TESTCREDS_CA_$(name))/CA.cert)
-$(eval TESTCREDS_CHILDREN += $(TESTCREDS_CA_$(name)))
-$(eval TESTCREDS_CHILDREN += $(TESTCREDS_CA_$(name)_PRIVATE))
-$(TESTCREDS_CA_$(name)_PRIVATE)/CA.pem: | $(TESTCREDS_CA_$(name)_PRIVATE)
-	$Qcd $(TESTCREDS_CA_$(name)_PRIVATE) && \
-		hxtool issue-certificate --self-signed --issue-ca \
+$(eval TESTCREDS_DONE += $(TESTCREDS_CA_$(name)))
+$(TESTCREDS_CA_$(name)_PRIVATE): | $(TESTCREDS_OUT)
+	$Qhxtool issue-certificate --self-signed --issue-ca \
 		--generate-key=rsa --subject="CN=$(name),DC=hcphacking,DC=xyz" \
-		--lifetime=10years --certificate="FILE:CA.pem"
-$(TESTCREDS_CA_$(name))/CA.cert: | $(TESTCREDS_CA_$(name))
-$(TESTCREDS_CA_$(name))/CA.cert: $(TESTCREDS_CA_$(name)_PRIVATE)/CA.pem
+		--lifetime=10years --certificate="FILE:$$@"
+$(TESTCREDS_CA_$(name)): | $(TESTCREDS_OUT)
+$(TESTCREDS_CA_$(name)): $(TESTCREDS_CA_$(name)_PRIVATE)
 	$$Qopenssl x509 -in $$< -outform PEM -out $$@
 endef
 
@@ -30,10 +27,10 @@ $(eval TESTCREDS_$(name) := $(TESTCREDS_OUT)/$(name))
 $(eval TESTCREDS_DONE += $(TESTCREDS_$(name))/$(_file))
 $(eval TESTCREDS_CHILDREN += $(TESTCREDS_$(name)))
 $(TESTCREDS_$(name))/$(_file): | $(TESTCREDS_$(name))
-$(TESTCREDS_$(name))/$(_file): $(TESTCREDS_CA_$(CA)_PRIVATE)/CA.pem
+$(TESTCREDS_$(name))/$(_file): $(TESTCREDS_CA_$(CA)_PRIVATE)
 	$$Qcd $(TESTCREDS_$(name)) && \
 		hxtool issue-certificate \
-		--ca-certificate="FILE:$(TESTCREDS_CA_$(CA)_PRIVATE)/CA.pem" \
+		--ca-certificate="FILE:$(TESTCREDS_CA_$(CA)_PRIVATE)" \
 		--certificate="FILE:$(_file)" \
 		--generate-key=rsa --key-bits=2048 \
 		$(flags)

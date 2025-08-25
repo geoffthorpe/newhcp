@@ -7,7 +7,7 @@
 # It performs the attestation routine step-wise.
 
 export ATTESTSVC_API_URL=https://attestsvc.hcphacking.xyz
-export ATTESTSVC_API_CACERT=/ca_default/CA.cert
+export ATTESTSVC_API_CACERT=/ca_default
 
 export PATH=/hcp/python:$PATH
 

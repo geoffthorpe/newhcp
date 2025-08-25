@@ -8,7 +8,7 @@
         "tpm_create": true,
         "tpm_enroll": true,
         "enroll_api": "https://enrollsvc.hcphacking.xyz",
-        "enroll_api_cacert": "/ca_default/CA.cert",
+        "enroll_api_cacert": "/ca_default",
         "enroll_api_clientcert": "/enrollclient/client.pem",
         "enroll_profile": {
             "hostname": "{hostname}",
@@ -37,7 +37,7 @@
                     ]
                 },
                 "appdefaults": {
-                    "pkinit_anchors": "FILE:/ca_default/CA.cert"
+                    "pkinit_anchors": "FILE:/ca_default"
                 },
                 "domain_realm": {
                     ".hcphacking.xyz": "HCPHACKING.XYZ"

@@ -71,7 +71,7 @@ def my_get_assets(ekpubhash, outdir):
                 for hostname in hostnames:
                     cmd = hxcmd.copy() + \
                         [ '--type=https-server', f"--hostname={hostname}",
-                          '--ca-certificate=FILE:/ca_default_private/CA.pem',
+                          '--ca-certificate=FILE:/ca_default_private',
                           f"--certificate=FILE:{tempdir}/https-server-{hostname}.pem" ]
                     c = subprocess.run(cmd)
                     if c.returncode != 0:
@@ -86,7 +86,7 @@ def my_get_assets(ekpubhash, outdir):
                 for client in clients:
                     cmd = hxcmd.copy() + \
                         [ '--type=https-client',
-                          '--ca-certificate=FILE:/ca_clienthttps_private/CA.pem',
+                          '--ca-certificate=FILE:/ca_clienthttps_private',
                           f"--subject=UID={client}",
                           f"--email={client}@hcphacking.xyz",
                           f"--certificate=FILE:{tempdir}/https-client-{client}.pem" ]
@@ -105,7 +105,7 @@ def my_get_assets(ekpubhash, outdir):
                         raise Exception("No realm for pkinit-client")
                     cmd = hxcmd.copy() + \
                         [ '--type=pkinit-client',
-                          '--ca-certificate=FILE:/ca_default_private/CA.pem',
+                          '--ca-certificate=FILE:/ca_default_private',
                           f"--pk-init-principal={client}@HCPHACKING.XYZ",
                           f"--certificate=FILE:{tempdir}/pkinit-client-{client}.pem" ]
                     c = subprocess.run(cmd)
@@ -119,7 +119,7 @@ def my_get_assets(ekpubhash, outdir):
                     raise Exception("No realm for pkinit-kdc")
                 cmd = hxcmd.copy() + \
                     [ '--type=pkinit-kdc',
-                      '--ca-certificate=FILE:/ca_default_private/CA.pem',
+                      '--ca-certificate=FILE:/ca_default_private',
                       f"--pk-init-principal=krbtgt/{realm}@{realm}",
                       f"--certificate=FILE:{tempdir}/pkinit-kdc-{realm}.pem" ]
                 c = subprocess.run(cmd)
@@ -133,7 +133,7 @@ def my_get_assets(ekpubhash, outdir):
                     raise Exception("No realm for pkinit-iprop")
                 cmd = hxcmd.copy() + \
                     [ '--type=pkinit-client',
-                      '--ca-certificate=FILE:/ca_default_private/CA.pem',
+                      '--ca-certificate=FILE:/ca_default_private',
                       f"--pk-init-principal=iprop/{hostname}@{realm}",
                       f"--subject=CN=iprop",
                       f"--certificate=FILE:{tempdir}/pkinit-iprop-{realm}.pem" ]
