@@ -54,16 +54,16 @@ do_exit() {
 echo "Destroying any existing state"
 do_run down
 
+echo "Creating TPMs"
+do_run run orchestrator -a -c
+
 echo "Starting core attestsvc service"
 do_run up attestsvc
-
-echo "Creating enrollsvc TPM (special case)"
-do_run run orchestrator -a -c enrollsvc
 
 echo "Starting enrollsvc TPM"
 do_run up enrollsvc_tpm
 
-echo "Waiting for enrollsvc TPM"
+echo "Waiting for enrollsvc TPM to advertise ek.pub"
 do_run run enrollsvc \
 	/hcp/python/HcpToolWaitTouchfile.py "/tpmsocket_enrollsvc/tpm.files/ek.pub"
 
@@ -86,12 +86,14 @@ EOF
 echo "Starting enrollsvc service"
 do_run up enrollsvc
 
-echo "Creating TPMs"
-do_run run orchestrator -a -c
+echo "Waiting for enrollsvc availability"
+do_run run orchestrator \
+	/hcp/python/HcpToolWaitWeb.py \
+		--cacert /ca_default \
+		--clientcert /cred_enrollclient \
+		--retries 10 --pause 1 \
+		https://enrollsvc.hcphacking.xyz/healthcheck
 
-# We cheat. By creating TPMs before enrolling them, we almost certainly
-# guarantee that enrollsvc is ready before we talk to it. By rights,
-# there should be a step here to wait for enrollsvc to be ready.
 echo "Enrolling KDC TPMs"
 do_run run orchestrator -e kdc_primary kdc_secondary
 
@@ -100,20 +102,24 @@ do_run run orchestrator -e kdc_primary kdc_secondary
 echo "Starting KDCs"
 do_run up kdc_primary kdc_primary_tpm kdc_secondary kdc_secondary_tpm
 
-# More cheating. By enrolling more TPMs after starting the KDCs, we give the
-# KDCs plenty of time to be ready before we start hosts that will attest. By
-# rights we should poll for the secondary to be ready.
-echo "Enrolling the other TPMs"
+echo "Waiting for kdc_secondary to be available"
+do_run exec attestsvc \
+	/hcp/python/HcpToolWaitWeb.py \
+		--cacert /ca_default \
+		--clientcert /cred_kdcclient \
+		--retries 10 --pause 1 \
+		https://secondary.kdc.hcphacking.xyz/healthcheck
+
+echo "Enrolling the remaining TPMs"
 do_run run orchestrator -e
 
-echo "Starting other hosts"
+echo "Starting remaining hosts"
 do_run up shell shell_tpm alicia alicia_tpm \
 	auth_certificate auth_certificate_tpm \
 	auth_kerberos auth_kerberos_tpm
 
 
-# Now we can't cheat, we have to wait. NB, by waiting for sshd launch, we
-# implicitly wait for attestation.
+# By waiting for sshd launch, we implicitly wait for attestation.
 echo "Waiting for alicia to be attested"
 do_run exec alicia \
 	/hcp/python/HcpToolWaitTouchfile.py /assets/pkinit-client-alicia.pem
