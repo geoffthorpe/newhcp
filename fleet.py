@@ -96,7 +96,7 @@ services:
         volumes:
           - ./_testcreds/ca_default:/ca_default:ro
           - ./_testcreds/verifier_asset:/verifier_asset:ro
-          - ./_testcreds/cred_enrollhealthclient:/cred_enrollhealthclient:ro
+          - ./_testcreds/cred_healthhttpsclient:/cred_healthhttpsclient:ro
 
     orchestrator:
         extends: common_nontpm

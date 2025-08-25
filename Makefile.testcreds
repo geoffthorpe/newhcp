@@ -61,11 +61,11 @@ $(eval $(call add_cred_hxtool,default,attestsvc, \
 		--hostname="attestsvc.hcphacking.xyz" \
 		--subject="UID=emgmt$(COMMA)DC=hcphacking$(COMMA)DC=xyz"))
 
-$(eval $(call add_CA,clienthttps))
-$(eval $(call add_cred_hxtool,clienthttps,enrollhealthclient, \
+$(eval $(call add_CA,httpsclient))
+$(eval $(call add_cred_hxtool,httpsclient,healthhttpsclient, \
 		--type=https-client \
-		--subject="UID=healthclient$(COMMA)DC=hcphacking$(COMMA)DC=xyz" \
-		--email="healthclient@hcphacking.xyz"))
+		--subject="UID=healthhttpsclient$(COMMA)DC=hcphacking$(COMMA)DC=xyz" \
+		--email="healthhttpsclient@hcphacking.xyz"))
 
 $(eval $(call add_CA,enrollsvc))
 $(eval $(call add_cred_hxtool,enrollsvc,enrollclient, \

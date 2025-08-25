@@ -86,7 +86,7 @@ def my_get_assets(ekpubhash, outdir):
                 for client in clients:
                     cmd = hxcmd.copy() + \
                         [ '--type=https-client',
-                          '--ca-certificate=FILE:/ca_clienthttps_private',
+                          '--ca-certificate=FILE:/ca_httpsclient_private',
                           f"--subject=UID={client}",
                           f"--email={client}@hcphacking.xyz",
                           f"--certificate=FILE:{tempdir}/https-client-{client}.pem" ]
