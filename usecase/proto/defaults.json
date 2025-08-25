@@ -28,7 +28,7 @@
     "kdcsvc_key_rotation_period": "1h",
     "kdcsvc_max_ticket_life": "1h",
     "kdcsvc_max_renewable_life": "5h",
-    "kdcsvc_admin_email": "orchestrator@hcphacking.xyz",
+    "kdcsvc_admin_email": "attestsvc@hcphacking.xyz",
     "kdcsvc_TGS_tag": "services",
     "NODEFAULT_kdcsvc_TGS_port": -1,
     "orchestrator_fleet": "/usecase/config/fleet.json",

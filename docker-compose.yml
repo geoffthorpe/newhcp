@@ -78,6 +78,7 @@ services:
         volumes:
           - example:/example
           - ./_testcreds/enrollsvc:/enrollsvc:ro
+          - ./_testcreds/ca_enrollsvc:/ca_enrollsvc:ro
         environment:
           - HCP_CONFIG_FILE=/usecase/hosts/enrollsvc.json
 
@@ -89,7 +90,7 @@ services:
           - ./_testcreds/attestsvc:/attestsvc:ro
           - ./_testcreds/attestnoncer:/attestnoncer:ro
           - ./_testcreds/assetsigner:/assetsigner:ro
-          - ./_testcreds/enrollclient:/enrollclient:ro
+          - ./_testcreds/kdcclient:/kdcclient:ro
           - ./_testcreds/ca_root_private:/ca_root_private:ro
         environment:
           - HCP_CONFIG_FILE=/usecase/hosts/attestsvc.json

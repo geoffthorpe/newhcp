@@ -72,6 +72,7 @@ $(TESTCREDS_$(public))/key.pem: $(TESTCREDS_$(private))/key.pem
 endef
 
 $(eval $(call add_CA,root))
+$(eval $(call add_CA,enrollsvc))
 $(eval $(call add_cred_hxtool,root,enrollsvc,server.pem, \
 		--type=https-server \
 		--hostname="enrollsvc.hcphacking.xyz" \
@@ -80,11 +81,16 @@ $(eval $(call add_cred_hxtool,root,attestsvc,server.pem, \
 		--type=https-server \
 		--hostname="attestsvc.hcphacking.xyz" \
 		--subject="UID=emgmt$(COMMA)DC=hcphacking$(COMMA)DC=xyz"))
-$(eval $(call add_cred_hxtool,root,enrollclient,client.pem, \
+$(eval $(call add_cred_hxtool,enrollsvc,enrollclient,client.pem, \
 		--type=https-client \
 		--hostname="orchestrator.hcphacking.xyz" \
 		--subject="UID=orchestrator$(COMMA)DC=hcphacking$(COMMA)DC=xyz" \
 		--email="orchestrator@hcphacking.xyz"))
+$(eval $(call add_cred_hxtool,root,kdcclient,client.pem, \
+		--type=https-client \
+		--hostname="attestsvc.hcphacking.xyz" \
+		--subject="UID=attestsvc$(COMMA)DC=hcphacking$(COMMA)DC=xyz" \
+		--email="attestsvc@hcphacking.xyz"))
 $(eval $(call add_cred_hxtool,root,enrollhealthclient,client.pem, \
 		--type=https-client \
 		--hostname="_no_host.hcphacking.xyz" \
