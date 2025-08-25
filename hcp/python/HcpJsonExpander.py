@@ -117,7 +117,7 @@ def vars_selfexpand(ctxvars, currentpath):
     return vars_fullexpand(ctxvars, ctxvars, currentpath)
 
 # This function is almost a duplicate of vars_expand(), which does variable
-# expansion through an object, but in out case we're accumulating vars/files
+# expansion through an object, but in our case we're accumulating vars/files
 # sections as we descend into the structure, whereas vars_expand() doesn't.
 def process_obj(ctxvars, obj, currentpath = '.',
             varskey = default_varskey, fileskey = default_fileskey,

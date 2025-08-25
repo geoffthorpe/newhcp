@@ -1,7 +1,8 @@
 #!/usr/bin/python3
+#
 # A "scope" allows a new data structure to be crafted from an existing one.
 #
-# The general form of "scope" consists of a array (list) of objects (dicts),
+# The general form of "scope" consists of an array (list) of objects (dicts),
 # each of which contribute step-wise in constructing the new data structure,
 # which starts out as a new/empty JSON object (dict). Each object in the array
 # will specify exactly one method key ("set", "delete", "import", or "union")
@@ -11,50 +12,6 @@
 # data structure (the "source" attribute indicates what path in the existing
 # data structure should be copied into the new one), the remaining methods all
 # act strictly within the new data structure.
-#
-# The following fictitous example shows the different methods and their
-# attributes;
-#     "scope": [
-#         { "set": ".tmp1", "value": [ 1, 2, { "a": "b" } ] },
-#         { "set": ".tmp2", "value": {
-#                 "name": "Blank",
-#                 "group": "Blank" } },
-#         { "import": ".tmp3", "source": ".details" },
-#         { "union": ".tmp3.headers", "source1": ".tmp3.headers",
-#             "source2": ".tmp2" },
-#         { "union": ".value", "source1": ".tmp1", "source2": ".tmp3.value" },
-#         { "delete": ".tmp3.do_not_care" },
-#         { "union": ".final", "source1": null, "source2": ".tmp3" },
-#         { "delete": ".tmp1" },
-#         { "delete": ".tmp2" },
-#         { "delete": ".tmp3" },
-#         { "delete": ".final.value" }
-#     ]
-# If the original data structure is;
-#     {
-#         "details": {
-#             "care": "something",
-#             "do_not_care": "something else",
-#             "value": [ 3, 4 ],
-#             "headers": {
-#                 "userid": 4015,
-#                 "name": "Nosferatu"
-#             }
-#         },
-#         "ignore_me": "ok"
-#     }
-# Then the "scope" example produces this new data structure;
-#     {
-#         "final": {
-#             "care": "something",
-#             "headers": {
-#                 "userid": 4015,
-#                 "name": "Blank",
-#                 "group": "Blank"
-#             },
-#         }
-#         "value": [ 1, 2, { "a": "b" }, 3, 4 ]
-#     }
 
 import json
 import os
