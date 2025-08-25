@@ -22,38 +22,10 @@
                 "api": "https://kdc_secondary.hcphacking.xyz"
             },
             "krb5conf": {
-                "logging": {
-                    "default": "STDERR"
-                },
-                "libdefaults": {
-                    "default_realm": "HCPHACKING.XYZ",
-                    "dns_lookup_kdc": "no",
-                    "dns_lookup_realm": "no",
-                    "ignore_acceptor_hostname": "yes",
-                    "dns_canonicalize_hostname": "no",
-                    "rdns": "no",
-                    "forwardable": "true",
-                    "kuserok": [
-                        "SYSTEM-K5LOGIN:/etc/k5login.d",
-                        "USER-K5LOGIN",
-                        "SIMPLE"
-                    ]
-                },
-                "appdefaults": {
-                    "pkinit_anchors": "FILE:/ca_default"
-                },
-                "domain_realm": {
-                    ".hcphacking.xyz": "HCPHACKING.XYZ"
-                },
-                "realms": {
-                    "HCPHACKING.XYZ": {
-                        "kdc": "kdc_secondary.hcphacking.xyz:3088",
-                        "pkinit_require_eku": "true",
-                        "pkinit_require_krbtgt_otherName": "true",
-                        "pkinit_win2k": "no",
-                        "pkinit_win2k_require_binding": "yes"
-                    }
-                }
+                "pkinit_anchors": "/ca_default",
+                "dotdomain": ".hcphacking.xyz",
+                "kdchost": "kdc_secondary.hcphacking.xyz",
+                "kdcport": "3088"
             }
         }
     },
@@ -99,11 +71,7 @@
                     "_": ["The point here is that kdc_secondary is the only host",
                           "that doesn't have kdc_secondary as its KDC, so we",
                           "override the setting in this one case."],
-                    "realms": {
-                        "HCPHACKING.XYZ": {
-                            "kdc": "kdc_primary.hcphacking.xyz:3089"
-                        }
-                    }
+                    "kdchost": "kdc_primary.hcphacking.xyz:3089"
                 }
             },
             "volumes": [
