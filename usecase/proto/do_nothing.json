@@ -1,5 +1,0 @@
-{
-    "exec": "/hcp/common/do_nothing.sh",
-    "healthcheck": "/hcp/attested.py",
-    "tag": "{do_nothing_tag}"
-}

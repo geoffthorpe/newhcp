@@ -10,7 +10,6 @@
     "attester_assetdir": "/assets",
     "attester_cacert": "/ca_default",
     "attester_until": "/assets/touch",
-    "do_nothing_tag": "services",
     "git-daemon_port": "9418",
     "git-daemon_tag": "services",
     "git-daemon_uid": "www-data",
