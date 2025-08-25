@@ -9,18 +9,16 @@ $(eval name := $(strip $1))
 $(eval TESTCREDS_CA_$(name) := $(TESTCREDS_OUT)/ca_$(name))
 $(eval TESTCREDS_CA_$(name)_PRIVATE := $(TESTCREDS_OUT)/ca_$(name)_private)
 $(eval TESTCREDS_DONE += $(TESTCREDS_CA_$(name))/CA.cert)
-$(eval TESTCREDS_DONE += $(TESTCREDS_CA_$(name)_PRIVATE)/CA.cert)
 $(eval TESTCREDS_CHILDREN += $(TESTCREDS_CA_$(name)))
 $(eval TESTCREDS_CHILDREN += $(TESTCREDS_CA_$(name)_PRIVATE))
-$(TESTCREDS_CA_$(name)_PRIVATE)/CA.cert: | $(TESTCREDS_CA_$(name)_PRIVATE)
+$(TESTCREDS_CA_$(name)_PRIVATE)/CA.pem: | $(TESTCREDS_CA_$(name)_PRIVATE)
 	$Qcd $(TESTCREDS_CA_$(name)_PRIVATE) && \
 		hxtool issue-certificate --self-signed --issue-ca \
 		--generate-key=rsa --subject="CN=$(name),DC=hcphacking,DC=xyz" \
-		--lifetime=10years --certificate="FILE:CA.pem" && \
-		openssl x509 -in CA.pem -outform PEM -out "CA.cert"
+		--lifetime=10years --certificate="FILE:CA.pem"
 $(TESTCREDS_CA_$(name))/CA.cert: | $(TESTCREDS_CA_$(name))
-$(TESTCREDS_CA_$(name))/CA.cert: $(TESTCREDS_CA_$(name)_PRIVATE)/CA.cert
-	$$Qcp $$< $$@
+$(TESTCREDS_CA_$(name))/CA.cert: $(TESTCREDS_CA_$(name)_PRIVATE)/CA.pem
+	$$Qopenssl x509 -in $$< -outform PEM -out $$@
 endef
 
 define add_cred_hxtool
@@ -32,7 +30,7 @@ $(eval TESTCREDS_$(name) := $(TESTCREDS_OUT)/$(name))
 $(eval TESTCREDS_DONE += $(TESTCREDS_$(name))/$(_file))
 $(eval TESTCREDS_CHILDREN += $(TESTCREDS_$(name)))
 $(TESTCREDS_$(name))/$(_file): | $(TESTCREDS_$(name))
-$(TESTCREDS_$(name))/$(_file): $(TESTCREDS_CA_$(CA)_PRIVATE)/CA.cert
+$(TESTCREDS_$(name))/$(_file): $(TESTCREDS_CA_$(CA)_PRIVATE)/CA.pem
 	$$Qcd $(TESTCREDS_$(name)) && \
 		hxtool issue-certificate \
 		--ca-certificate="FILE:$(TESTCREDS_CA_$(CA)_PRIVATE)/CA.pem" \
@@ -62,13 +60,12 @@ $(eval TESTCREDS_$(public) := $(TESTCREDS_OUT)/$(public))
 $(eval TESTCREDS_CHILDREN += $(TESTCREDS_$(private)))
 $(eval TESTCREDS_CHILDREN += $(TESTCREDS_$(public)))
 $(eval TESTCREDS_DONE += $(TESTCREDS_$(public))/key.pem)
-$(TESTCREDS_$(private))/key.pem: | $(TESTCREDS_$(private))
+$(TESTCREDS_$(private))/key.priv: | $(TESTCREDS_$(private))
 	$$Qcd $(TESTCREDS_$(private)) && \
-		openssl genrsa -out key.priv && \
-		openssl rsa -pubout -in key.priv -out key.pem
+		openssl genrsa -out key.priv
 $(TESTCREDS_$(public))/key.pem: | $(TESTCREDS_$(public))
-$(TESTCREDS_$(public))/key.pem: $(TESTCREDS_$(private))/key.pem
-	$$Qcp $$< $$@
+$(TESTCREDS_$(public))/key.pem: $(TESTCREDS_$(private))/key.priv
+	$$Qopenssl rsa -pubout -in $$< -out $$@
 endef
 
 $(eval $(call add_CA,default))
