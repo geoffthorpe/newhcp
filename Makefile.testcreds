@@ -56,10 +56,6 @@ $(TESTCREDS_$(name)_PUBLIC): $(TESTCREDS_$(name)_PRIVATE)
 endef
 
 $(eval $(call add_CA,default))
-$(eval $(call add_cred_hxtool,default,enrollsvc, \
-		--type=https-server \
-		--hostname="enrollsvc.hcphacking.xyz" \
-		--subject="UID=emgmt$(COMMA)DC=hcphacking$(COMMA)DC=xyz"))
 $(eval $(call add_cred_hxtool,default,attestsvc, \
 		--type=https-server \
 		--hostname="attestsvc.hcphacking.xyz" \

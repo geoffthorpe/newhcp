@@ -54,11 +54,40 @@ do_exit() {
 echo "Destroying any existing state"
 do_run down
 
-echo "Starting core attestsvc and enrollsvc services"
-do_run up attestsvc enrollsvc
+echo "Starting core attestsvc service"
+do_run up attestsvc
+
+echo "Creating enrollsvc TPM (special case)"
+do_run run orchestrator -a -c enrollsvc
+
+echo "Starting enrollsvc TPM"
+do_run up enrollsvc_tpm
+
+echo "Waiting for enrollsvc TPM"
+do_run run enrollsvc \
+	/hcp/python/HcpToolWaitTouchfile.py "/tpmsocket_enrollsvc/tpm.files/ek.pub"
+
+echo "Self-enrolling enrollsvc TPM"
+do_run run enrollsvc bash <<EOF
+hash=\$(openssl sha256 -r "/tpmsocket_enrollsvc/tpm.files/ek.pub")
+path="/backend/db/\${hash:0:2}/\${hash:0:4}/\${hash:0:64}"
+if [[ ! -d "\$path" ]]; then
+	mkdir -p "\$path"
+	echo -n "\${hash:0:64}" > "\$path/ekpubhash"
+	cp "/tpmsocket_enrollsvc/tpm.files/ek.pub" "\$path/"
+	cat "/usecase/config/fleet.json" \
+		| jq .defaults.enroll_profile \
+		| sed -e "s/{hostname}/enrollsvc.hcphacking.xyz/g" \
+		> "\$path/profile"
+	chown -R www-data "\$path"
+fi
+EOF
+
+echo "Starting enrollsvc service"
+do_run up enrollsvc
 
 echo "Creating TPMs"
-do_run run orchestrator -c
+do_run run orchestrator -a -c
 
 # We cheat. By creating TPMs before enrolling them, we almost certainly
 # guarantee that enrollsvc is ready before we talk to it. By rights,

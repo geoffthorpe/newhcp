@@ -7,6 +7,8 @@ volumes:
     backend:
     kdc_primary:
     kdc_secondary:
+    tpm_enrollsvc:
+    tpmsocket_enrollsvc:
     tpm_kdc_primary:
     tpmsocket_kdc_primary:
     tpm_kdc_secondary:
@@ -63,6 +65,7 @@ services:
         hostname: orchestrator.hcphacking.xyz
         volumes:
           - ./_testcreds/cred_enrollclient:/cred_enrollclient:ro
+          - tpm_enrollsvc:/tpm_enrollsvc
           - tpm_kdc_primary:/tpm_primary.kdc
           - tpm_kdc_secondary:/tpm_secondary.kdc
           - tpm_shell:/tpm_shell
@@ -71,16 +74,6 @@ services:
           - tpm_auth_kerberos:/tpm_auth_kerberos
         environment:
           - HCP_CONFIG_FILE=/usecase/hosts/orchestrator.json
-
-    enrollsvc:
-        extends: common_nontpm
-        hostname: enrollsvc.hcphacking.xyz
-        volumes:
-          - backend:/backend
-          - ./_testcreds/cred_enrollsvc:/cred_enrollsvc:ro
-          - ./_testcreds/ca_enrollsvc:/ca_enrollsvc:ro
-        environment:
-          - HCP_CONFIG_FILE=/usecase/hosts/enrollsvc.json
 
     attestsvc:
         extends: common_nontpm
@@ -95,6 +88,26 @@ services:
           - ./_testcreds/ca_clienthttps_private:/ca_clienthttps_private:ro
         environment:
           - HCP_CONFIG_FILE=/usecase/hosts/attestsvc.json
+
+    enrollsvc:
+        extends: common_nontpm
+        hostname: enrollsvc.hcphacking.xyz
+        volumes:
+          - backend:/backend
+          - ./_testcreds/cred_enrollsvc:/cred_enrollsvc:ro
+          - ./_testcreds/ca_enrollsvc:/ca_enrollsvc:ro
+          - tpmsocket_enrollsvc:/tpmsocket_enrollsvc
+        environment:
+          - HCP_CONFIG_FILE=/usecase/hosts/enrollsvc.json
+
+    enrollsvc_tpm:
+        extends: common_tpm
+        hostname: enrollsvc_tpm.hcphacking.xyz
+        volumes:
+          - tpm_enrollsvc:/tpm_enrollsvc
+          - tpmsocket_enrollsvc:/tpmsocket_enrollsvc
+        environment:
+          - HCP_CONFIG_FILE=/usecase/hosts/enrollsvc.json
 
     kdc_primary:
         extends: common_nontpm
