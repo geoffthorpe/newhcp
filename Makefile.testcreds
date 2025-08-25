@@ -41,13 +41,10 @@ endef
 
 define add_cred_randkey
 $(eval name := $(strip $1))
-$(eval _file := $(strip $2))
 $(eval TESTCREDS_$(name) := $(TESTCREDS_OUT)/$(name))
-$(eval TESTCREDS_DONE += $(TESTCREDS_$(name))/$(_file))
-$(eval TESTCREDS_CHILDREN += $(TESTCREDS_$(name)))
-$(TESTCREDS_$(name))/$(_file): | $(TESTCREDS_$(name))
-	$$Qcd $(TESTCREDS_$(name)) && \
-		openssl rand -out $(_file) -hex 32
+$(eval TESTCREDS_DONE += $(TESTCREDS_$(name)))
+$(TESTCREDS_$(name)): | $(TESTCREDS_OUT)
+	$$Qopenssl rand -out $$@ -hex 32
 endef
 
 # TODO: this should be unnecessary. Replace the assetsigner/assetverifier pair

@@ -32,7 +32,7 @@
         "setup": [ {
             "tag": "copykey",
             "exec": [ "bash", "-c",
-                "cp /attestnoncer/key /tmp/www-data-noncekey && cp /assetsigner/key.priv /tmp/www-data-signer && chown www-data /tmp/www-data-* && touch /tmp/www-data.copied"],
+                "cp /attestnoncer /tmp/www-data-noncekey && cp /assetsigner/key.priv /tmp/www-data-signer && chown www-data /tmp/www-data-* && touch /tmp/www-data.copied"],
             "touchfile": "/tmp/www-data.copied"
         } ]
     },

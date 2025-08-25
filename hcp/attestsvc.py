@@ -85,7 +85,7 @@ def my_initiate():
             fp.write(ticketjson)
         c = subprocess.run(['openssl', 'aes-256-cbc', '-salt', '-pbkdf2',
                            '-e',
-                           '-kfile', '/attestnoncer/key',
+                           '-kfile', '/tmp/www-data-noncekey',
                            '-in', f"{tempdir}/json",
                            '-out', f"{tempdir}/encrypted"])
         if c.returncode != 0:
@@ -128,7 +128,7 @@ def my_complete():
             fp.write(c.stdout)
         c = subprocess.run(['openssl', 'aes-256-cbc', '-salt', '-pbkdf2',
                            '-d',
-                           '-kfile', '/attestnoncer/key',
+                           '-kfile', '/tmp/www-data-noncekey',
                            '-in', f"{tempdir}/ticket.enc",
                            '-out', f"{tempdir}/ticket"])
         if c.returncode != 0:
