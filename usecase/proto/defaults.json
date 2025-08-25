@@ -1,6 +1,6 @@
 {
     "default_domain": "hcphacking.xyz",
-    "default_targets": [ "start-services" ],
+    "NODEFAULT_default_targets": [ "start-services" ],
     "attester_tag": "attester",
     "attester_period": 120,
     "attester_retry": 5,

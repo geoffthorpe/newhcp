@@ -1,0 +1,31 @@
+{
+    "vars": {
+        "services": [ "createdb", "copykey", "webapi" ],
+        "default_targets": [ "setup-createdb", "setup-copykey", "start-services" ],
+        "webapi_app": "/hcp/backend/attestsvc.py"
+    },
+
+    "createdb": {
+        "setup": [ {
+                "tag": "createdb",
+                "exec": [ "bash", "-c",
+                    "mkdir -p /backend/db && chown -R www-data /backend/db && touch /backend/.db-created" ],
+                "touchfile": "/backend/.db-created"
+        } ]
+    },
+
+    "copykey": {
+        "setup": [ {
+            "tag": "copykey",
+            "exec": [ "bash", "-c",
+                "cp /key_attestnoncer /tmp/www-data-noncekey && cp /signer_asset /tmp/www-data-signer && chown www-data /tmp/www-data-* && touch /tmp/www-data.copied"],
+            "touchfile": "/tmp/www-data.copied"
+        } ]
+    },
+
+    "backend": {
+        "_": "The hooks in hcp/backend/attestsvc will consume these.",
+        "cacert": "/ca_default",
+        "clientcert": "/cred_kdcclient"
+    }
+}

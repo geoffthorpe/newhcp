@@ -13,16 +13,18 @@
     },
     "args_for": "attester",
 
-    "scope": [
-        { "load": ".defaults", "path": "/usecase/proto/defaults.json" },
-        { "vars": ".defaults" },
-        { "import": ".", "source": "." },
-        { "vars": ".vars" },
-        { "loadunion": ".", "path": "/usecase/proto/root.json" },
-        { "load": ".attester", "path": "/usecase/proto/attester.json" },
-        { "load": ".webapi", "path": "/usecase/proto/webapi.json" },
-        { "load": ".tpm", "path": "/usecase/proto/tpm_sidecar.json" },
-	{ "loadunion": ".env", "path": "/usecase/proto/env_tpm2tools.json" },
-	{ "loadunion": ".env", "path": "/usecase/proto/env_krb5.json" }
+    "mutate": [
+        { "method": "load", "jspath": "/usecase/proto/root.json" },
+        { "method": "union" },
+        { "method": "load", "register": "d", "jspath": "/usecase/proto/defaults.json" },
+        { "method": "union", "regpath": "vars", "srcregister": "d", "underlay": true },
+        { "method": "load", "regpath": "attester", "jspath": "/usecase/proto/attester.json" },
+        { "method": "load", "regpath": "webapi", "jspath": "/usecase/proto/webapi.json" },
+        { "method": "load", "regpath": "tpm", "jspath": "/usecase/proto/tpm_sidecar.json" },
+        { "method": "load", "register": "e", "jspath": "/usecase/proto/env_tpm2tools.json" },
+	{ "method": "union", "srcregister": "e", "regpath": "env" },
+        { "method": "load", "register": "e", "jspath": "/usecase/proto/env_krb5.json" },
+	{ "method": "union", "srcregister": "e", "regpath": "env" },
+        { "method": "expand" }
     ]
 }

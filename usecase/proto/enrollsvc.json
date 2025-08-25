@@ -1,0 +1,26 @@
+{
+    "vars": {
+        "services": [ "attester", "waitdb", "selfenroll", "webapi" ],
+        "default_targets": [ "start-attester", "setup-waitdb",
+                             "setup-selfenroll", "start-services" ],
+        "webapi_app": "/hcp/backend/enrollsvc.py"
+    },
+
+    "waitdb": {
+        "setup": [ {
+            "tag": "waitdb",
+            "exec": [ "/hcp/python/HcpToolWaitTouchfile.py", "/backend/.db-created" ],
+            "touchfile": "/backend/.db-created"
+        } ]
+    },
+
+    "selfenroll": {
+        "setup": [ {
+            "tag": "selfenroll",
+            "exec": [
+                "touch", "/backend/.enrollsvc-enrolled"
+            ],
+            "touchfile": "/backend/.enrollsvc-enrolled"
+        } ]
+    }
+}

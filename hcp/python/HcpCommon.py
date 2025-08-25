@@ -12,7 +12,8 @@ from datetime import datetime, timezone, timedelta
 sys.path.insert(1, '/hcp/python')
 
 import HcpJsonPath
-from HcpJsonScope import parse_scope, run_scope
+
+import gson.mutater as mut
 
 # Equivalent for the 'touch' command
 def touch(p, *, makedirs = True):
@@ -99,12 +100,7 @@ def bail(s, exitcode = 1):
 # We use this hook to handle replace all calls to json.load(open(...)) in order
 # to detect and automatically process any ".scope" stanza.
 def jsonload(p):
-	j = json.load(open(p, 'r'))
-	if isinstance(j, dict) and 'scope' in j:
-		rb = j.pop('scope')
-		parse_scope(rb, 'null')
-		j = run_scope(j, rb, 'null')
-	return j
+	return mut.mutate(json.load(open(p, 'r')))
 
 # - HCP_CONFIG_FILE is the path to the JSON config file.
 # - HCP_CONFIG_SCOPE is where we are currently 'nested' within that JSON.

@@ -1,40 +1,48 @@
 {
-    "setup": [ {
-            "tag": "global",
-            "exec": "/hcp/kdcsvc/setup_global.sh",
-            "touchfile": "{kdcsvc_dir}/initialized"
-        }, {
-            "tag": "local",
-            "exec": "/hcp/kdcsvc/setup_local.sh",
-            "touchfile": "/tmp/touch-kdcsvc-local-setup-{kdcsvc_realm}"
-        } ],
-    "state": "{kdcsvc_dir}",
-    "mode": "{kdcsvc_mode}",
-    "secondaries": "{kdcsvc_secondaries}",
-    "realm": "{kdcsvc_realm}",
-    "namespace": "{kdcsvc_namespace}",
-    "policy_url": "{kdcsvc_policyurl}",
-    "anchor": "{kdcsvc_anchor}",
-    "pkinit_identity": "{kdcsvc_pkinit_identity}",
-    "key_rotation_epoch": "{kdcsvc_key_rotation_epoch}",
-    "key_rotation_period": "{kdcsvc_key_rotation_period}",
-    "max_ticket_life": "{kdcsvc_max_ticket_life}",
-    "max_renewable_life": "{kdcsvc_max_renewable_life}",
-    "admin_email": "{kdcsvc_admin_email}",
-    "kadmin": {
-        "preclient": {
-            "__env": {
-                "KDC_REALM": "{kdcsvc_realm}",
-                "KDC_DOMAIN": "{kdcsvc_namespace}"
+    "vars": {
+        "services": [ "attester", "kdcsvc", "webapi", "kdcsvc_TGS" ],
+        "default_targets": [ "start-attester", "setup-global", "setup-local",
+                            "start-services" ]
+    },
+
+    "kdcsvc": {
+        "setup": [ {
+                "tag": "global",
+                "exec": "/hcp/kdcsvc/setup_global.sh",
+                "touchfile": "{kdcsvc_dir}/initialized"
+            }, {
+                "tag": "local",
+                "exec": "/hcp/kdcsvc/setup_local.sh",
+                "touchfile": "/tmp/touch-kdcsvc-local-setup-{kdcsvc_realm}"
+            } ],
+        "state": "{kdcsvc_dir}",
+        "mode": "{kdcsvc_mode}",
+        "secondaries": "{kdcsvc_secondaries}",
+        "realm": "{kdcsvc_realm}",
+        "namespace": "{kdcsvc_namespace}",
+        "policy_url": "{kdcsvc_policyurl}",
+        "anchor": "{kdcsvc_anchor}",
+        "pkinit_identity": "{kdcsvc_pkinit_identity}",
+        "key_rotation_epoch": "{kdcsvc_key_rotation_epoch}",
+        "key_rotation_period": "{kdcsvc_key_rotation_period}",
+        "max_ticket_life": "{kdcsvc_max_ticket_life}",
+        "max_renewable_life": "{kdcsvc_max_renewable_life}",
+        "admin_email": "{kdcsvc_admin_email}",
+        "kadmin": {
+            "preclient": {
+                "__env": {
+                    "KDC_REALM": "{kdcsvc_realm}",
+                    "KDC_DOMAIN": "{kdcsvc_namespace}"
+                },
+                "<common>": {
+                    "realm": "{KDC_REALM}"
+                }
             },
-            "<common>": {
-                "realm": "{KDC_REALM}"
-            }
-        },
-        "postclient": {
-            "add": {
-            },
-            "add_ns": {
+            "postclient": {
+                "add": {
+                },
+                "add_ns": {
+                }
             }
         }
     }

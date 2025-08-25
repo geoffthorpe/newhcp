@@ -6,12 +6,12 @@
     },
     "args_for": "orchestrator",
 
-    "scope": [
-        { "load": ".defaults", "path": "/usecase/proto/defaults.json" },
-        { "vars": ".defaults" },
-        { "import": ".", "source": "." },
-        { "vars": ".vars" },
-        { "loadunion": ".", "path": "/usecase/proto/root.json" },
-        { "load": ".orchestrator", "path": "/usecase/proto/orchestrator.json" }
+    "mutate": [
+        { "method": "load", "jspath": "/usecase/proto/root.json" },
+        { "method": "union" },
+        { "method": "load", "register": "d", "jspath": "/usecase/proto/defaults.json" },
+        { "method": "union", "regpath": "vars", "srcregister": "d", "underlay": true },
+        { "method": "load", "regpath": "orchestrator", "jspath": "/usecase/proto/orchestrator.json" },
+        { "method": "expand" }
     ]
 }

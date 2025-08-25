@@ -1,45 +1,25 @@
 {
     "vars": {
         "id": "enrollsvc",
-        "services": [ "attester", "waitdb", "selfenroll", "webapi" ],
-        "default_targets": [ "start-attester", "setup-waitdb",
-                             "setup-selfenroll", "start-services" ],
-        "webapi_app": "/hcp/backend/enrollsvc.py",
         "webapi_fqdn": "enrollsvc.hcphacking.xyz",
         "webapi_port": 443,
         "webapi_https_authentication": "clientcert",
         "webapi_https_certificate": "/assets/https-server-enrollsvc.hcphacking.xyz.pem",
         "webapi_https_client_CA": "/ca_enrollsvc"
     },
-    "args_for": "enrollsvc",
 
-    "scope": [
-        { "load": ".defaults", "path": "/usecase/proto/defaults.json" },
-        { "vars": ".defaults" },
-        { "import": ".", "source": "." },
-        { "vars": ".vars" },
-        { "loadunion": ".", "path": "/usecase/proto/root.json" },
-        { "load": ".attester", "path": "/usecase/proto/attester.json" },
-        { "load": ".webapi", "path": "/usecase/proto/webapi.json" },
-        { "load": ".tpm", "path": "/usecase/proto/tpm_sidecar.json" },
-        { "loadunion": ".env", "path": "/usecase/proto/env_tpm2tools.json" }
-    ],
-
-    "waitdb": {
-        "setup": [ {
-            "tag": "waitdb",
-            "exec": [ "/hcp/python/HcpToolWaitTouchfile.py", "/backend/.db-created" ],
-            "touchfile": "/backend/.db-created"
-        } ]
-    },
-
-    "selfenroll": {
-        "setup": [ {
-            "tag": "selfenroll",
-            "exec": [
-                "touch", "/backend/.enrollsvc-enrolled"
-            ],
-            "touchfile": "/backend/.enrollsvc-enrolled"
-        } ]
-    }
+    "mutate": [
+        { "method": "load", "jspath": "/usecase/proto/root.json" },
+        { "method": "union" },
+        { "method": "load", "register": "a", "jspath": "/usecase/proto/enrollsvc.json" },
+        { "method": "union", "srcregister": "a" },
+        { "method": "load", "register": "d", "jspath": "/usecase/proto/defaults.json" },
+        { "method": "union", "regpath": "vars", "srcregister": "d", "underlay": true },
+        { "method": "load", "regpath": "attester", "jspath": "/usecase/proto/attester.json" },
+        { "method": "load", "regpath": "webapi", "jspath": "/usecase/proto/webapi.json" },
+        { "method": "load", "regpath": "tpm", "jspath": "/usecase/proto/tpm_sidecar.json" },
+        { "method": "load", "register": "e", "jspath": "/usecase/proto/env_tpm2tools.json" },
+	{ "method": "union", "srcregister": "e", "regpath": "env" },
+        { "method": "expand" }
+    ]
 }
