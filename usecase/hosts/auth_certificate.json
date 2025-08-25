@@ -8,6 +8,7 @@
         "webapi_port": 443,
         "webapi_https_certificate": "/assets/https-server-certificate.auth.hcphacking.xyz.pem",
         "webapi_https_authentication": "clientcert",
+        "webapi_https_client_CA": "/ca_clienthttps/CA.cert",
         "webapi_setup": { "touchfile": "/assets/https-server-certificate.auth.hcphacking.xyz.pem" }
     },
     "args_for": "attester",

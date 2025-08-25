@@ -79,9 +79,27 @@ def my_get_assets(ekpubhash, outdir):
                     add_secret(enrollpath, f"{tempdir}/https-server-{hostname}.pem",
                                f"{outdir}/https-server-{hostname}.pem")
                     result.append([f"https-server-{hostname}.pem", False])
+            elif certtype == 'https-client':
+                clients = profile['https-clients'] if \
+                    'https-clients' in profile else ['nobody']
+                # TODO: get rid of "hcphacking.xyz" - configurable
+                for client in clients:
+                    cmd = hxcmd.copy() + \
+                        [ '--type=https-client',
+                          '--ca-certificate=FILE:/ca_clienthttps_private/CA.pem',
+                          f"--subject=UID={client}",
+                          f"--email={client}@hcphacking.xyz",
+                          f"--certificate=FILE:{tempdir}/https-client-{client}.pem" ]
+                    c = subprocess.run(cmd)
+                    if c.returncode != 0:
+                        raise Exception(f"hxtool failed: {cmd}")
+                    add_secret(enrollpath, f"{tempdir}/https-client-{client}.pem",
+                               f"{outdir}/https-client-{client}.pem")
+                    result.append([f"https-client-{client}.pem", False])
             elif certtype == 'pkinit-client':
                 clients = profile['pkinit-clients'] if \
                     'pkinit-clients' in profile else ['nobody']
+                # TODO: get rid of "HCPHACKING.XYZ" - configurable
                 for client in clients:
                     if not realm:
                         raise Exception("No realm for pkinit-client")

@@ -94,7 +94,9 @@
             "vars": { "hostname": "alicia.hcphacking.xyz" },
             "tpm_path": "/tpm_alicia",
             "enroll_profile": {
-                "pkinit-clients": [ "alicia" ]
+                "certgen": [ "pkinit-client", "https-client" ],
+                "pkinit-clients": [ "alicia" ],
+                "https-clients": [ "alicia", "boz" ]
             }
         },
         "auth_certificate": {

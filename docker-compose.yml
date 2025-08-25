@@ -92,6 +92,7 @@ services:
           - ./_testcreds/assetsigner:/assetsigner:ro
           - ./_testcreds/kdcclient:/kdcclient:ro
           - ./_testcreds/ca_default_private:/ca_default_private:ro
+          - ./_testcreds/ca_clienthttps_private:/ca_clienthttps_private:ro
         environment:
           - HCP_CONFIG_FILE=/usecase/hosts/attestsvc.json
 
@@ -171,6 +172,7 @@ services:
         hostname: certificate.auth.hcphacking.xyz
         volumes:
           - tpmsocket_auth_certificate:/tpmsocket_auth_certificate
+          - ./_testcreds/ca_clienthttps:/ca_clienthttps:ro
         environment:
           - HCP_CONFIG_FILE=/usecase/hosts/auth_certificate.json
 
