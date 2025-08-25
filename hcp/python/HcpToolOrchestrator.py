@@ -28,6 +28,9 @@ fleethosts = [ name for name in fleet if name != '_']
 
 class FleetHost:
     def post_exist(self):
+        if self.assume_enrolled != None:
+            self.enrolled = self.assume_enrolled
+            return
         c = subprocess.run(['openssl', 'sha256', '-r', self.ekpub],
                            capture_output = True, text = True)
         if c.returncode != 0:
@@ -41,12 +44,13 @@ class FleetHost:
         if not retcode or 'entries' not in result:
             raise Exception("Failed to query enrollsvc")
         self.enrolled = len(result['entries']) > 0
-    def __init__(self, name):
+    def __init__(self, name, assume_enrolled = None):
         if name == 'defaults':
             raise Exception("'defaults' is an illegal fleet host name")
         if name not in fleet:
             raise Exception(f"Unknown fleet host '{name}'")
         self.name = name
+        self.assume_enrolled = assume_enrolled
         self.profile = expandload(union(fleetdefaults, fleet[name]))
         self.api = self.profile['enroll_api']
         self.api_cacert = self.profile['enroll_api_cacert']
@@ -171,13 +175,17 @@ if __name__ == '__main__':
     _epilog = """
     Using the fleet.json config file, this tool can manage swtpm instances
     and perform enroll/unenroll actions against the Enrollment Service
-    management interface.
+    management interface. On startup, by default, the tool will query the
+    Enrollment Service for the enrollment status of each of the given
+    hosts, or all hostnames if none are specified. Use the '--assume' flag
+    to override this behavior.
     """
     _help_create = 'The host\'s TPM will be created if it doesn\'t exist'
     _help_delete = 'The host\'s TPM will be deleted if it exists'
     _help_enroll = 'The host will be enrolled if it\'s not already'
     _help_unenroll = 'The host will be unenrolled if it\'s enrolled'
     _help_verbosity = 'Verbosity level, 0 means quiet, more than 0 means less quiet'
+    _help_assume = 'Assume hosts are unenrolled when enrolling'
     _help_hostnames = 'Names matching stanzas found in fleet.json'
     parser = argparse.ArgumentParser(description = _desc,
                                      epilog = _epilog)
@@ -186,6 +194,7 @@ if __name__ == '__main__':
     parser.add_argument('-e', '--enroll', action='store_true', help = _help_enroll)
     parser.add_argument('-u', '--unenroll', action='store_true', help = _help_unenroll)
     parser.add_argument('-v', '--verbosity', help = _help_verbosity)
+    parser.add_argument('-a', '--assume', action='store_true', help = _help_assume)
     parser.add_argument('hostnames', nargs='*', help = _help_hostnames)
 
     args = parser.parse_args()
@@ -198,7 +207,13 @@ if __name__ == '__main__':
     if len(args.hostnames) == 0:
         args.hostnames = fleethosts
     for host in args.hostnames:
-        fh = FleetHost(host)
+        if args.assume == True and args.unenroll:
+            assume_enrolled = True
+        elif args.assume == True:
+            assume_enrolled = False
+        else:
+            assume_enrolled = None
+        fh = FleetHost(host, assume_enrolled = assume_enrolled)
         if args.create:
             fh.create()
         if args.delete:
