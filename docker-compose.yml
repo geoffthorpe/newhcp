@@ -4,7 +4,7 @@
 version: "2.4"
 
 volumes:
-    example:
+    backend:
     kdc_primary:
     kdc_secondary:
     tpm_kdc_primary:
@@ -76,7 +76,7 @@ services:
         extends: common_nontpm
         hostname: enrollsvc.hcphacking.xyz
         volumes:
-          - example:/example
+          - backend:/backend
           - ./_testcreds/cred_enrollsvc:/cred_enrollsvc:ro
           - ./_testcreds/ca_enrollsvc:/ca_enrollsvc:ro
         environment:
@@ -86,7 +86,7 @@ services:
         extends: common_nontpm
         hostname: attestsvc.hcphacking.xyz
         volumes:
-          - example:/example
+          - backend:/backend
           - ./_testcreds/cred_attestsvc:/cred_attestsvc:ro
           - ./_testcreds/key_attestnoncer:/key_attestnoncer:ro
           - ./_testcreds/signer_asset:/signer_asset:ro

@@ -3,8 +3,7 @@
 # This picks up things like TPM2TOOLS_TCTI
 . /hcp/common/hcp.sh
 
-# This script can be run on 'host1' in the 'example1' scenario.
-# It performs the attestation routine step-wise.
+# This script performs the attestation routine step-wise.
 
 export ATTESTSVC_API_URL=https://attestsvc.hcphacking.xyz
 export ATTESTSVC_API_CACERT=/ca_default

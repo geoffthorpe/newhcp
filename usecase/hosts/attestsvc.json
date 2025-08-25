@@ -3,7 +3,7 @@
         "id": "attestsvc",
         "services": [ "waitdb", "copykey", "webapi" ],
         "default_targets": [ "setup-waitdb", "setup-copykey", "start-services" ],
-        "webapi_app": "/hcp/example1/attestsvc.py",
+        "webapi_app": "/hcp/backend/attestsvc.py",
         "webapi_fqdn": "attestsvc.hcphacking.xyz",
         "webapi_port": 443,
         "webapi_https_authentication": "none",
@@ -23,8 +23,8 @@
     "waitdb": {
         "setup": [ {
             "tag": "waitdb",
-            "exec": [ "/hcp/python/HcpToolWaitTouchfile.py", "/example/.db-created" ],
-            "touchfile": "/example/.db-created"
+            "exec": [ "/hcp/python/HcpToolWaitTouchfile.py", "/backend/.db-created" ],
+            "touchfile": "/backend/.db-created"
         } ]
     },
 
@@ -37,8 +37,8 @@
         } ]
     },
 
-    "example1": {
-        "_": "The hooks in hcp/example1/attestsvc will consume these.",
+    "backend": {
+        "_": "The hooks in hcp/backend/attestsvc will consume these.",
         "cacert": "/ca_default",
         "clientcert": "/cred_kdcclient"
     }

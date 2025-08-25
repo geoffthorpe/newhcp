@@ -14,7 +14,7 @@ import tempfile
 import glob
 import shutil
 import hcp.enrollsvc as enrollsvc
-from hcp.example1.common import *
+from hcp.backend.common import *
 
 app = enrollsvc.app
 

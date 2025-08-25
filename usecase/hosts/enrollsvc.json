@@ -3,7 +3,7 @@
         "id": "enrollsvc",
         "services": [ "createdb", "webapi" ],
         "default_targets": [ "setup-createdb", "start-services" ],
-        "webapi_app": "/hcp/example1/enrollsvc.py",
+        "webapi_app": "/hcp/backend/enrollsvc.py",
         "webapi_fqdn": "enrollsvc.hcphacking.xyz",
         "webapi_port": 443,
         "webapi_https_authentication": "clientcert",
@@ -25,8 +25,8 @@
         "setup": [ {
                 "tag": "createdb",
                 "exec": [ "bash", "-c",
-                    "mkdir -p /example/db && chown -R www-data /example/db && touch /example/.db-created" ],
-                "touchfile": "/example/.db-created"
+                    "mkdir -p /backend/db && chown -R www-data /backend/db && touch /backend/.db-created" ],
+                "touchfile": "/backend/.db-created"
         } ]
     }
 }
