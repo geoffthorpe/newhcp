@@ -4,6 +4,7 @@
 import argparse
 import sys
 import json
+from gson.union import union
 
 def path_pop_member(path):
     member = ''
@@ -106,54 +107,26 @@ def path_remove(obj, pathlist):
     obj.pop(step)
     return retobj
 
-def union(a, b, noDictUnion, noListUnion, listDedup):
-    ta = type(a)
-    tb = type(b)
-    if ta != tb:
-        return b
-    if ta == dict and not noDictUnion:
-        result = a.copy()
-        for i in b:
-            if i in a:
-                result[i] = union(a[i], b[i],
-                                  noDictUnion, noListUnion, listDedup)
-            else:
-                result[i] = b[i]
-        return result
-    if ta == list and not noListUnion:
-        c = a + b
-        if listDedup:
-            d = list()
-            for i in c:
-                if i not in d:
-                    d.append(i)
-            c = d
-        return c
-    return b
+def cb_underlay(old, new, **kwargs):
+    return union(new, old, **kwargs)
 
-def cb_underlay(old, new, noDictUnion, noListUnion, listDedup):
-    return union(new, old, noDictUnion, noListUnion, listDedup)
+def cb_overlay(old, new, **kwargs):
+    return union(old, new, **kwargs)
 
-def cb_overlay(old, new, noDictUnion, noListUnion, listDedup):
-    return union(old, new, noDictUnion, noListUnion, listDedup)
-
-def path_union(obj, pathlist, valjson, underlay,
-               noDictUnion = False,
-               noListUnion = False,
-               listDedup = True):
+def path_union(obj, pathlist, valjson, underlay, **kwargs):
     valobj = json.loads(valjson)
     if obj == None:
         return valobj
     cb = cb_underlay if underlay else cb_overlay
     if len(pathlist) == 0:
-        return cb(obj, valobj, noDictUnion, noListUnion, listDedup)
+        return cb(obj, valobj, **kwargs)
     retobj = obj
     while len(pathlist) > 1:
         step = pathlist.pop(0)
         obj = obj[step]
     step = pathlist.pop(0)
     tmp = obj[step] if step in obj else None
-    obj[step] = cb(tmp, valobj, noDictUnion, noListUnion, listDedup)
+    obj[step] = cb(tmp, valobj, **kwargs)
     return retobj
 
 if __name__ == '__main__':
