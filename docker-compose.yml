@@ -55,14 +55,14 @@ services:
           - hcpnetwork
         volumes:
           - ./_testcreds/ca_default:/ca_default:ro
-          - ./_testcreds/assetverifier:/assetverifier:ro
-          - ./_testcreds/enrollhealthclient:/enrollhealthclient:ro
+          - ./_testcreds/verifier_asset:/verifier_asset:ro
+          - ./_testcreds/cred_enrollhealthclient:/cred_enrollhealthclient:ro
 
     orchestrator:
         extends: common_nontpm
         hostname: orchestrator.hcphacking.xyz
         volumes:
-          - ./_testcreds/enrollclient:/enrollclient:ro
+          - ./_testcreds/cred_enrollclient:/cred_enrollclient:ro
           - tpm_kdc_primary:/tpm_primary.kdc
           - tpm_kdc_secondary:/tpm_secondary.kdc
           - tpm_shell:/tpm_shell
@@ -77,7 +77,7 @@ services:
         hostname: enrollsvc.hcphacking.xyz
         volumes:
           - example:/example
-          - ./_testcreds/enrollsvc:/enrollsvc:ro
+          - ./_testcreds/cred_enrollsvc:/cred_enrollsvc:ro
           - ./_testcreds/ca_enrollsvc:/ca_enrollsvc:ro
         environment:
           - HCP_CONFIG_FILE=/usecase/hosts/enrollsvc.json
@@ -87,10 +87,10 @@ services:
         hostname: attestsvc.hcphacking.xyz
         volumes:
           - example:/example
-          - ./_testcreds/attestsvc:/attestsvc:ro
-          - ./_testcreds/attestnoncer:/attestnoncer:ro
-          - ./_testcreds/assetsigner:/assetsigner:ro
-          - ./_testcreds/kdcclient:/kdcclient:ro
+          - ./_testcreds/cred_attestsvc:/cred_attestsvc:ro
+          - ./_testcreds/key_attestnoncer:/key_attestnoncer:ro
+          - ./_testcreds/signer_asset:/signer_asset:ro
+          - ./_testcreds/cred_kdcclient:/cred_kdcclient:ro
           - ./_testcreds/ca_default_private:/ca_default_private:ro
           - ./_testcreds/ca_clienthttps_private:/ca_clienthttps_private:ro
         environment:

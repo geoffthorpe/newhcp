@@ -7,7 +7,7 @@
         "webapi_fqdn": "attestsvc.hcphacking.xyz",
         "webapi_port": 443,
         "webapi_https_authentication": "none",
-        "webapi_https_certificate": "/attestsvc"
+        "webapi_https_certificate": "/cred_attestsvc"
     },
     "args_for": "attestsvc",
 
@@ -32,7 +32,7 @@
         "setup": [ {
             "tag": "copykey",
             "exec": [ "bash", "-c",
-                "cp /attestnoncer /tmp/www-data-noncekey && cp /assetsigner /tmp/www-data-signer && chown www-data /tmp/www-data-* && touch /tmp/www-data.copied"],
+                "cp /key_attestnoncer /tmp/www-data-noncekey && cp /signer_asset /tmp/www-data-signer && chown www-data /tmp/www-data-* && touch /tmp/www-data.copied"],
             "touchfile": "/tmp/www-data.copied"
         } ]
     },
@@ -40,6 +40,6 @@
     "example1": {
         "_": "The hooks in hcp/example1/attestsvc will consume these.",
         "cacert": "/ca_default",
-        "clientcert": "/kdcclient"
+        "clientcert": "/cred_kdcclient"
     }
 }

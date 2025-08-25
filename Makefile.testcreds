@@ -22,7 +22,7 @@ define add_cred_hxtool
 $(eval CA := $(strip $1))
 $(eval name := $(strip $2))
 $(eval flags := $(strip $3))
-$(eval TESTCREDS_$(name) := $(TESTCREDS_OUT)/$(name))
+$(eval TESTCREDS_$(name) := $(TESTCREDS_OUT)/cred_$(name))
 $(eval TESTCREDS_DONE += $(TESTCREDS_$(name)))
 $(TESTCREDS_$(name)): | $(TESTCREDS_OUT)
 $(TESTCREDS_$(name)): $(TESTCREDS_CA_$(CA)_PRIVATE)
@@ -35,7 +35,7 @@ endef
 
 define add_cred_randkey
 $(eval name := $(strip $1))
-$(eval TESTCREDS_$(name) := $(TESTCREDS_OUT)/$(name))
+$(eval TESTCREDS_$(name) := $(TESTCREDS_OUT)/key_$(name))
 $(eval TESTCREDS_DONE += $(TESTCREDS_$(name)))
 $(TESTCREDS_$(name)): | $(TESTCREDS_OUT)
 	$$Qopenssl rand -out $$@ -hex 32
@@ -44,15 +44,14 @@ endef
 # TODO: this should be unnecessary. Replace the assetsigner/assetverifier pair
 # by a certificate-based approach.
 define add_cred_keypair
-$(eval private := $(strip $1))
-$(eval public := $(strip $2))
-$(eval TESTCREDS_$(private) := $(TESTCREDS_OUT)/$(private))
-$(eval TESTCREDS_$(public) := $(TESTCREDS_OUT)/$(public))
-$(eval TESTCREDS_DONE += $(TESTCREDS_$(public)))
-$(TESTCREDS_$(private)): | $(TESTCREDS_OUT)
+$(eval name := $(strip $1))
+$(eval TESTCREDS_$(name)_PRIVATE := $(TESTCREDS_OUT)/signer_$(name))
+$(eval TESTCREDS_$(name)_PUBLIC := $(TESTCREDS_OUT)/verifier_$(name))
+$(eval TESTCREDS_DONE += $(TESTCREDS_$(name)_PUBLIC))
+$(TESTCREDS_$(name)_PRIVATE): | $(TESTCREDS_OUT)
 	$$Qopenssl genrsa -out $$@
-$(TESTCREDS_$(public)): | $(TESTCREDS_OUT)
-$(TESTCREDS_$(public)): $(TESTCREDS_$(private))
+$(TESTCREDS_$(name)_PUBLIC): | $(TESTCREDS_OUT)
+$(TESTCREDS_$(name)_PUBLIC): $(TESTCREDS_$(name)_PRIVATE)
 	$$Qopenssl rsa -pubout -in $$< -out $$@
 endef
 
@@ -87,7 +86,7 @@ $(eval $(call add_cred_hxtool,kdcsvc,kdcclient, \
 		--email="attestsvc@hcphacking.xyz"))
 
 $(eval $(call add_cred_randkey,attestnoncer,key))
-$(eval $(call add_cred_keypair,assetsigner,assetverifier))
+$(eval $(call add_cred_keypair,asset))
 
 $(TESTCREDS_OUT):
 	$Qmkdir $@
