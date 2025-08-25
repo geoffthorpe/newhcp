@@ -7,7 +7,7 @@
         "webapi_fqdn": "enrollsvc.hcphacking.xyz",
         "webapi_port": 443,
         "webapi_https_authentication": "clientcert",
-        "webapi_https_certificate": "/enrollsvc/server.pem",
+        "webapi_https_certificate": "/enrollsvc",
 	"webapi_https_client_CA": "/ca_enrollsvc"
     },
     "args_for": "enrollsvc",

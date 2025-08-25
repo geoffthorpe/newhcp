@@ -21,17 +21,14 @@ endef
 define add_cred_hxtool
 $(eval CA := $(strip $1))
 $(eval name := $(strip $2))
-$(eval _file := $(strip $3))
-$(eval flags := $(strip $4))
+$(eval flags := $(strip $3))
 $(eval TESTCREDS_$(name) := $(TESTCREDS_OUT)/$(name))
-$(eval TESTCREDS_DONE += $(TESTCREDS_$(name))/$(_file))
-$(eval TESTCREDS_CHILDREN += $(TESTCREDS_$(name)))
-$(TESTCREDS_$(name))/$(_file): | $(TESTCREDS_$(name))
-$(TESTCREDS_$(name))/$(_file): $(TESTCREDS_CA_$(CA)_PRIVATE)
-	$$Qcd $(TESTCREDS_$(name)) && \
-		hxtool issue-certificate \
+$(eval TESTCREDS_DONE += $(TESTCREDS_$(name)))
+$(TESTCREDS_$(name)): | $(TESTCREDS_OUT)
+$(TESTCREDS_$(name)): $(TESTCREDS_CA_$(CA)_PRIVATE)
+	$$Qhxtool issue-certificate \
 		--ca-certificate="FILE:$(TESTCREDS_CA_$(CA)_PRIVATE)" \
-		--certificate="FILE:$(_file)" \
+		--certificate="FILE:$$@" \
 		--generate-key=rsa --key-bits=2048 \
 		$(flags)
 endef
@@ -60,30 +57,30 @@ $(TESTCREDS_$(public)): $(TESTCREDS_$(private))
 endef
 
 $(eval $(call add_CA,default))
-$(eval $(call add_cred_hxtool,default,enrollsvc,server.pem, \
+$(eval $(call add_cred_hxtool,default,enrollsvc, \
 		--type=https-server \
 		--hostname="enrollsvc.hcphacking.xyz" \
 		--subject="UID=emgmt$(COMMA)DC=hcphacking$(COMMA)DC=xyz"))
-$(eval $(call add_cred_hxtool,default,attestsvc,server.pem, \
+$(eval $(call add_cred_hxtool,default,attestsvc, \
 		--type=https-server \
 		--hostname="attestsvc.hcphacking.xyz" \
 		--subject="UID=emgmt$(COMMA)DC=hcphacking$(COMMA)DC=xyz"))
 
 $(eval $(call add_CA,clienthttps))
-$(eval $(call add_cred_hxtool,clienthttps,enrollhealthclient,client.pem, \
+$(eval $(call add_cred_hxtool,clienthttps,enrollhealthclient, \
 		--type=https-client \
 		--subject="UID=healthclient$(COMMA)DC=hcphacking$(COMMA)DC=xyz" \
 		--email="healthclient@hcphacking.xyz"))
 
 $(eval $(call add_CA,enrollsvc))
-$(eval $(call add_cred_hxtool,enrollsvc,enrollclient,client.pem, \
+$(eval $(call add_cred_hxtool,enrollsvc,enrollclient, \
 		--type=https-client \
 		--hostname="orchestrator.hcphacking.xyz" \
 		--subject="UID=orchestrator$(COMMA)DC=hcphacking$(COMMA)DC=xyz" \
 		--email="orchestrator@hcphacking.xyz"))
 
 $(eval $(call add_CA,kdcsvc))
-$(eval $(call add_cred_hxtool,kdcsvc,kdcclient,client.pem, \
+$(eval $(call add_cred_hxtool,kdcsvc,kdcclient, \
 		--type=https-client \
 		--hostname="attestsvc.hcphacking.xyz" \
 		--subject="UID=attestsvc$(COMMA)DC=hcphacking$(COMMA)DC=xyz" \
@@ -92,8 +89,7 @@ $(eval $(call add_cred_hxtool,kdcsvc,kdcclient,client.pem, \
 $(eval $(call add_cred_randkey,attestnoncer,key))
 $(eval $(call add_cred_keypair,assetsigner,assetverifier))
 
-$(TESTCREDS_CHILDREN): | $(TESTCREDS_OUT)
-$(TESTCREDS_OUT) $(TESTCREDS_CHILDREN):
+$(TESTCREDS_OUT):
 	$Qmkdir $@
 
 testcreds: $(TESTCREDS_DONE)

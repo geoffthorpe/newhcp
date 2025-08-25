@@ -9,7 +9,7 @@
         "tpm_enroll": true,
         "enroll_api": "https://enrollsvc.hcphacking.xyz",
         "enroll_api_cacert": "/ca_default",
-        "enroll_api_clientcert": "/enrollclient/client.pem",
+        "enroll_api_clientcert": "/enrollclient",
         "enroll_profile": {
             "hostname": "{hostname}",
             "certgen": [ "https-server", "pkinit-client" ],
