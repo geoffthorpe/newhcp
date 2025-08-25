@@ -17,11 +17,18 @@ if [[ $phase == "pre" ]]; then
 		echo "keytab-http: chown to 'www-data', chmod to 0640"
 		chown www-data "$path"
 		chmod 0640 "$path"
+	elif [[ $asset = pkinit-client-* ]] || [[ $asset = https-client-* ]]; then
+		name=$(echo "$asset" | sed -e "s/^.*-client-//" | sed -e "s/.pem\$//")
+		if [[ -n "$name" ]] && [[ -d "/home/$name" ]]; then
+			echo "$asset: chown to '$name'"
+			chown "$name" "$path"
+		else
+			echo "Ignoring"
+		fi
 	fi
 
 elif [[ $phase == "post" ]]; then
 
-	echo "FOOBAR: asset=$asset"
 	if [[ "$asset" == "https-server-$(hostname).pem" ]]; then
 		if [[ -f "/run/$HOSTNAME/nginx.pid" ]]; then
 			PID=$(cat "/run/$HOSTNAME/nginx.pid")
