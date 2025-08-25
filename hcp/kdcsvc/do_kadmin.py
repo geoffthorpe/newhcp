@@ -12,7 +12,7 @@ from HcpCommon import log, bail, current_tracefile, \
 		http2exit, exit2http, hcp_config_extract
 
 from HcpRecursiveUnion import union
-import HcpJsonExpander
+import gson.expander as x
 
 # Usage:
 # do_kadmin.py <cmd> <principals_list> <clientprofile>
@@ -58,8 +58,7 @@ mylog(f"client-adjusted resultprofile={resultprofile}")
 # to the merged and expanded profile _for the requested command_. Note that this includes
 # any "<common>" underlay and the merged environment attached as "__env".
 origenv = resultprofile.pop('__env', {})
-resultprofile = HcpJsonExpander.process_obj(origenv, resultprofile, '.',
-					varskey = None, fileskey = None)
+resultprofile = x.expand(resultprofile, origenv, '.')
 
 # So far, we've followed the enrollsvc example. Here add kdcsvc's own handling
 # of <common> and the extracting of the commands-specific subsection.

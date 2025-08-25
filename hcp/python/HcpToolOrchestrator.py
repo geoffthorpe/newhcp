@@ -15,7 +15,8 @@ from HcpCommon import bail, log, hlog, \
     hcp_config_scope_shrink
 from HcpRecursiveUnion import union
 import HcpApiEnroll
-from HcpJsonExpander import _load as expandload
+
+from gson.expander import expand as expandload
 
 fleetconfpath = hcp_config_extract('.orchestrator.fleet', must_exist = True)
 if not os.path.isfile(fleetconfpath):
