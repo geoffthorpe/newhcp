@@ -11,7 +11,7 @@ from uuid import uuid4
 from HcpCommon import log, bail, current_tracefile, \
 		http2exit, exit2http, hcp_config_extract
 
-from HcpRecursiveUnion import union
+from gson.union import union
 import gson.expander as x
 
 # Usage:

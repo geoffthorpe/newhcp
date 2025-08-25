@@ -13,9 +13,9 @@ import argparse
 from HcpCommon import bail, log, hlog, \
     hcp_config_extract, hcp_config_scope_get, hcp_config_scope_set, \
     hcp_config_scope_shrink
-from HcpRecursiveUnion import union
 import HcpApiEnroll
 
+from gson.union import union
 from gson.expander import expand as expandload
 
 fleetconfpath = hcp_config_extract('.orchestrator.fleet', must_exist = True)

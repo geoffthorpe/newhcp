@@ -10,7 +10,7 @@ from werkzeug.utils import secure_filename
 import tempfile
 import requests
 
-from HcpRecursiveUnion import union
+from gson.union import union
 from HcpPemHelper import get_email_address
 
 from HcpCommon import log, current_tracefile, http2exit, exit2http
