@@ -230,8 +230,3 @@ def load(fp, varskey = default_varskey, fileskey = default_fileskey,
     obj = json.load(fp)
     return _load(obj, varskey = varskey, fileskey = fileskey,
                 retainkeys = retainkeys)
-
-def test():
-    with open('input.json', 'r') as fp:
-        foo = load(fp)
-    return foo
