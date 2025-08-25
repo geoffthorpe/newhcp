@@ -54,14 +54,11 @@ $(eval private := $(strip $1))
 $(eval public := $(strip $2))
 $(eval TESTCREDS_$(private) := $(TESTCREDS_OUT)/$(private))
 $(eval TESTCREDS_$(public) := $(TESTCREDS_OUT)/$(public))
-$(eval TESTCREDS_CHILDREN += $(TESTCREDS_$(private)))
-$(eval TESTCREDS_CHILDREN += $(TESTCREDS_$(public)))
-$(eval TESTCREDS_DONE += $(TESTCREDS_$(public))/key.pem)
-$(TESTCREDS_$(private))/key.priv: | $(TESTCREDS_$(private))
-	$$Qcd $(TESTCREDS_$(private)) && \
-		openssl genrsa -out key.priv
-$(TESTCREDS_$(public))/key.pem: | $(TESTCREDS_$(public))
-$(TESTCREDS_$(public))/key.pem: $(TESTCREDS_$(private))/key.priv
+$(eval TESTCREDS_DONE += $(TESTCREDS_$(public)))
+$(TESTCREDS_$(private)): | $(TESTCREDS_OUT)
+	$$Qopenssl genrsa -out $$@
+$(TESTCREDS_$(public)): | $(TESTCREDS_OUT)
+$(TESTCREDS_$(public)): $(TESTCREDS_$(private))
 	$$Qopenssl rsa -pubout -in $$< -out $$@
 endef
 

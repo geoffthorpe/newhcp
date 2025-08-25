@@ -27,7 +27,7 @@ HcpApiAttest.py complete "$tmp/initial" "$tmp/quote" "$tmp/bundle.tar.gz"
 
 echo "Unsealing returned assets..."
 mkdir -p /assets
-HcpApiAttest.py unseal /assetverifier/key.pem "$tmp/bundle.tar.gz" /assets
+HcpApiAttest.py unseal /assetverifier "$tmp/bundle.tar.gz" /assets
 
 echo "Done, listing /assets;"
 ls -l /assets

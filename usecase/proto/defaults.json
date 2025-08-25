@@ -6,7 +6,7 @@
     "attester_retry": 5,
     "attester_tool": "/hcp/tools/run_attestclient.sh",
     "attester_api": "https://attestsvc.hcphacking.xyz",
-    "attester_verifier": "/assetverifier/key.pem",
+    "attester_verifier": "/assetverifier",
     "attester_assetdir": "/assets",
     "attester_cacert": "/ca_default/CA.cert",
     "attester_until": "/assets/touch",
