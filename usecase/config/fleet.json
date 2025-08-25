@@ -58,14 +58,14 @@
         "kdc_primary": {
             "vars": { "hostname": "kdc_primary.hcphacking.xyz" },
             "enroll_profile": {
-                "certgen": [ "https-server", "pkinit-kdc" ]
+                "certgen": [ "pkinit-kdc" ]
             },
             "volumes": [ "kdc_primary:/kdc_primary" ]
         },
         "kdc_secondary": {
             "vars": { "hostname": "kdc_secondary.hcphacking.xyz" },
             "enroll_profile": {
-                "certgen": [ "https-server", "pkinit-kdc",
+                "certgen": [ "pkinit-kdc",
                              "pkinit-iprop" ],
                 "krb5conf": {
                     "_": ["The point here is that kdc_secondary is the only host",
