@@ -119,6 +119,7 @@ services:
         volumes:
           - kdc_secondary:/kdc_secondary
           - tpmsocket_kdc_secondary:/tpmsocket_secondary.kdc
+          - ./_testcreds/ca_kdcsvc:/ca_kdcsvc:ro
         environment:
           - HCP_CONFIG_FILE=/usecase/hosts/kdc_secondary.json
 

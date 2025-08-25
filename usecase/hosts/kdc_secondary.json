@@ -16,6 +16,7 @@
         "webapi_port": 443,
         "webapi_https_certificate": "/assets/https-server-secondary.kdc.hcphacking.xyz.pem",
         "webapi_https_authentication": "clientcert",
+        "webapi_https_client_CA": "/ca_kdcsvc/CA.cert",
         "webapi_setup": { "touchfile": "/tmp/touch-kdcsvc-local-setup-HCPHACKING.XYZ" }
     },
     "args_for": "kdcsvc_TGS",
