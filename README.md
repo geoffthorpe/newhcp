@@ -44,7 +44,7 @@ V=1 NOTRAP=1 ./test.sh
 docker-compose ps
 
 # Show (+follow) the enrollment and attestation service containers
-docker-compose logs -f emgmt erepl arepl ahcp
+docker-compose logs -f enrollsvc attestsvc
 
 # Get a root shell on the secondary KDC
 docker-compose exec kdc_secondary bash
@@ -53,19 +53,22 @@ docker-compose exec kdc_secondary bash
 ### Step 1 of 2: get a Kerberos-authenticated shell
 
 ```
-docker-compose exec workstation1 bash
-root@workstation1:/# su - luser
-luser@workstation1:~$ kinit \
-    -C FILE:/home/luser/.hcp/pkinit/user-luser-key.pem luser bash
-luser@workstation1:~$ echo $KRB5CCNAME 
-FILE:/tmp/krb5cc_zJ0xtC
+docker-compose exec alicia bash
+root@alicia:/# su -w HCP_CONFIG_FILE,KRB5_CONFIG - alicia
+alicia@alicia:~$ kinit -C FILE:/assets/pkinit-client-alicia.pem alicia bash
+alicia@alicia:~$ klist
+Credentials cache: FILE:/tmp/krb5cc_yorGFK
+        Principal: alicia@HCPHACKING.XYZ
+
+  Issued                Expires               Principal
+Aug 19 17:26:57 2025  Aug 19 17:31:57 2025  krbtgt/HCPHACKING.XYZ@HCPHACKING.XYZ
 ```
 
 ### Step 2 of 2: ssh
 
 ```
-luser@workstation1:~$ ssh ssherver1.hcphacking.xyz
-luser@ssherver1:~$
+alicia@alicia:~$ ssh shell.hcphacking.xyz
+alicia@shell:~$
 ```
 
 ### Teardown all running containers
@@ -102,7 +105,7 @@ A cotenant service that allows a host's user accounts to become ssh-accessible u
 
 ### WebAPI service
 
-A web-API-hosting service (based on uwsgi) for representing Flask applications and, if enabled, providing a HTTPS reverse-proxy (based on nginx) using TLS certificates obtained from TPM enrollment. This service runs co-tenant inside all the other serviecs that provide web APIs (dog-food).
+A web-API-hosting service (based on uwsgi) for representing Flask applications and, if enabled, providing a HTTPS reverse-proxy (based on nginx) using TLS certificates obtained from TPM enrollment. This service runs co-tenant inside all the other services that provide web APIs (dog-food).
 
 ### **[Tooling](doc/tooling.md)**
 
