@@ -79,7 +79,7 @@ if [[ ! -d "\$path" ]]; then
 		| jq .defaults.enroll_profile \
 		| sed -e "s/{hostname}/enrollsvc.hcphacking.xyz/g" \
 		> "\$path/profile"
-	chown -R www-data "\$path"
+	chown -R www-data "/backend/db/\${hash:0:2}"
 fi
 EOF
 
