@@ -69,9 +69,12 @@ $(eval $(call parse_target,hcp_builder_nginx,hcp_builder_heimdal,cb_hcp_builder_
 $(eval $(call parse_target,hcp_caboodle,hcp_baseline,cb_hcp_caboodle))
 
 # default needs to go after parse_target() but before gen_rules()
-default: testcreds $(hcp_caboodle_trixie)
+default: testcreds $(hcp_caboodle_trixie) docker-compose.yml
 
 $(eval $(call gen_rules))
+
+docker-compose.yml: usecase/config/fleet.json
+	$Q./fleet.py
 
 # NB: the following dep uses "|" to avoid gratuitous rebuilds
 heimdal/$(HEIMDAL_OUT): | $(hcp_builder_heimdal_bookworm)
