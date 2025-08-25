@@ -12,12 +12,15 @@
         "enroll_api_clientcert": "/cred_enrollclient",
         "enroll_profile": {
             "hostname": "{hostname}",
-            "certgen": [ "https-server", "pkinit-client" ],
-            "pkinit-clients": [ "nobody" ],
+            "certgen": [ "https-server" ],
+            "pkinit-clients": [],
             "realm": "HCPHACKING.XYZ",
             "lifetime": "2h",
             "key-type": "rsa",
             "key-bits": 2048,
+            "ktgen": {
+                "api": "https://secondary.kdc.hcphacking.xyz"
+            },
             "krb5conf": {
                 "logging": {
                     "default": "STDERR"
@@ -51,19 +54,18 @@
                         "pkinit_win2k_require_binding": "yes"
                     }
                 }
-            },
-            "ktgen": {
-                "api": "https://secondary.kdc.hcphacking.xyz",
-                "sshd": [ "host/{hostname}" ]
             }
         }
     },
     "fleet": {
+        "enrollsvc": {
+            "vars": { "hostname": "enrollsvc.hcphacking.xyz" },
+            "tpm_path": "/tpm_enrollsvc"
+        },
         "kdc_primary": {
             "vars": { "hostname": "primary.kdc.hcphacking.xyz" },
             "tpm_path": "/tpm_primary.kdc",
             "enroll_profile": {
-                "ktgen": [],
                 "certgen": [ "https-server", "pkinit-kdc" ]
             }
         },
@@ -71,7 +73,6 @@
             "vars": { "hostname": "secondary.kdc.hcphacking.xyz" },
             "tpm_path": "/tpm_secondary.kdc",
             "enroll_profile": {
-                "ktgen": [],
                 "certgen": [ "https-server", "pkinit-kdc",
                              "pkinit-iprop" ],
                 "krb5conf": {
@@ -88,7 +89,12 @@
         },
         "shell": {
             "vars": { "hostname": "shell.hcphacking.xyz" },
-            "tpm_path": "/tpm_shell"
+            "tpm_path": "/tpm_shell",
+            "enroll_profile": {
+                "ktgen": {
+                    "sshd": [ "host/{hostname}" ]
+                }
+            }
         },
         "alicia": {
             "vars": { "hostname": "alicia.hcphacking.xyz" },
