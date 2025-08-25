@@ -58,7 +58,7 @@ class FleetHost:
             if 'enroll_api_clientcert' in self.profile else False
         self.tpm_create = self.profile['tpm_create']
         self.tpm_enroll = self.profile['tpm_enroll']
-        self.tpm_path = self.profile['tpm_path']
+        self.tpm_path = f"/tpm_{self.name}"
         self.enroll_profile = self.profile['enroll_profile']
         self.ekpub = f"{self.tpm_path}/tpm/ek.pub"
         self.exists = os.path.isfile(self.ekpub)

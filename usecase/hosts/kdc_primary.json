@@ -1,17 +1,17 @@
 {
     "vars": {
-        "id": "primary.kdc",
+        "id": "kdc_primary",
         "services": [ "attester", "kdcsvc", "webapi", "kdcsvc_TGS",
                         "kdcsvc_iprop_primary" ],
         "default_targets": [ "start-attester", "setup-global", "setup-local",
                             "start-services" ],
-        "kdcsvc_secondaries": [ "secondary.kdc.hcphacking.xyz" ],
+        "kdcsvc_secondaries": [ "kdc_secondary.hcphacking.xyz" ],
 	"kdcsvc_TGS_port": "3089",
 	"kdcsvc_pkinit_identity": "/assets/pkinit-kdc-HCPHACKING.XYZ.pem",
         "webapi_app": "/hcp/kdcsvc/mgmt_api.py",
-        "webapi_fqdn": "primary.kdc.hcphacking.xyz",
+        "webapi_fqdn": "kdc_primary.hcphacking.xyz",
         "webapi_port": 443,
-        "webapi_https_certificate": "/assets/https-server-primary.kdc.hcphacking.xyz.pem",
+        "webapi_https_certificate": "/assets/https-server-kdc_primary.hcphacking.xyz.pem",
         "webapi_https_authentication": "clientcert",
         "webapi_setup": { "touchfile": "/tmp/touch-kdcsvc-local-setup-HCPHACKING.XYZ" }
     },

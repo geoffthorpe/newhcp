@@ -108,7 +108,7 @@ do_run exec attestsvc \
 		--cacert /ca_default \
 		--clientcert /cred_kdcclient \
 		--retries 10 --pause 1 \
-		https://secondary.kdc.hcphacking.xyz/healthcheck
+		https://kdc_secondary.hcphacking.xyz/healthcheck
 
 echo "Enrolling the remaining TPMs"
 do_run run orchestrator -e

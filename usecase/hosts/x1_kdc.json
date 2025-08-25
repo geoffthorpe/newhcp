@@ -11,7 +11,7 @@
         "kdcsvc_key_rotation_period": "1m",
         "kdcsvc_max_ticket_life": "1m",
         "kdcsvc_max_renewable_life": "5m",
-        "kdcsvc_primary": "primary.kdc.hcphacking.xyz",
+        "kdcsvc_primary": "kdc_primary.hcphacking.xyz",
         "kdcsvc_TGS_port": "3088"
     },
     "args_for": "kdcsvc_TGS",

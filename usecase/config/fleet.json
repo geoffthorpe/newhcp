@@ -19,7 +19,7 @@
             "key-type": "rsa",
             "key-bits": 2048,
             "ktgen": {
-                "api": "https://secondary.kdc.hcphacking.xyz"
+                "api": "https://kdc_secondary.hcphacking.xyz"
             },
             "krb5conf": {
                 "logging": {
@@ -47,7 +47,7 @@
                 },
                 "realms": {
                     "HCPHACKING.XYZ": {
-                        "kdc": "secondary.kdc.hcphacking.xyz:3088",
+                        "kdc": "kdc_secondary.hcphacking.xyz:3088",
                         "pkinit_require_eku": "true",
                         "pkinit_require_krbtgt_otherName": "true",
                         "pkinit_win2k": "no",
@@ -57,21 +57,41 @@
             }
         }
     },
+    "volumes": [
+        "backend",
+        "kdc_primary",
+        "kdc_secondary"
+    ],
+    "attestsvc": {
+        "vars": { "hostname": "attestsvc.hcphacking.xyz" },
+        "volumes": [
+            "backend:/backend",
+            "./_testcreds/ca_default_private:/ca_default_private:ro",
+            "./_testcreds/ca_clienthttps_private:/ca_clienthttps_private:ro",
+            "./_testcreds/cred_attestsvc:/cred_attestsvc:ro",
+            "./_testcreds/cred_kdcclient:/cred_kdcclient:ro",
+            "./_testcreds/key_attestnoncer:/key_attestnoncer:ro",
+            "./_testcreds/signer_asset:/signer_asset:ro"
+        ]
+    },
     "fleet": {
         "enrollsvc": {
             "vars": { "hostname": "enrollsvc.hcphacking.xyz" },
-            "tpm_path": "/tpm_enrollsvc"
+            "volumes": [
+                "backend:/backend",
+                "./_testcreds/ca_enrollsvc:/ca_enrollsvc:ro",
+                "./_testcreds/cred_enrollsvc:/cred_enrollsvc:ro"
+            ]
         },
         "kdc_primary": {
-            "vars": { "hostname": "primary.kdc.hcphacking.xyz" },
-            "tpm_path": "/tpm_primary.kdc",
+            "vars": { "hostname": "kdc_primary.hcphacking.xyz" },
             "enroll_profile": {
                 "certgen": [ "https-server", "pkinit-kdc" ]
-            }
+            },
+            "volumes": [ "kdc_primary:/kdc_primary" ]
         },
         "kdc_secondary": {
-            "vars": { "hostname": "secondary.kdc.hcphacking.xyz" },
-            "tpm_path": "/tpm_secondary.kdc",
+            "vars": { "hostname": "kdc_secondary.hcphacking.xyz" },
             "enroll_profile": {
                 "certgen": [ "https-server", "pkinit-kdc",
                              "pkinit-iprop" ],
@@ -81,15 +101,18 @@
                           "override the setting in this one case."],
                     "realms": {
                         "HCPHACKING.XYZ": {
-                            "kdc": "primary.kdc.hcphacking.xyz:3089"
+                            "kdc": "kdc_primary.hcphacking.xyz:3089"
                         }
                     }
                 }
-            }
+            },
+            "volumes": [
+                "kdc_secondary:/kdc_secondary",
+                "./_testcreds/ca_kdcsvc:/ca_kdcsvc:ro"
+            ]
         },
         "shell": {
             "vars": { "hostname": "shell.hcphacking.xyz" },
-            "tpm_path": "/tpm_shell",
             "enroll_profile": {
                 "ktgen": {
                     "sshd": [ "host/{hostname}" ]
@@ -98,7 +121,6 @@
         },
         "alicia": {
             "vars": { "hostname": "alicia.hcphacking.xyz" },
-            "tpm_path": "/tpm_alicia",
             "enroll_profile": {
                 "certgen": [ "pkinit-client", "https-client" ],
                 "pkinit-clients": [ "alicia" ],
@@ -107,11 +129,10 @@
         },
         "auth_certificate": {
             "vars": { "hostname": "certificate.auth.hcphacking.xyz" },
-            "tpm_path": "/tpm_auth_certificate"
+            "volumes": [ "./_testcreds/ca_clienthttps:/ca_clienthttps:ro" ]
         },
         "auth_kerberos": {
             "vars": { "hostname": "kerberos.auth.hcphacking.xyz" },
-            "tpm_path": "/tpm_auth_kerberos",
             "enroll_profile": {
                 "ktgen": {
                     "http": [ "HTTP/{hostname}" ]
