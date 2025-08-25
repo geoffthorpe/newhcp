@@ -23,7 +23,7 @@ if [[ $phase == "pre" ]]; then
 			echo "$asset: chown to '$name'"
 			chown "$name" "$path"
 		else
-			echo "Ignoring"
+			echo "$asset: ignoring"
 		fi
 	fi
 
