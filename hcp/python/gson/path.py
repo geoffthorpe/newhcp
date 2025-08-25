@@ -48,11 +48,40 @@ def path_deconstruct(path):
             l.append(member)
     return l
 
+def path_exists(obj, pathlist):
+    while len(pathlist) > 0:
+        step = pathlist.pop(0)
+        if step not in obj:
+            return False
+        obj = obj[step]
+    return True
+
 def path_get(obj, pathlist):
     while len(pathlist) > 0:
         step = pathlist.pop(0)
         obj = obj[step]
     return obj
+
+# Compatibility interface from the old HcpJsonPath code. It would be preferable
+# to get rid of this. Without 'must_exist' or 'or_default', this function
+# returns a 2-tuple, which can lead to weird bugs caller-side if it's expecting
+# a single output.
+def extract_path(obj, path, must_exist = False, or_default = False,
+                 default = None):
+    def convert(exists, element):
+        if not must_exist and not or_default:
+            return (exists, element)
+        if exists:
+            return element
+        if or_default:
+            return default
+        raise Exception("Non-existent path into object")
+    pathlist = path_deconstruct(path)
+    try:
+        result = path_get(obj, pathlist)
+    except:
+        return convert(False, None)
+    return convert(True, result)
 
 def path_set(obj, pathlist, valjson):
     valobj = json.loads(valjson)

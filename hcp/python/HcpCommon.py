@@ -11,8 +11,7 @@ from datetime import datetime, timezone, timedelta
 
 sys.path.insert(1, '/hcp/python')
 
-import HcpJsonPath
-
+import gson.path as pat
 import gson.mutater as mut
 
 # Equivalent for the 'touch' command
@@ -142,7 +141,7 @@ def hcp_config_scope_set(path):
 	if not path.startswith('.'):
 		path = f".{path}"
 	hlog(2, f"hcp_config_scope_set: {path}")
-	_ = HcpJsonPath.extract_path(world, path, must_exist = True)
+	_ = pat.extract_path(world, path, must_exist = True)
 	os.environ['HCP_CONFIG_SCOPE'] = path
 def hcp_config_scope_get():
 	if 'HCP_CONFIG_FILE' not in os.environ:
@@ -204,7 +203,7 @@ def hcp_config_scope_shrink(path):
 	elif path != '.':
 		full_path = f"{full_path}{path}"
 	hcp_config_scope_set(full_path)
-# Don't forget, this API shares semantics with HcpJsonPath.extract_path(). Most
+# Don't forget, this API shares semantics with pat.extract_path(). Most
 # notably, it returns a 2-tuple by default;
 #  (boolean success, {dict|list|str|int|None} resultdata)
 # unless you set 'must_exist=True' or 'or_default=True'. If 'must_exist' is
@@ -226,7 +225,7 @@ def hcp_config_extract(path, **kwargs):
 		full_path = f"{full_path}{path}"
 	hlog(2,f"hcp_config_extract({path}), HCP_CONFIG_FILE={os.environ['HCP_CONFIG_FILE']}, full_path={full_path}")
 	world = jsonload(os.environ['HCP_CONFIG_FILE'])
-	return HcpJsonPath.extract_path(world, full_path, **kwargs)
+	return pat.extract_path(world, full_path, **kwargs)
 
 def env_get(k):
 	if not k in os.environ:
