@@ -28,7 +28,7 @@
                     "--generate-key=rsa",
                     "--key-bits=2048",
                     "--lifetime=10y",
-                    "--ca-certificate=FILE:/enrollcertissuer/CA.pem",
+                    "--ca-certificate=FILE:/ca_default_private",
                     "--pk-init-principal=alicia@HCPHACKING.XYZ",
 		    "--subject=CN=alicia,DC=x1_sshd,DC=hcphacking,DC=xyz" ],
                 "touchfile": "/pkinit_identity.pem"
