@@ -2,99 +2,100 @@
 
 TESTCREDS_OUT := $(TOP)/_testcreds
 TESTCREDS_DONE :=
-TESTCREDS_CA_ROOT_PRIVATE := $(TESTCREDS_OUT)/ca_root_private
-TESTCREDS_DONE += $(TESTCREDS_CA_ROOT_PRIVATE)/CA.cert
-TESTCREDS_CA_ROOT := $(TESTCREDS_OUT)/ca_root
-TESTCREDS_DONE += $(TESTCREDS_CA_ROOT)/CA.cert
-TESTCREDS_ENROLLSVC := $(TESTCREDS_OUT)/enrollsvc
-TESTCREDS_DONE += $(TESTCREDS_ENROLLSVC)/server.pem
-TESTCREDS_ATTESTSVC := $(TESTCREDS_OUT)/attestsvc
-TESTCREDS_DONE += $(TESTCREDS_ATTESTSVC)/server.pem
-TESTCREDS_ASSETSIGNER := $(TESTCREDS_OUT)/assetsigner
-TESTCREDS_DONE += $(TESTCREDS_ASSETSIGNER)/key.pem
-TESTCREDS_ASSETVERIFIER := $(TESTCREDS_OUT)/assetverifier
-TESTCREDS_DONE += $(TESTCREDS_ASSETVERIFIER)/key.pem
-TESTCREDS_ENROLLCLIENT := $(TESTCREDS_OUT)/enrollclient
-TESTCREDS_DONE += $(TESTCREDS_ENROLLCLIENT)/client.pem
-TESTCREDS_ENROLLHEALTHCLIENT := $(TESTCREDS_OUT)/enrollhealthclient
-TESTCREDS_DONE += $(TESTCREDS_ENROLLHEALTHCLIENT)/client.pem
-TESTCREDS_ATTESTNONCER := $(TESTCREDS_OUT)/attestnoncer
-TESTCREDS_DONE += $(TESTCREDS_ATTESTNONCER)/key
-TESTCREDS_CHILDREN := \
-	$(TESTCREDS_CA_ROOT_PRIVATE) \
-	$(TESTCREDS_CA_ROOT) \
-	$(TESTCREDS_ENROLLSVC) \
-	$(TESTCREDS_ATTESTSVC) \
-	$(TESTCREDS_ASSETSIGNER) \
-	$(TESTCREDS_ASSETVERIFIER) \
-	$(TESTCREDS_ENROLLCLIENT) \
-	$(TESTCREDS_ENROLLHEALTHCLIENT) \
-	$(TESTCREDS_ATTESTNONCER)
+COMMA := ,
+
+define add_CA
+$(eval name := $(strip $1))
+$(eval TESTCREDS_CA_$(name) := $(TESTCREDS_OUT)/ca_$(name))
+$(eval TESTCREDS_CA_$(name)_PRIVATE := $(TESTCREDS_OUT)/ca_$(name)_private)
+$(eval TESTCREDS_DONE += $(TESTCREDS_CA_$(name))/CA.cert)
+$(eval TESTCREDS_DONE += $(TESTCREDS_CA_$(name)_PRIVATE)/CA.cert)
+$(eval TESTCREDS_CHILDREN += $(TESTCREDS_CA_$(name)))
+$(eval TESTCREDS_CHILDREN += $(TESTCREDS_CA_$(name)_PRIVATE))
+$(TESTCREDS_CA_$(name)_PRIVATE)/CA.cert: | $(TESTCREDS_CA_$(name)_PRIVATE)
+	$Qcd $(TESTCREDS_CA_$(name)_PRIVATE) && \
+		hxtool issue-certificate --self-signed --issue-ca \
+		--generate-key=rsa --subject="CN=$(name),DC=hcphacking,DC=xyz" \
+		--lifetime=10years --certificate="FILE:CA.pem" && \
+		openssl x509 -in CA.pem -outform PEM -out "CA.cert"
+$(TESTCREDS_CA_$(name))/CA.cert: | $(TESTCREDS_CA_$(name))
+$(TESTCREDS_CA_$(name))/CA.cert: $(TESTCREDS_CA_$(name)_PRIVATE)/CA.cert
+	$$Qcp $$< $$@
+endef
+
+define add_cred_hxtool
+$(eval CA := $(strip $1))
+$(eval name := $(strip $2))
+$(eval _file := $(strip $3))
+$(eval flags := $(strip $4))
+$(eval TESTCREDS_$(name) := $(TESTCREDS_OUT)/$(name))
+$(eval TESTCREDS_DONE += $(TESTCREDS_$(name))/$(_file))
+$(eval TESTCREDS_CHILDREN += $(TESTCREDS_$(name)))
+$(TESTCREDS_$(name))/$(_file): | $(TESTCREDS_$(name))
+$(TESTCREDS_$(name))/$(_file): $(TESTCREDS_CA_$(CA)_PRIVATE)/CA.cert
+	$$Qcd $(TESTCREDS_$(name)) && \
+		hxtool issue-certificate \
+		--ca-certificate="FILE:$(TESTCREDS_CA_$(CA)_PRIVATE)/CA.pem" \
+		--certificate="FILE:$(_file)" \
+		--generate-key=rsa --key-bits=2048 \
+		$(flags)
+endef
+
+define add_cred_randkey
+$(eval name := $(strip $1))
+$(eval _file := $(strip $2))
+$(eval TESTCREDS_$(name) := $(TESTCREDS_OUT)/$(name))
+$(eval TESTCREDS_DONE += $(TESTCREDS_$(name))/$(_file))
+$(eval TESTCREDS_CHILDREN += $(TESTCREDS_$(name)))
+$(TESTCREDS_$(name))/$(_file): | $(TESTCREDS_$(name))
+	$$Qcd $(TESTCREDS_$(name)) && \
+		openssl rand -out $(_file) -hex 32
+endef
+
+# TODO: this should be unnecessary. Replace the assetsigner/assetverifier pair
+# by a certificate-based approach.
+define add_cred_keypair
+$(eval private := $(strip $1))
+$(eval public := $(strip $2))
+$(eval TESTCREDS_$(private) := $(TESTCREDS_OUT)/$(private))
+$(eval TESTCREDS_$(public) := $(TESTCREDS_OUT)/$(public))
+$(eval TESTCREDS_CHILDREN += $(TESTCREDS_$(private)))
+$(eval TESTCREDS_CHILDREN += $(TESTCREDS_$(public)))
+$(eval TESTCREDS_DONE += $(TESTCREDS_$(public))/key.pem)
+$(TESTCREDS_$(private))/key.pem: | $(TESTCREDS_$(private))
+	$$Qcd $(TESTCREDS_$(private)) && \
+		openssl genrsa -out key.priv && \
+		openssl rsa -pubout -in key.priv -out key.pem
+$(TESTCREDS_$(public))/key.pem: | $(TESTCREDS_$(public))
+$(TESTCREDS_$(public))/key.pem: $(TESTCREDS_$(private))/key.pem
+	$$Qcp $$< $$@
+endef
+
+$(eval $(call add_CA,root))
+$(eval $(call add_cred_hxtool,root,enrollsvc,server.pem, \
+		--type=https-server \
+		--hostname="enrollsvc.hcphacking.xyz" \
+		--subject="UID=emgmt$(COMMA)DC=hcphacking$(COMMA)DC=xyz"))
+$(eval $(call add_cred_hxtool,root,attestsvc,server.pem, \
+		--type=https-server \
+		--hostname="attestsvc.hcphacking.xyz" \
+		--subject="UID=emgmt$(COMMA)DC=hcphacking$(COMMA)DC=xyz"))
+$(eval $(call add_cred_hxtool,root,enrollclient,client.pem, \
+		--type=https-client \
+		--hostname="orchestrator.hcphacking.xyz" \
+		--subject="UID=orchestrator$(COMMA)DC=hcphacking$(COMMA)DC=xyz" \
+		--email="orchestrator@hcphacking.xyz"))
+$(eval $(call add_cred_hxtool,root,enrollhealthclient,client.pem, \
+		--type=https-client \
+		--hostname="_no_host.hcphacking.xyz" \
+		--subject="UID=healthclient$(COMMA)DC=hcphacking$(COMMA)DC=xyz" \
+		--email="healthclient@hcphacking.xyz"))
+$(eval $(call add_cred_randkey,attestnoncer,key))
+$(eval $(call add_cred_keypair,assetsigner,assetverifier))
+
 $(TESTCREDS_CHILDREN): | $(TESTCREDS_OUT)
 $(TESTCREDS_OUT) $(TESTCREDS_CHILDREN):
 	$Qmkdir $@
-
-$(TESTCREDS_CA_ROOT_PRIVATE)/CA.cert: | $(TESTCREDS_CA_ROOT_PRIVATE)
-	$Qcd $(TESTCREDS_CA_ROOT_PRIVATE) && \
-		hxtool issue-certificate --self-signed --issue-ca \
-		--generate-key=rsa --subject="CN=CA,DC=hcphacking,DC=xyz" \
-		--lifetime=10years --certificate="FILE:CA.pem" && \
-		openssl x509 -in CA.pem -outform PEM -out "CA.cert"
-$(TESTCREDS_CA_ROOT)/CA.cert: | $(TESTCREDS_CA_ROOT)
-$(TESTCREDS_CA_ROOT)/CA.cert: $(TESTCREDS_CA_ROOT_PRIVATE)/CA.cert
-	$Qcp $< $@
-$(TESTCREDS_ENROLLSVC)/server.pem: | $(TESTCREDS_ENROLLSVC)
-$(TESTCREDS_ENROLLSVC)/server.pem: $(TESTCREDS_CA_ROOT_PRIVATE)/CA.cert
-	$Qcd $(TESTCREDS_ENROLLSVC) && \
-		hxtool issue-certificate \
-		--ca-certificate="FILE:$(TESTCREDS_CA_ROOT_PRIVATE)/CA.pem" \
-		--type=https-server \
-		--hostname="enrollsvc.hcphacking.xyz" \
-		--subject="UID=emgmt,DC=hcphacking,DC=xyz" \
-		--generate-key=rsa --key-bits=2048 \
-		--certificate="FILE:server.pem"
-$(TESTCREDS_ATTESTSVC)/server.pem: | $(TESTCREDS_ATTESTSVC)
-$(TESTCREDS_ATTESTSVC)/server.pem: $(TESTCREDS_CA_ROOT_PRIVATE)/CA.cert
-	$Qcd $(TESTCREDS_ATTESTSVC) && \
-		hxtool issue-certificate \
-		--ca-certificate="FILE:$(TESTCREDS_CA_ROOT_PRIVATE)/CA.pem" \
-		--type=https-server \
-		--hostname="attestsvc.hcphacking.xyz" \
-		--subject="UID=emgmt,DC=hcphacking,DC=xyz" \
-		--generate-key=rsa --key-bits=2048 \
-		--certificate="FILE:server.pem"
-$(TESTCREDS_ASSETSIGNER)/key.pem: | $(TESTCREDS_ASSETSIGNER)
-	$Qcd $(TESTCREDS_ASSETSIGNER) && \
-		openssl genrsa -out key.priv && \
-		openssl rsa -pubout -in key.priv -out key.pem
-$(TESTCREDS_ASSETVERIFIER)/key.pem: | $(TESTCREDS_ASSETVERIFIER)
-$(TESTCREDS_ASSETVERIFIER)/key.pem: $(TESTCREDS_ASSETSIGNER)/key.pem
-	$Qcp $< $@
-$(TESTCREDS_ENROLLCLIENT)/client.pem: | $(TESTCREDS_ENROLLCLIENT)
-$(TESTCREDS_ENROLLCLIENT)/client.pem: $(TESTCREDS_CA_ROOT_PRIVATE)/CA.cert
-	$Qcd $(TESTCREDS_ENROLLCLIENT) && \
-		hxtool issue-certificate \
-		--ca-certificate="FILE:$(TESTCREDS_CA_ROOT_PRIVATE)/CA.pem" \
-		--type=https-client \
-		--hostname="orchestrator.hcphacking.xyz" \
-		--subject="UID=orchestrator,DC=hcphacking,DC=xyz" \
-			--email="orchestrator@hcphacking.xyz" \
-		--generate-key=rsa --key-bits=2048 \
-		--certificate="FILE:client.pem"
-$(TESTCREDS_ENROLLHEALTHCLIENT)/client.pem: | $(TESTCREDS_ENROLLHEALTHCLIENT)
-$(TESTCREDS_ENROLLHEALTHCLIENT)/client.pem: $(TESTCREDS_CA_ROOT_PRIVATE)/CA.cert
-	$Qcd $(TESTCREDS_ENROLLHEALTHCLIENT) && \
-		hxtool issue-certificate \
-		--ca-certificate="FILE:$(TESTCREDS_CA_ROOT_PRIVATE)/CA.pem" \
-		--type=https-client \
-		--hostname="orchestrator.hcphacking.xyz" \
-		--subject="UID=healthclient,DC=hcphacking,DC=xyz" \
-			--email="healthclient@hcphacking.xyz" \
-		--generate-key=rsa --key-bits=2048 \
-		--certificate="FILE:client.pem"
-$(TESTCREDS_ATTESTNONCER)/key: | $(TESTCREDS_ATTESTNONCER)
-	$Qcd $(TESTCREDS_ATTESTNONCER) && \
-		openssl rand -out key -hex 32
 
 testcreds: $(TESTCREDS_DONE)
 ifneq (,$(wildcard $(TESTCREDS_OUT)))
