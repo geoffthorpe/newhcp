@@ -1,8 +1,8 @@
 {
     "vars": {
         "id": "attestsvc",
-        "services": [ "waitdb", "copykey", "webapi" ],
-        "default_targets": [ "setup-waitdb", "setup-copykey", "start-services" ],
+        "services": [ "createdb", "copykey", "webapi" ],
+        "default_targets": [ "setup-createdb", "setup-copykey", "start-services" ],
         "webapi_app": "/hcp/backend/attestsvc.py",
         "webapi_fqdn": "attestsvc.hcphacking.xyz",
         "webapi_port": 443,
@@ -20,11 +20,12 @@
         { "load": ".webapi", "path": "/usecase/proto/webapi.json" }
     ],
 
-    "waitdb": {
+    "createdb": {
         "setup": [ {
-            "tag": "waitdb",
-            "exec": [ "/hcp/python/HcpToolWaitTouchfile.py", "/backend/.db-created" ],
-            "touchfile": "/backend/.db-created"
+                "tag": "createdb",
+                "exec": [ "bash", "-c",
+                    "mkdir -p /backend/db && chown -R www-data /backend/db && touch /backend/.db-created" ],
+                "touchfile": "/backend/.db-created"
         } ]
     },
 

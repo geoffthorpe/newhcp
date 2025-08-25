@@ -1,8 +1,8 @@
 {
     "vars": {
         "id": "enrollsvc",
-        "services": [ "createdb", "webapi" ],
-        "default_targets": [ "setup-createdb", "start-services" ],
+        "services": [ "waitdb", "webapi" ],
+        "default_targets": [ "setup-waitdb", "start-services" ],
         "webapi_app": "/hcp/backend/enrollsvc.py",
         "webapi_fqdn": "enrollsvc.hcphacking.xyz",
         "webapi_port": 443,
@@ -21,12 +21,11 @@
         { "load": ".webapi", "path": "/usecase/proto/webapi.json" }
     ],
 
-    "createdb": {
+    "waitdb": {
         "setup": [ {
-                "tag": "createdb",
-                "exec": [ "bash", "-c",
-                    "mkdir -p /backend/db && chown -R www-data /backend/db && touch /backend/.db-created" ],
-                "touchfile": "/backend/.db-created"
+            "tag": "waitdb",
+            "exec": [ "/hcp/python/HcpToolWaitTouchfile.py", "/backend/.db-created" ],
+            "touchfile": "/backend/.db-created"
         } ]
     }
 }

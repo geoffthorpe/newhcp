@@ -54,8 +54,8 @@ do_exit() {
 echo "Destroying any existing state"
 do_run down
 
-echo "Starting core enrollsvc and attestsvc services"
-do_run up enrollsvc attestsvc
+echo "Starting core attestsvc and enrollsvc services"
+do_run up attestsvc enrollsvc
 
 echo "Creating TPMs"
 do_run run orchestrator -c
