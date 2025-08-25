@@ -78,7 +78,10 @@ echo "Enrolling the other TPMs"
 do_run run orchestrator -e
 
 echo "Starting other hosts"
-do_run up shell shell_tpm alicia alicia_tpm
+do_run up shell shell_tpm alicia alicia_tpm \
+	auth_certificate auth_certificate_tpm \
+	auth_kerberos auth_kerberos_tpm
+
 
 # Now we can't cheat, we have to wait. NB, by waiting for sshd launch, we
 # implicitly wait for attestation.
@@ -107,7 +110,7 @@ do_run exec shell \
 #         - Run 'hostname', the output will return through the ssh shell.
 # - pass the output through 'xargs' (a trick to strip whitespace)
 # - we confirm that all of the above generated "shell.hcphacking.xyz".
-echo "Running an SSO ssh session to confirm all is well"
+echo "Running an SSO ssh session alicia -> shell"
 result=$(do_run execT alicia bash <<EOF
 source /hcp/common/hcp.sh
 kinit -C FILE:/assets/pkinit-client-alicia.pem alicia \
@@ -122,8 +125,24 @@ if [[ $result != 'shell.hcphacking.xyz' ]]; then
 	exit 1
 fi
 
-echo "Start up auth_{certificate,kerberos} servers"
-do_run up auth_certificate auth_certificate_tpm \
-	  auth_kerberos auth_kerberos_tpm
+echo "Running a client-certificate authentication alicia -> auth_certificate"
+result=$(docker-compose exec alicia curl --cacert /ca_default --cert /assets/https-client-alicia.pem https://certificate.auth.hcphacking.xyz/get | jq .is_secure)
+if [[ $result != 'true' ]]; then
+	echo "Error, unexpected output: $result" >&2
+	exit 1
+fi
+
+echo "Running a kerberos-SPNEGO authentication alicia -> auth_kerberos"
+result=$(do_run execT alicia bash <<EOF
+source /hcp/common/hcp.sh
+kinit -C FILE:/assets/pkinit-client-alicia.pem alicia \
+	curl --cacert /ca_default --negotiate -u : https://kerberos.auth.hcphacking.xyz/get \
+	| jq .is_secure
+EOF
+)
+if [[ $result != 'true' ]]; then
+	echo "Error, unexpected output: $result" >&2
+	exit 1
+fi
 
 echo "Success"
