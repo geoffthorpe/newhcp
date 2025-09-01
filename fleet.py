@@ -157,9 +157,9 @@ if __name__ == '__main__':
             output['args_for'] = data['args_for']
         # perform parameter-expansion
         output['mutate'].append({ 'method': 'expand' })
-        # Generate host config (and make it human-readable + comparable)
+        # Generate host config (and make it human-readable)
         with open(f"{args.hosts}/{host}.json", 'w') as fp:
-            json.dump(output, fp, indent = 4, sort_keys = True)
+            json.dump(output, fp, indent = 4)
 
     else:
 
