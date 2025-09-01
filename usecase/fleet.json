@@ -36,8 +36,7 @@
     ],
     "orchestrator": {
         "args_for": "orchestrator",
-        "services": { "orchestrator": null },
-        "hack1": [ "orchestrator" ]
+        "services": { "orchestrator": null }
     },
     "attestsvc": {
         "hostname": "attestsvc.hcphacking.xyz",
@@ -59,7 +58,7 @@
                 "https_certificate": "/cred_attestsvc"
             }
         },
-        "hack1": [ "xtra", "webapi" ]
+        "xtra_services": [ "xtra" ]
     },
     "fleet": {
         "enrollsvc": {
@@ -81,8 +80,8 @@
                 "attester": null,
                 "tpm": null
             },
-            "env": [ "tpm2tools" ],
-            "hack1": [ "attester", "waitdb", "webapi" ]
+            "xtra_services": [ "waitdb" ],
+            "env": [ "tpm2tools" ]
         },
         "kdc_primary": {
             "hostname": "kdc_primary.hcphacking.xyz",
@@ -110,8 +109,8 @@
                 "kdcsvc_iprop_primary": null,
                 "tpm": null
             },
-            "env": [ "tpm2tools", "krb5" ],
-            "hack1": [ "kdcsvc_iprop_primary", "attester", "kdcsvc", "webapi", "kdcsvc_TGS" ]
+            "xtra_services": [ "kdcsvc" ],
+            "env": [ "tpm2tools", "krb5" ]
         },
         "kdc_secondary": {
             "hostname": "kdc_secondary.hcphacking.xyz",
@@ -152,8 +151,8 @@
                 "kdcsvc_iprop_secondary": null,
                 "tpm": null
             },
-            "env": [ "tpm2tools", "krb5" ],
-            "hack1": [ "kdcsvc_iprop_secondary", "attester", "kdcsvc", "webapi", "kdcsvc_TGS" ]
+            "xtra_services": [ "kdcsvc" ],
+            "env": [ "tpm2tools", "krb5" ]
         },
         "shell": {
             "hostname": "shell.hcphacking.xyz",
@@ -170,8 +169,7 @@
                 },
                 "tpm": null
             },
-            "env": [ "tpm2tools", "krb5", "sshd" ],
-            "hack1": [ "attester", "sshd" ]
+            "env": [ "tpm2tools", "krb5", "sshd" ]
         },
         "alicia": {
             "hostname": "alicia.hcphacking.xyz",
@@ -188,8 +186,7 @@
                 },
                 "tpm": null
             },
-            "env": [ "tpm2tools", "krb5", "sshd" ],
-            "hack1": [ "attester", "sshd" ]
+            "env": [ "tpm2tools", "krb5", "sshd" ]
         },
         "auth_certificate": {
             "hostname": "certificate.auth.hcphacking.xyz",
@@ -207,8 +204,7 @@
                 "attester": null,
                 "tpm": null
             },
-            "env": [ "tpm2tools", "krb5" ],
-            "hack1": [ "attester", "webapi" ]
+            "env": [ "tpm2tools", "krb5" ]
         },
         "auth_kerberos": {
             "hostname": "kerberos.auth.hcphacking.xyz",
@@ -229,8 +225,7 @@
                 "attester": null,
                 "tpm": null
             },
-            "env": [ "tpm2tools", "krb5", "httpskrb5" ],
-            "hack1": [ "attester", "webapi" ]
+            "env": [ "tpm2tools", "krb5", "httpskrb5" ]
         }
     }
 }

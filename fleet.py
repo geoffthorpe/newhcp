@@ -88,8 +88,13 @@ if __name__ == '__main__':
             data = _input['fleet'][host]
         else: # host == attestsvc or host == orchestrator
             data = _input[host]
-        # 'output' is the structure that gets jsonified into the host config
-        # start with what is invariant
+        servicenames = [ k for k in data['services']] \
+            if 'services' in data else []
+        if 'tpm' in servicenames:
+            servicenames.pop(servicenames.index('tpm'))
+        if 'xtra_services' in data:
+            servicenames += data['xtra_services']
+        # 'output' is the structure that gets jsonified at the end
         output = {
             'vars': {
                 'id': host
@@ -98,7 +103,7 @@ if __name__ == '__main__':
                 { 'method': 'load', 'jspath': '/usecase/proto/root.json' },
                 { 'method': 'union' }
             ],
-            'services': data['hack1'],
+            'services': servicenames,
             'default_targets': [ 'setup-global', 'setup-local',
                                  'start-services', 'start-tool' ]
         }
