@@ -10,7 +10,7 @@ def docker_write_service(fp, name, data, with_tpm = True):
     print(f"Writing service '{name}' to docker compose file")
     fp.write(f"    {name}:\n")
     fp.write('        extends: common_nontpm\n')
-    fp.write(f"        hostname: {data['vars']['hostname']}\n")
+    fp.write(f"        hostname: {data['hostname']}\n")
     fp.write('        volumes:\n')
     if with_tpm:
         fp.write(f"          - tpmsocket_{name}:/tpmsocket_{name}\n")
@@ -24,7 +24,7 @@ def docker_write_tpm(fp, name, data, with_tpm = True):
     print(f"Writing service '{name}_tpm' to docker compose file")
     fp.write(f"    {name}_tpm:\n")
     fp.write('        extends: common_tpm\n')
-    fp.write(f"        hostname: tpm.{data['vars']['hostname']}\n")
+    fp.write(f"        hostname: tpm.{data['hostname']}\n")
     fp.write('        volumes:\n')
     if with_tpm:
         fp.write(f"          - tpm_{name}:/tpm_{name}\n")

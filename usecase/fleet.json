@@ -41,7 +41,7 @@
         "hack2": [ "start-orchestrator" ]
     },
     "attestsvc": {
-        "vars": { "hostname": "attestsvc.hcphacking.xyz" },
+        "hostname": "attestsvc.hcphacking.xyz",
         "volumes": [
             "backend:/backend",
             "./_testcreds/ca_default_private:/ca_default_private:ro",
@@ -65,7 +65,7 @@
     },
     "fleet": {
         "enrollsvc": {
-            "vars": { "hostname": "enrollsvc.hcphacking.xyz" },
+            "hostname": "enrollsvc.hcphacking.xyz",
             "volumes": [
                 "backend:/backend",
                 "./_testcreds/ca_enrollsvc:/ca_enrollsvc:ro",
@@ -88,7 +88,7 @@
             "hack2": [ "start-attester", "setup-waitdb", "setup-selfenroll", "start-services" ]
         },
         "kdc_primary": {
-            "vars": { "hostname": "kdc_primary.hcphacking.xyz" },
+            "hostname": "kdc_primary.hcphacking.xyz",
             "enroll_profile": {
                 "certgen": [ "pkinit-kdc" ]
             },
@@ -118,7 +118,7 @@
             "hack2": [ "start-attester", "setup-global", "setup-local", "start-services" ]
         },
         "kdc_secondary": {
-            "vars": { "hostname": "kdc_secondary.hcphacking.xyz" },
+            "hostname": "kdc_secondary.hcphacking.xyz",
             "enroll_profile": {
                 "certgen": [ "pkinit-kdc",
                              "pkinit-iprop" ],
@@ -161,7 +161,7 @@
             "hack2": [ "start-attester", "setup-global", "setup-local", "start-services" ]
         },
         "shell": {
-            "vars": { "hostname": "shell.hcphacking.xyz" },
+            "hostname": "shell.hcphacking.xyz",
             "enroll_profile": {
                 "ktgen": {
                     "sshd": [ "host/{hostname}" ]
@@ -180,7 +180,7 @@
             "hack2": [ "start-attester", "start-services" ]
         },
         "alicia": {
-            "vars": { "hostname": "alicia.hcphacking.xyz" },
+            "hostname": "alicia.hcphacking.xyz",
             "enroll_profile": {
                 "certgen": [ "pkinit-client", "https-client" ],
                 "pkinit-clients": [ "alicia" ],
@@ -199,7 +199,7 @@
             "hack2": [ "start-attester", "start-services" ]
         },
         "auth_certificate": {
-            "vars": { "hostname": "certificate.auth.hcphacking.xyz" },
+            "hostname": "certificate.auth.hcphacking.xyz",
             "volumes": [ "./_testcreds/ca_httpsclient:/ca_httpsclient:ro" ],
             "services": {
                 "webapi": {
@@ -219,7 +219,7 @@
             "hack2": [ "start-attester", "start-services" ]
         },
         "auth_kerberos": {
-            "vars": { "hostname": "kerberos.auth.hcphacking.xyz" },
+            "hostname": "kerberos.auth.hcphacking.xyz",
             "enroll_profile": {
                 "ktgen": {
                     "http": [ "HTTP/{hostname}" ]

@@ -16,13 +16,13 @@ from HcpCommon import bail, log, hlog, \
 import HcpApiEnroll
 
 from gson.union import union
-from gson.expander import expand as expandload
+from gson.expander import expand
 
 fleetconfpath = hcp_config_extract('.orchestrator.fleet', must_exist = True)
 if not os.path.isfile(fleetconfpath):
     bail(f"No config at '{fleetconfpath}'")
 with open(fleetconfpath, 'r') as fp:
-    fleetconf = expandload(json.loads(fp.read()))
+    fleetconf = expand(json.loads(fp.read()))
 fleetdefaults = fleetconf.pop('defaults') if 'defaults' in fleetconf else {}
 fleet = fleetconf.pop('fleet') if 'fleet' in fleetconf else {}
 fleethosts = [ name for name in fleet if name != '_']
@@ -51,8 +51,10 @@ class FleetHost:
         if name not in fleet:
             raise Exception(f"Unknown fleet host '{name}'")
         self.name = name
+        self.hostname = fleet[name]['hostname']
         self.assume_enrolled = assume_enrolled
-        self.profile = expandload(union(fleetdefaults, fleet[name]))
+        self.profile = expand(union(fleetdefaults, fleet[name]),
+                              env = { 'hostname': self.hostname })
         self.api = self.profile['enroll_api']
         self.api_cacert = self.profile['enroll_api_cacert']
         self.api_clientcert = self.profile['enroll_api_clientcert'] \
