@@ -90,8 +90,8 @@ def requester_loop(request_fn, retries = 0, pause = 0):
 # They all return a 2-tuple of {result,json}, where result is True iff the
 # operation was successful.
 
-def attest_initiate(api, output, requests_verify = True, requests_cert = False,
-                    retries = 0, timeout = 120):
+def initiate(api, output, requests_verify = True, requests_cert = False,
+             retries = 0, timeout = 120):
     with tempfile.TemporaryDirectory() as tempdir:
         if not tpm2_flushall() or \
             not sr(['tpm2', 'createek',
@@ -131,7 +131,7 @@ def attest_initiate(api, output, requests_verify = True, requests_cert = False,
         fp.write(json.dumps(jr))
     return True
 
-def attest_quote(initial, output):
+def quote(initial, output):
     with open(initial, 'r') as fp:
         initjson = fp.read()
     init = json.loads(initjson)
@@ -177,8 +177,8 @@ def attest_quote(initial, output):
             return True
     return False
 
-def attest_complete(api, initial, quote, output, requests_verify = True,
-                    requests_cert = False, retries = 0, timeout = 120):
+def complete(api, initial, quote, output, requests_verify = True,
+             requests_cert = False, retries = 0, timeout = 120):
     form_data = {
         'initial': ('initial', open(initial, 'r')),
         'quote': ('quote', open(quote, 'rb'))
@@ -201,7 +201,7 @@ def attest_complete(api, initial, quote, output, requests_verify = True,
         fp.write(response.content)
     return True
 
-def attest_unseal(bundle, output, callback = None):
+def unseal(bundle, output, verifier, callback = None):
     if not os.path.isfile(f"{bundle}"):
         err(f"Error, no bundle at path '{bundle}'")
         return False
@@ -417,20 +417,21 @@ if __name__ == '__main__':
     # parent process. As such, catch them all here.
     try:
         if args.func == 'initiate':
-            result = attest_initiate(args.api, args.output,
-                                     requests_verify = requests_verify,
-                                     requests_cert = requests_cert,
-                                     timeout = args.timeout)
+            result = initiate(args.api, args.output,
+                              requests_verify = requests_verify,
+                              requests_cert = requests_cert,
+                              timeout = args.timeout)
         elif args.func == 'quote':
-            result = attest_quote(args.initial, args.output)
+            result = quote(args.initial, args.output)
         elif args.func == 'complete':
-            result = attest_complete(args.api, args.initial,
-                                     args.quote, args.output,
-                                     requests_verify = requests_verify,
-                                     requests_cert = requests_cert,
-                                     timeout = args.timeout)
+            result = complete(args.api, args.initial,
+                              args.quote, args.output,
+                              requests_verify = requests_verify,
+                              requests_cert = requests_cert,
+                              timeout = args.timeout)
         elif args.func == 'unseal':
-            result = attest_unseal(args.bundle, args.output, args.callback)
+            result = unseal(args.bundle, args.output, args.verifier,
+                            callback = args.callback)
         else:
             raise Exception("BUG")
     except Exception as e:

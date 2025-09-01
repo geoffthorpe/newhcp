@@ -9,5 +9,6 @@
     "verifier": "{attester_verifier}",
     "assetdir": "{attester_assetdir}",
     "cacert": "{attester_cacert}",
+    "callback": "{attester_callback}",
     "until": "{attester_assetdir}/touch"
 }
