@@ -39,7 +39,7 @@
         "services": { "orchestrator": null }
     },
     "attestsvc": {
-        "hostname": "attestsvc.hcphacking.xyz",
+        "hostname": "attestsvc.{domain}",
         "volumes": [
             "backend:/backend",
             "./_testcreds/ca_default_private:/ca_default_private:ro",
@@ -52,7 +52,7 @@
         "rootproto": { "attestsvc": null },
         "services": {
             "webapi": {
-                "fqdn": "attestsvc.hcphacking.xyz",
+                "fqdn": "{hostname}",
                 "https_authentication": "none",
                 "https_certificate": "/cred_attestsvc"
             }
@@ -61,7 +61,7 @@
     },
     "fleet": {
         "enrollsvc": {
-            "hostname": "enrollsvc.hcphacking.xyz",
+            "hostname": "enrollsvc.{domain}",
             "volumes": [
                 "backend:/backend",
                 "./_testcreds/ca_enrollsvc:/ca_enrollsvc:ro",
@@ -70,9 +70,9 @@
             "rootproto": { "enrollsvc": null },
             "services": {
                 "webapi": {
-                    "fqdn": "enrollsvc.hcphacking.xyz",
+                    "fqdn": "{hostname}",
                     "https_authentication": "clientcert",
-                    "https_certificate": "/assets/https-server-enrollsvc.hcphacking.xyz.pem",
+                    "https_certificate": "/assets/https-server-{hostname}.pem",
                     "https_client_CA": "/ca_enrollsvc"
                 },
                 "attester": null,
@@ -82,22 +82,22 @@
             "env": [ "tpm2tools" ]
         },
         "kdc_primary": {
-            "hostname": "kdc_primary.hcphacking.xyz",
+            "hostname": "kdc_primary.{domain}",
             "enroll_profile": {
                 "certgen": [ "pkinit-kdc" ]
             },
             "volumes": [ "kdc_primary:/kdc_primary" ],
             "rootproto": {
                 "kdcsvc": {
-                    "secondaries": [ "kdc_secondary.hcphacking.xyz" ],
+                    "secondaries": [ "kdc_secondary.{domain}" ],
                     "pkinit_identity": "/assets/pkinit-kdc-HCPHACKING.XYZ.pem"
                 }
             },
             "services": {
                 "webapi": {
                     "app": "/hcp/kdcsvc/mgmt_api.py",
-                    "fqdn": "kdc_primary.hcphacking.xyz",
-                    "https_certificate": "/assets/https-server-kdc_primary.hcphacking.xyz.pem",
+                    "fqdn": "{hostname}",
+                    "https_certificate": "/assets/https-server-{hostname}.pem",
                     "https_authentication": "clientcert",
                     "setup": { "touchfile": "/tmp/touch-kdcsvc-local-setup-HCPHACKING.XYZ" }
                 },
@@ -110,7 +110,7 @@
             "env": [ "tpm2tools", "krb5" ]
         },
         "kdc_secondary": {
-            "hostname": "kdc_secondary.hcphacking.xyz",
+            "hostname": "kdc_secondary.{domain}",
             "enroll_profile": {
                 "certgen": [ "pkinit-kdc",
                              "pkinit-iprop" ],
@@ -129,15 +129,15 @@
                 "kdcsvc": {
                     "dir": "/kdc_secondary",
                     "mode": "secondary",
-                    "primary": "kdc_primary.hcphacking.xyz",
+                    "primary": "kdc_primary.{domain}",
                     "pkinit_identity": "/assets/pkinit-kdc-HCPHACKING.XYZ.pem"
                 }
             },
             "services": {
                 "webapi": {
                     "app": "/hcp/kdcsvc/mgmt_api.py",
-                    "fqdn": "kdc_secondary.hcphacking.xyz",
-                    "https_certificate": "/assets/https-server-kdc_secondary.hcphacking.xyz.pem",
+                    "fqdn": "{hostname}",
+                    "https_certificate": "/assets/https-server-{hostname}.pem",
                     "https_authentication": "clientcert",
                     "https_client_CA": "/ca_kdcsvc",
                     "setup": { "touchfile": "/tmp/touch-kdcsvc-local-setup-HCPHACKING.XYZ" }
@@ -151,7 +151,7 @@
             "env": [ "tpm2tools", "krb5" ]
         },
         "shell": {
-            "hostname": "shell.hcphacking.xyz",
+            "hostname": "shell.{domain}",
             "enroll_profile": {
                 "ktgen": {
                     "sshd": [ "host/{hostname}" ]
@@ -160,7 +160,7 @@
             "services": {
                 "attester": null,
                 "sshd": {
-                    "fqdn": "shell.hcphacking.xyz",
+                    "fqdn": "{hostname}",
                     "port": 22
                 },
                 "tpm": null
@@ -168,7 +168,7 @@
             "env": [ "tpm2tools", "krb5", "sshd" ]
         },
         "alicia": {
-            "hostname": "alicia.hcphacking.xyz",
+            "hostname": "alicia.{domain}",
             "enroll_profile": {
                 "certgen": [ "pkinit-client", "https-client" ],
                 "pkinit-clients": [ "alicia" ],
@@ -177,7 +177,7 @@
             "services": {
                 "attester": null,
                 "sshd": {
-                    "fqdn": "alicia.hcphacking.xyz",
+                    "fqdn": "{hostname}",
                     "port": 22
                 },
                 "tpm": null
@@ -185,16 +185,16 @@
             "env": [ "tpm2tools", "krb5", "sshd" ]
         },
         "auth_certificate": {
-            "hostname": "certificate.auth.hcphacking.xyz",
+            "hostname": "certificate.auth.{domain}",
             "volumes": [ "./_testcreds/ca_httpsclient:/ca_httpsclient:ro" ],
             "services": {
                 "webapi": {
                     "app": "/hcp/python/HcpFlaskDummy.py",
-                    "fqdn": "certificate.auth.hcphacking.xyz",
-                    "https_certificate": "/assets/https-server-certificate.auth.hcphacking.xyz.pem",
+                    "fqdn": "{hostname}",
+                    "https_certificate": "/assets/https-server-{hostname}.pem",
                     "https_authentication": "clientcert",
                     "https_client_CA": "/ca_httpsclient",
-                    "setup": { "touchfile": "/assets/https-server-certificate.auth.hcphacking.xyz.pem" }
+                    "setup": { "touchfile": "/assets/https-server-{hostname}.pem" }
                 },
                 "attester": null,
                 "tpm": null
@@ -202,7 +202,7 @@
             "env": [ "tpm2tools", "krb5" ]
         },
         "auth_kerberos": {
-            "hostname": "kerberos.auth.hcphacking.xyz",
+            "hostname": "kerberos.auth.{domain}",
             "enroll_profile": {
                 "ktgen": {
                     "http": [ "HTTP/{hostname}" ]
@@ -211,10 +211,10 @@
             "services": {
                 "webapi": {
                     "app": "/hcp/python/HcpFlaskDummy.py",
-                    "fqdn": "kerberos.auth.hcphacking.xyz",
-                    "https_certificate": "/assets/https-server-kerberos.auth.hcphacking.xyz.pem",
+                    "fqdn": "{hostname}",
+                    "https_certificate": "/assets/https-server-{hostname}.pem",
                     "https_authentication": "kerberos",
-                    "setup": { "touchfile": "/assets/https-server-kerberos.auth.hcphacking.xyz.pem" }
+                    "setup": { "touchfile": "/assets/https-server-{hostname}.pem" }
                 },
                 "attester": null,
                 "tpm": null
