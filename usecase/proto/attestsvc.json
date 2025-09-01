@@ -1,7 +1,5 @@
 {
     "vars": {
-        "services": [ "createdb", "copykey", "webapi" ],
-        "default_targets": [ "setup-createdb", "setup-copykey", "start-services" ],
         "webapi_app": "/hcp/backend/attestsvc.py"
     },
 

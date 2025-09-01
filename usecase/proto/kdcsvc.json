@@ -1,10 +1,4 @@
 {
-    "vars": {
-        "services": [ "attester", "kdcsvc", "webapi", "kdcsvc_TGS" ],
-        "default_targets": [ "start-attester", "setup-global", "setup-local",
-                            "start-services" ]
-    },
-
     "kdcsvc": {
         "setup": [ {
                 "tag": "global",

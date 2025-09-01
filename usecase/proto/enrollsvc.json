@@ -1,8 +1,5 @@
 {
     "vars": {
-        "services": [ "attester", "waitdb", "selfenroll", "webapi" ],
-        "default_targets": [ "start-attester", "setup-waitdb",
-                             "setup-selfenroll", "start-services" ],
         "webapi_app": "/hcp/backend/enrollsvc.py"
     },
 
