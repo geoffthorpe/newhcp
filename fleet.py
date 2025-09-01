@@ -99,8 +99,11 @@ if __name__ == '__main__':
                 { 'method': 'union' }
             ],
             'services': data['hack1'],
-            'default_targets': data['hack2']
+            'default_targets': [ 'setup-global', 'setup-local',
+                                 'start-services', 'start-tool' ]
         }
+        if 'attester' in data['services']:
+            output['default_targets'] = [ 'start-attester' ] + output['default_targets']
         # add a root prototype (merged into the top-level, rather than into
         # a named sub-object) if requested.
         if 'rootproto' in data:

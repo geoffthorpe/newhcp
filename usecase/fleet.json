@@ -37,8 +37,7 @@
     "orchestrator": {
         "args_for": "orchestrator",
         "services": { "orchestrator": null },
-        "hack1": [ "orchestrator" ],
-        "hack2": [ "start-orchestrator" ]
+        "hack1": [ "orchestrator" ]
     },
     "attestsvc": {
         "hostname": "attestsvc.hcphacking.xyz",
@@ -60,8 +59,7 @@
                 "https_certificate": "/cred_attestsvc"
             }
         },
-        "hack1": [ "createdb", "copykey", "webapi" ],
-        "hack2": [ "setup-createdb", "setup-copykey", "start-services" ]
+        "hack1": [ "createdb", "copykey", "webapi" ]
     },
     "fleet": {
         "enrollsvc": {
@@ -84,8 +82,7 @@
                 "tpm": null
             },
             "env": [ "tpm2tools" ],
-            "hack1": [ "attester", "waitdb", "selfenroll", "webapi" ],
-            "hack2": [ "start-attester", "setup-waitdb", "setup-selfenroll", "start-services" ]
+            "hack1": [ "attester", "waitdb", "webapi" ]
         },
         "kdc_primary": {
             "hostname": "kdc_primary.hcphacking.xyz",
@@ -114,8 +111,7 @@
                 "tpm": null
             },
             "env": [ "tpm2tools", "krb5" ],
-            "hack1": [ "kdcsvc_iprop_primary", "attester", "kdcsvc", "webapi", "kdcsvc_TGS" ],
-            "hack2": [ "start-attester", "setup-global", "setup-local", "start-services" ]
+            "hack1": [ "kdcsvc_iprop_primary", "attester", "kdcsvc", "webapi", "kdcsvc_TGS" ]
         },
         "kdc_secondary": {
             "hostname": "kdc_secondary.hcphacking.xyz",
@@ -157,8 +153,7 @@
                 "tpm": null
             },
             "env": [ "tpm2tools", "krb5" ],
-            "hack1": [ "kdcsvc_iprop_secondary", "attester", "kdcsvc", "webapi", "kdcsvc_TGS" ],
-            "hack2": [ "start-attester", "setup-global", "setup-local", "start-services" ]
+            "hack1": [ "kdcsvc_iprop_secondary", "attester", "kdcsvc", "webapi", "kdcsvc_TGS" ]
         },
         "shell": {
             "hostname": "shell.hcphacking.xyz",
@@ -176,8 +171,7 @@
                 "tpm": null
             },
             "env": [ "tpm2tools", "krb5", "sshd" ],
-            "hack1": [ "attester", "sshd" ],
-            "hack2": [ "start-attester", "start-services" ]
+            "hack1": [ "attester", "sshd" ]
         },
         "alicia": {
             "hostname": "alicia.hcphacking.xyz",
@@ -195,8 +189,7 @@
                 "tpm": null
             },
             "env": [ "tpm2tools", "krb5", "sshd" ],
-            "hack1": [ "attester", "sshd" ],
-            "hack2": [ "start-attester", "start-services" ]
+            "hack1": [ "attester", "sshd" ]
         },
         "auth_certificate": {
             "hostname": "certificate.auth.hcphacking.xyz",
@@ -215,8 +208,7 @@
                 "tpm": null
             },
             "env": [ "tpm2tools", "krb5" ],
-            "hack1": [ "attester", "webapi" ],
-            "hack2": [ "start-attester", "start-services" ]
+            "hack1": [ "attester", "webapi" ]
         },
         "auth_kerberos": {
             "hostname": "kerberos.auth.hcphacking.xyz",
@@ -238,8 +230,7 @@
                 "tpm": null
             },
             "env": [ "tpm2tools", "krb5", "httpskrb5" ],
-            "hack1": [ "attester", "webapi" ],
-            "hack2": [ "start-attester", "start-services" ]
+            "hack1": [ "attester", "webapi" ]
         }
     }
 }

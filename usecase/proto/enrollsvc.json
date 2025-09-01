@@ -8,19 +8,9 @@
 
     "waitdb": {
         "setup": [ {
-            "tag": "waitdb",
+            "tag": "global",
             "exec": [ "/hcp/python/HcpToolWaitTouchfile.py", "/backend/.db-created" ],
             "touchfile": "/backend/.db-created"
-        } ]
-    },
-
-    "selfenroll": {
-        "setup": [ {
-            "tag": "selfenroll",
-            "exec": [
-                "touch", "/backend/.enrollsvc-enrolled"
-            ],
-            "touchfile": "/backend/.enrollsvc-enrolled"
         } ]
     }
 }

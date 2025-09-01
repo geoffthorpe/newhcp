@@ -7,7 +7,7 @@
 
     "createdb": {
         "setup": [ {
-                "tag": "createdb",
+                "tag": "global",
                 "exec": [ "bash", "-c",
                     "mkdir -p /backend/db && chown -R www-data /backend/db && touch /backend/.db-created" ],
                 "touchfile": "/backend/.db-created"
@@ -16,7 +16,7 @@
 
     "copykey": {
         "setup": [ {
-            "tag": "copykey",
+            "tag": "local",
             "exec": [ "bash", "-c",
                 "cp /key_attestnoncer /tmp/www-data-noncekey && cp /signer_asset /tmp/www-data-signer && chown www-data /tmp/www-data-* && touch /tmp/www-data.copied"],
             "touchfile": "/tmp/www-data.copied"

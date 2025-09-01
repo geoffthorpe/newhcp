@@ -1,5 +1,5 @@
 {
     "exec": "/hcp/python/HcpToolOrchestrator.py",
-    "tag": "orchestrator",
+    "tag": "tool",
     "fleet": "{orchestrator_fleet}"
 }
