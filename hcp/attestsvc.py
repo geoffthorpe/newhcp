@@ -11,6 +11,7 @@ from pathlib import Path
 import tempfile
 import requests
 import time
+import yaml
 
 app = flask.Flask(__name__)
 app.config["DEBUG"] = False
@@ -168,7 +169,6 @@ def my_complete():
             return make_response("Error: AK pub missing from quote", 400)
         if c.stdout.find('value: fixedtpm|stclear|fixedparent|sensitivedataorigin|userwithauth|restricted|sign') < 0:
             return make_response("Error: AK pub has wrong attributes", 400)
-        c = subprocess.run(['ls', tempdir], capture_output = True, text = True)
         c = subprocess.run(['tpm2', 'checkquote',
                             '--qualification', nonce,
                             '--message', f"{tempdir}/quote.out",
