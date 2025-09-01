@@ -30,7 +30,7 @@
     "kdcsvc_admin_email": "attestsvc@hcphacking.xyz",
     "kdcsvc_TGS_tag": "services",
     "NODEFAULT_kdcsvc_TGS_port": -1,
-    "orchestrator_fleet": "/usecase/config/fleet.json",
+    "orchestrator_fleet": "/usecase/fleet.json",
     "policysvc_port": 9080,
     "NODEFAULT_policysvc_config": "none.policy.json",
     "policysvc_uwsgi_env": { "HCP_TRACEFILE": "/tmp" },

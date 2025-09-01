@@ -44,13 +44,13 @@ if __name__ == '__main__':
 """
     parser = argparse.ArgumentParser(description=fleet_desc,
                                      epilog=fleet_epilog)
-    fleet_help_input = 'path to JSON input, default = usecase/config/fleet.json'
+    fleet_help_input = 'path to JSON input, default = usecase/fleet.json'
     fleet_help_docker = 'path to docker-compose output, default = docker-compose.yml'
     fleet_help_hosts = 'path to directory for host configs, default = _crud/usecase'
     fleet_help_show = 'display the fleet host-ids (modifies no files)'
     fleet_help_host = 'name of host to produce config for (there is no default)'
     parser.add_argument('--input', metavar = '<PATH>',
-                        default = 'usecase/config/fleet.json',
+                        default = 'usecase/fleet.json',
                         help = fleet_help_input)
     parser.add_argument('--docker', metavar = '<PATH>',
                         default = 'docker-compose.yml',

@@ -81,11 +81,11 @@ $(eval $(call gen_rules))
 
 $(USECASE_DIR): | $(CRUD)
 MDIRS += $(USECASE_DIR)
-docker-compose.yml: usecase/config/fleet.json fleet.py
+docker-compose.yml: usecase/fleet.json fleet.py
 	$Q./fleet.py
 define usecase_host
 $(USECASE_DIR)/$1.json: | $(USECASE_DIR)
-$(USECASE_DIR)/$1.json: usecase/config/fleet.json fleet.py
+$(USECASE_DIR)/$1.json: usecase/fleet.json fleet.py
 	$Q./fleet.py --hosts=$(USECASE_DIR) $1
 endef
 $(foreach i,$(USECASE_HOSTS),$(eval $(call usecase_host,$i)))

@@ -75,7 +75,7 @@ if [[ ! -d "\$path" ]]; then
 	mkdir -p "\$path"
 	echo -n "\${hash:0:64}" > "\$path/ekpubhash"
 	cp "/tpmsocket_enrollsvc/tpm.files/ek.pub" "\$path/"
-	cat "/usecase/config/fleet.json" \
+	cat "/usecase/fleet.json" \
 		| jq .defaults.enroll_profile \
 		| sed -e "s/{hostname}/enrollsvc.hcphacking.xyz/g" \
 		> "\$path/profile"
