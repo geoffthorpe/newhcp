@@ -11,7 +11,7 @@ import tempfile
 import requests
 
 from gson.union import union
-from HcpPemHelper import get_email_address
+from hcp.openssl import get_email_address
 
 from hcp.common import log, current_tracefile, http2exit, exit2http
 
