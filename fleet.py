@@ -6,6 +6,8 @@ import os
 import sys
 import argparse
 
+from gson.expander import expand
+
 def docker_write_service(fp, name, data, with_tpm = True):
     print(f"Writing service '{name}' to docker compose file")
     fp.write(f"    {name}:\n")
@@ -68,6 +70,7 @@ if __name__ == '__main__':
 
     # Load the input
     _input = json.load(open(args.input, 'r'))
+    _input = expand(_input)
     hosts = [ x for x in _input['fleet'] ]
     if 'attestsvc' in hosts:
         raise Exception("'attestsvc' is not a valid fleet host id")
@@ -88,6 +91,7 @@ if __name__ == '__main__':
             data = _input['fleet'][host]
         else: # host == attestsvc or host == orchestrator
             data = _input[host]
+        hostname = data['hostname'] if 'hostname' in data else 'nada'
         servicenames = [ k for k in data['services']] \
             if 'services' in data else []
         if 'tpm' in servicenames:
@@ -97,7 +101,8 @@ if __name__ == '__main__':
         # 'output' is the structure that gets jsonified at the end
         output = {
             'vars': {
-                'id': host
+                'id': host,
+                'hostname': hostname
             },
             'mutate': [
                 { 'method': 'load', 'jspath': '/usecase/proto/root.json' },
