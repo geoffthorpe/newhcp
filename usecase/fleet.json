@@ -176,7 +176,7 @@
             "volumes": [ "./_testcreds/ca_httpsclient:/ca_httpsclient:ro" ],
             "services": {
                 "webapi": {
-                    "app": "/hcp/python/HcpFlaskDummy.py",
+                    "app": "/hcp/python/hcp/flask/dummy.py",
                     "https_certificate": "/assets/https-server-{hostname}.pem",
                     "https_authentication": "clientcert",
                     "https_client_CA": "/ca_httpsclient"
@@ -195,7 +195,7 @@
             },
             "services": {
                 "webapi": {
-                    "app": "/hcp/python/HcpFlaskDummy.py",
+                    "app": "/hcp/python/hcp/flask/dummy.py",
                     "https_certificate": "/assets/https-server-{hostname}.pem",
                     "https_authentication": "kerberos"
                 },
