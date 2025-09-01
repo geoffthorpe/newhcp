@@ -4,6 +4,8 @@ TESTCREDS_OUT := $(TOP)/_testcreds
 TESTCREDS_DONE :=
 COMMA := ,
 
+DOMAIN := $(shell jq -r .vars.domain usecase/fleet.json)
+
 define add_CA
 $(eval name := $(strip $1))
 $(eval TESTCREDS_CA_$(name) := $(TESTCREDS_OUT)/ca_$(name))
@@ -11,7 +13,7 @@ $(eval TESTCREDS_CA_$(name)_PRIVATE := $(TESTCREDS_OUT)/ca_$(name)_private)
 $(eval TESTCREDS_DONE += $(TESTCREDS_CA_$(name)))
 $(TESTCREDS_CA_$(name)_PRIVATE): | $(TESTCREDS_OUT)
 	$Qhxtool issue-certificate --self-signed --issue-ca \
-		--generate-key=rsa --subject="CN=$(name),DC=hcphacking,DC=xyz" \
+		--generate-key=rsa --subject="CN=$(name)" \
 		--lifetime=10years --certificate="FILE:$$@"
 $(TESTCREDS_CA_$(name)): | $(TESTCREDS_OUT)
 $(TESTCREDS_CA_$(name)): $(TESTCREDS_CA_$(name)_PRIVATE)
@@ -58,28 +60,28 @@ endef
 $(eval $(call add_CA,default))
 $(eval $(call add_cred_hxtool,default,attestsvc, \
 		--type=https-server \
-		--hostname="attestsvc.hcphacking.xyz" \
-		--subject="UID=emgmt$(COMMA)DC=hcphacking$(COMMA)DC=xyz"))
+		--hostname="attestsvc.$(DOMAIN)" \
+		--subject="UID=attestsvc"))
 
 $(eval $(call add_CA,httpsclient))
 $(eval $(call add_cred_hxtool,httpsclient,healthhttpsclient, \
 		--type=https-client \
-		--subject="UID=healthhttpsclient$(COMMA)DC=hcphacking$(COMMA)DC=xyz" \
-		--email="healthhttpsclient@hcphacking.xyz"))
+		--subject="UID=healthhttpsclient" \
+		--email="healthhttpsclient@$(DOMAIN)"))
 
 $(eval $(call add_CA,enrollsvc))
 $(eval $(call add_cred_hxtool,enrollsvc,enrollclient, \
 		--type=https-client \
-		--hostname="orchestrator.hcphacking.xyz" \
-		--subject="UID=orchestrator$(COMMA)DC=hcphacking$(COMMA)DC=xyz" \
-		--email="orchestrator@hcphacking.xyz"))
+		--hostname="orchestrator.$(DOMAIN)" \
+		--subject="UID=orchestrator" \
+		--email="orchestrator@$(DOMAIN)"))
 
 $(eval $(call add_CA,kdcsvc))
 $(eval $(call add_cred_hxtool,kdcsvc,kdcclient, \
 		--type=https-client \
-		--hostname="attestsvc.hcphacking.xyz" \
-		--subject="UID=attestsvc$(COMMA)DC=hcphacking$(COMMA)DC=xyz" \
-		--email="attestsvc@hcphacking.xyz"))
+		--hostname="attestsvc.$(DOMAIN)" \
+		--subject="UID=attestsvc" \
+		--email="attestsvc@$(DOMAIN)"))
 
 $(eval $(call add_cred_randkey,attestnoncer,key))
 $(eval $(call add_cred_keypair,asset))

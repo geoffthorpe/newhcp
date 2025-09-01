@@ -8,7 +8,7 @@ set -e
 	echo "WARN: no PROJECT set, defaulting to '$PROJECT'"
 DCFLAGS="-p $PROJECT"
 
-DOMAIN=hcphacking.xyz
+DOMAIN=$(jq -r .vars.domain usecase/fleet.json)
 
 echo "Running basic sanity test"
 
