@@ -70,7 +70,7 @@ $(eval $(call parse_target,hcp_caboodle,hcp_baseline,cb_hcp_caboodle))
 
 # The usecase requires host configs (and docker-compose.yml) to be generated
 # from fleet.json
-USECASE_HOSTS := $(shell ./fleet.py --show)
+USECASE_HOSTS := $(shell ./usecase/fleet.py --show)
 USECASE_DIR := $(CRUD)/usecase
 USECASE_OUTS := $(foreach i,$(USECASE_HOSTS),$(USECASE_DIR)/$(i).json)
 
@@ -81,12 +81,12 @@ $(eval $(call gen_rules))
 
 $(USECASE_DIR): | $(CRUD)
 MDIRS += $(USECASE_DIR)
-docker-compose.yml: usecase/fleet.json fleet.py
-	$Q./fleet.py
+docker-compose.yml: usecase/fleet.json usecase/fleet.py
+	$Q./usecase/fleet.py
 define usecase_host
 $(USECASE_DIR)/$1.json: | $(USECASE_DIR)
-$(USECASE_DIR)/$1.json: usecase/fleet.json fleet.py
-	$Q./fleet.py --hosts=$(USECASE_DIR) $1
+$(USECASE_DIR)/$1.json: usecase/fleet.json usecase/fleet.py
+	$Q./usecase/fleet.py --hosts=$(USECASE_DIR) $1
 endef
 $(foreach i,$(USECASE_HOSTS),$(eval $(call usecase_host,$i)))
 ifneq (,$(wildcard $(USECASE_DIR)))
