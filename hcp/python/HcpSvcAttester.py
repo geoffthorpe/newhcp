@@ -5,7 +5,7 @@ import os
 import subprocess
 import time
 
-from HcpCommon import log, bail, current_tracefile, hcp_config_extract
+from hcp.common import log, bail, current_tracefile, hcp_config_extract
 
 _period = hcp_config_extract('.attester.period', must_exist = True)
 _tool = hcp_config_extract('.attester.tool', must_exist = True)

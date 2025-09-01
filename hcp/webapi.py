@@ -9,7 +9,7 @@ import time
 import shutil
 import json
 
-import HcpCommon as h
+import hcp.common as h
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--healthcheck", action = "store_true",

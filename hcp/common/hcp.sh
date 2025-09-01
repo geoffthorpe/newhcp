@@ -126,7 +126,7 @@ function exit2http {
 
 # Until all the relevant code can migrate from bash to python, we need some
 # equivalent functionality. This mimics the "hcp_config_*" functions in
-# HcpCommon.py.
+# hcp.common.py.
 function normalize_path {
 	if [[ $1 =~ ^\. ]]; then
 		mypath=$1
@@ -310,7 +310,7 @@ function add_trust_root {
 	fi
 }
 
-# The HcpCommon.py function 'dict_timedelta' parses a time period out of a
+# The hcp.common.py function 'dict_timedelta' parses a time period out of a
 # JSON struct so that it can be expressed using any of 'years', 'months',
 # 'weeks', 'days', 'hours', 'minutes', and/or 'seconds'. This bash version is
 # similar except;

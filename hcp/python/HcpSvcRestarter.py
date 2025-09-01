@@ -9,7 +9,7 @@ import sys
 import subprocess
 import time
 
-from HcpCommon import log
+from hcp.common import log
 
 log(f"Inside restarter.py")
 

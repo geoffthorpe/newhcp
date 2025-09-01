@@ -8,7 +8,7 @@ import time
 import shutil
 import json
 
-import HcpCommon as h
+import hcp.common as h
 
 try:
 	verbosity = int(os.environ['VERBOSE'])

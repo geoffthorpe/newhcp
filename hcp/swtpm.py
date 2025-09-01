@@ -8,7 +8,7 @@ import time
 import shutil
 import json
 
-import HcpCommon as h
+import hcp.common as h
 
 myworld = h.hcp_config_extract(".", must_exist = True)
 

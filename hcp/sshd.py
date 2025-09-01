@@ -7,7 +7,7 @@ import argparse
 import time
 import shutil
 
-import HcpCommon as h
+import hcp.common as h
 
 myinstance = h.hcp_config_extract(".id", must_exist = True)
 myport = h.hcp_config_extract('.sshd.port', or_default = True, default = 22)

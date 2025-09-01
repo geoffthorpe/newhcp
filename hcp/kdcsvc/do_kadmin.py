@@ -8,7 +8,7 @@ import tempfile
 import requests
 from uuid import uuid4
 
-from HcpCommon import log, bail, current_tracefile, \
+from hcp.common import log, bail, current_tracefile, \
 		http2exit, exit2http, hcp_config_extract
 
 from gson.union import union

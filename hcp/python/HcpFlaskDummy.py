@@ -3,7 +3,7 @@ import flask
 from flask import request, abort, send_file, jsonify
 import sys
 
-from HcpCommon import log, bail, hcp_config_extract
+from hcp.common import log, bail, hcp_config_extract
 
 app = flask.Flask(__name__)
 app.config["DEBUG"] = False

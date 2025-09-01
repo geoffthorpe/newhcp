@@ -7,7 +7,7 @@ import argparse
 import time
 import shutil
 
-import HcpCommon as h
+import hcp.common as h
 
 try:
 	verbosity = int(os.environ['VERBOSE'])

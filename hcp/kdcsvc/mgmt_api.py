@@ -13,7 +13,7 @@ import requests
 from gson.union import union
 from HcpPemHelper import get_email_address
 
-from HcpCommon import log, current_tracefile, http2exit, exit2http
+from hcp.common import log, current_tracefile, http2exit, exit2http
 
 app = flask.Flask(__name__)
 app.config["DEBUG"] = False
