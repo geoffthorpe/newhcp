@@ -345,7 +345,6 @@ function dict_timedelta {
 for i in $(find / -maxdepth 1 -mindepth 1 -type d -name "install-*"); do
 	add_install_path "$i"
 done
-export PYTHONPATH=/hcp/python
 envjson_set=$(hcp_config_extract ".env.set")
 if [[ $envjson_set != 'null' ]]; then
 	envjson_set_keys=$(echo "$envjson_set" | jq 'keys[]')
