@@ -68,13 +68,32 @@ $(eval $(call parse_target,hcp_builder_heimdal,hcp_baseline))
 $(eval $(call parse_target,hcp_builder_nginx,hcp_builder_heimdal,cb_hcp_builder_nginx))
 $(eval $(call parse_target,hcp_caboodle,hcp_baseline,cb_hcp_caboodle))
 
+# The usecase requires host configs (and docker-compose.yml) to be generated
+# from fleet.json
+USECASE_HOSTS := $(shell ./fleet.py --show)
+USECASE_DIR := $(CRUD)/usecase
+USECASE_OUTS := $(foreach i,$(USECASE_HOSTS),$(USECASE_DIR)/$(i).json)
+
 # default needs to go after parse_target() but before gen_rules()
-default: testcreds $(hcp_caboodle_trixie) docker-compose.yml
+default: testcreds $(hcp_caboodle_trixie) docker-compose.yml $(USECASE_OUTS)
 
 $(eval $(call gen_rules))
 
-docker-compose.yml: usecase/config/fleet.json
+$(USECASE_DIR): | $(CRUD)
+MDIRS += $(USECASE_DIR)
+docker-compose.yml: usecase/config/fleet.json fleet.py
 	$Q./fleet.py
+define usecase_host
+$(USECASE_DIR)/$1.json: | $(USECASE_DIR)
+$(USECASE_DIR)/$1.json: usecase/config/fleet.json fleet.py
+	$Q./fleet.py --hosts=$(USECASE_DIR) $1
+endef
+$(foreach i,$(USECASE_HOSTS),$(eval $(call usecase_host,$i)))
+ifneq (,$(wildcard $(USECASE_DIR)))
+clean_usecase:
+	$Qrm $(USECASE_OUTS)
+clean: clean_usecase
+endif
 
 # NB: the following dep uses "|" to avoid gratuitous rebuilds
 heimdal/$(HEIMDAL_OUT): | $(hcp_builder_heimdal_bookworm)

@@ -34,6 +34,12 @@
         "kdc_primary",
         "kdc_secondary"
     ],
+    "orchestrator": {
+        "args_for": "orchestrator",
+        "services": { "orchestrator": null },
+        "hack1": [ "orchestrator" ],
+        "hack2": [ "start-orchestrator" ]
+    },
     "attestsvc": {
         "vars": { "hostname": "attestsvc.hcphacking.xyz" },
         "volumes": [
@@ -44,7 +50,18 @@
             "./_testcreds/cred_kdcclient:/cred_kdcclient:ro",
             "./_testcreds/key_attestnoncer:/key_attestnoncer:ro",
             "./_testcreds/signer_asset:/signer_asset:ro"
-        ]
+        ],
+        "rootproto": { "attestsvc": null },
+        "services": {
+            "webapi": {
+                "fqdn": "attestsvc.hcphacking.xyz",
+                "port": 443,
+                "https_authentication": "none",
+                "https_certificate": "/cred_attestsvc"
+            }
+        },
+        "hack1": [ "createdb", "copykey", "webapi" ],
+        "hack2": [ "setup-createdb", "setup-copykey", "start-services" ]
     },
     "fleet": {
         "enrollsvc": {
@@ -53,14 +70,52 @@
                 "backend:/backend",
                 "./_testcreds/ca_enrollsvc:/ca_enrollsvc:ro",
                 "./_testcreds/cred_enrollsvc:/cred_enrollsvc:ro"
-            ]
+            ],
+            "rootproto": { "enrollsvc": null },
+            "services": {
+                "webapi": {
+                    "fqdn": "enrollsvc.hcphacking.xyz",
+                    "port": 443,
+                    "https_authentication": "clientcert",
+                    "https_certificate": "/assets/https-server-enrollsvc.hcphacking.xyz.pem",
+                    "https_client_CA": "/ca_enrollsvc"
+                },
+                "attester": null,
+                "tpm": null
+            },
+            "env": [ "tpm2tools" ],
+            "hack1": [ "attester", "waitdb", "selfenroll", "webapi" ],
+            "hack2": [ "start-attester", "setup-waitdb", "setup-selfenroll", "start-services" ]
         },
         "kdc_primary": {
             "vars": { "hostname": "kdc_primary.hcphacking.xyz" },
             "enroll_profile": {
                 "certgen": [ "pkinit-kdc" ]
             },
-            "volumes": [ "kdc_primary:/kdc_primary" ]
+            "volumes": [ "kdc_primary:/kdc_primary" ],
+            "rootproto": {
+                "kdcsvc": {
+                    "secondaries": [ "kdc_secondary.hcphacking.xyz" ],
+                    "pkinit_identity": "/assets/pkinit-kdc-HCPHACKING.XYZ.pem"
+                }
+            },
+            "services": {
+                "webapi": {
+                    "app": "/hcp/kdcsvc/mgmt_api.py",
+                    "fqdn": "kdc_primary.hcphacking.xyz",
+                    "port": 443,
+                    "https_certificate": "/assets/https-server-kdc_primary.hcphacking.xyz.pem",
+                    "https_authentication": "clientcert",
+                    "setup": { "touchfile": "/tmp/touch-kdcsvc-local-setup-HCPHACKING.XYZ" }
+                },
+                "attester": null,
+                "kdcsvc_TGS": { "port": "3089" },
+                "kdcsvc_iprop_primary": null,
+                "tpm": null
+            },
+            "env": [ "tpm2tools", "krb5" ],
+            "hack1": [ "kdcsvc_iprop_primary", "attester", "kdcsvc", "webapi", "kdcsvc_TGS" ],
+            "hack2": [ "start-attester", "setup-global", "setup-local", "start-services" ]
         },
         "kdc_secondary": {
             "vars": { "hostname": "kdc_secondary.hcphacking.xyz" },
@@ -77,7 +132,33 @@
             "volumes": [
                 "kdc_secondary:/kdc_secondary",
                 "./_testcreds/ca_kdcsvc:/ca_kdcsvc:ro"
-            ]
+            ],
+            "rootproto": {
+                "kdcsvc": {
+                    "dir": "/kdc_secondary",
+                    "mode": "secondary",
+                    "primary": "kdc_primary.hcphacking.xyz",
+                    "pkinit_identity": "/assets/pkinit-kdc-HCPHACKING.XYZ.pem"
+                }
+            },
+            "services": {
+                "webapi": {
+                    "app": "/hcp/kdcsvc/mgmt_api.py",
+                    "fqdn": "kdc_secondary.hcphacking.xyz",
+                    "port": 443,
+                    "https_certificate": "/assets/https-server-kdc_secondary.hcphacking.xyz.pem",
+                    "https_authentication": "clientcert",
+                    "https_client_CA": "/ca_kdcsvc",
+                    "setup": { "touchfile": "/tmp/touch-kdcsvc-local-setup-HCPHACKING.XYZ" }
+                },
+                "attester": null,
+                "kdcsvc_TGS": { "port": "3088" },
+                "kdcsvc_iprop_secondary": null,
+                "tpm": null
+            },
+            "env": [ "tpm2tools", "krb5" ],
+            "hack1": [ "kdcsvc_iprop_secondary", "attester", "kdcsvc", "webapi", "kdcsvc_TGS" ],
+            "hack2": [ "start-attester", "setup-global", "setup-local", "start-services" ]
         },
         "shell": {
             "vars": { "hostname": "shell.hcphacking.xyz" },
@@ -85,7 +166,18 @@
                 "ktgen": {
                     "sshd": [ "host/{hostname}" ]
                 }
-            }
+            },
+            "services": {
+                "attester": null,
+                "sshd": {
+                    "fqdn": "shell.hcphacking.xyz",
+                    "port": 22
+                },
+                "tpm": null
+            },
+            "env": [ "tpm2tools", "krb5", "sshd" ],
+            "hack1": [ "attester", "sshd" ],
+            "hack2": [ "start-attester", "start-services" ]
         },
         "alicia": {
             "vars": { "hostname": "alicia.hcphacking.xyz" },
@@ -93,11 +185,38 @@
                 "certgen": [ "pkinit-client", "https-client" ],
                 "pkinit-clients": [ "alicia" ],
                 "https-clients": [ "alicia", "boz" ]
-            }
+            },
+            "services": {
+                "attester": null,
+                "sshd": {
+                    "fqdn": "alicia.hcphacking.xyz",
+                    "port": 22
+                },
+                "tpm": null
+            },
+            "env": [ "tpm2tools", "krb5", "sshd" ],
+            "hack1": [ "attester", "sshd" ],
+            "hack2": [ "start-attester", "start-services" ]
         },
         "auth_certificate": {
             "vars": { "hostname": "certificate.auth.hcphacking.xyz" },
-            "volumes": [ "./_testcreds/ca_httpsclient:/ca_httpsclient:ro" ]
+            "volumes": [ "./_testcreds/ca_httpsclient:/ca_httpsclient:ro" ],
+            "services": {
+                "webapi": {
+                    "app": "/hcp/python/HcpFlaskDummy.py",
+                    "fqdn": "certificate.auth.hcphacking.xyz",
+                    "port": 443,
+                    "https_certificate": "/assets/https-server-certificate.auth.hcphacking.xyz.pem",
+                    "https_authentication": "clientcert",
+                    "https_client_CA": "/ca_httpsclient",
+                    "setup": { "touchfile": "/assets/https-server-certificate.auth.hcphacking.xyz.pem" }
+                },
+                "attester": null,
+                "tpm": null
+            },
+            "env": [ "tpm2tools", "krb5" ],
+            "hack1": [ "attester", "webapi" ],
+            "hack2": [ "start-attester", "start-services" ]
         },
         "auth_kerberos": {
             "vars": { "hostname": "kerberos.auth.hcphacking.xyz" },
@@ -105,7 +224,22 @@
                 "ktgen": {
                     "http": [ "HTTP/{hostname}" ]
                 }
-            }
+            },
+            "services": {
+                "webapi": {
+                    "app": "/hcp/python/HcpFlaskDummy.py",
+                    "fqdn": "kerberos.auth.hcphacking.xyz",
+                    "port": 443,
+                    "https_certificate": "/assets/https-server-kerberos.auth.hcphacking.xyz.pem",
+                    "https_authentication": "kerberos",
+                    "setup": { "touchfile": "/assets/https-server-kerberos.auth.hcphacking.xyz.pem" }
+                },
+                "attester": null,
+                "tpm": null
+            },
+            "env": [ "tpm2tools", "krb5", "httpskrb5" ],
+            "hack1": [ "attester", "webapi" ],
+            "hack2": [ "start-attester", "start-services" ]
         }
     }
 }
