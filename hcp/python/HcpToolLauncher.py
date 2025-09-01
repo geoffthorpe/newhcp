@@ -410,16 +410,10 @@ def run_exec(name):
 # character), we behave as though the previous argument was 'custom'.
 
 if len(sys.argv) < 2:
-    if 'HCP_LAUNCHER_TGTS' in os.environ and \
-            len(os.environ['HCP_LAUNCHER_TGTS']) > 0:
-        actions = os.environ['HCP_LAUNCHER_TGTS'].split()
-    else:
-        actions = default_targets
+    actions = default_targets
 else:
     actions = sys.argv.copy()
     actions.pop(0)
-
-os.environ['HCP_LAUNCHER_TGTS'] = ' '.join(actions)
 
 hlog(2, f"HCP launcher: processing options: {actions}")
 tostart = []

@@ -48,10 +48,8 @@ include Makefile.macros
 define cb_hcp_caboodle
 $(eval D := $(strip $1))
 $(eval _CTX := $(strip $2))
-$($D_SYNC): $(shell find ./hcp)
 $($D_SYNC): ./ctx/ssh_config ./heimdal/$(HEIMDAL_OUT) ./nginx/$(NGINX_OUT)
-	$Qrsync -a ./hcp ./ctx/ssh_config \
-		./heimdal/$(HEIMDAL_OUT) ./nginx/$(NGINX_OUT) $(_CTX)/
+	$Qrsync -a ./ctx/ssh_config ./heimdal/$(HEIMDAL_OUT) ./nginx/$(NGINX_OUT) $(_CTX)/
 	$Qtouch $$@
 endef
 
@@ -70,28 +68,30 @@ $(eval $(call parse_target,hcp_caboodle,hcp_baseline,cb_hcp_caboodle))
 
 # The usecase requires host configs (and docker-compose.yml) to be generated
 # from fleet.json
-USECASE_HOSTS := $(shell ./usecase/fleet.py --show)
+USECASE_HOSTS := $(shell PYTHONPATH=hcp/python ./usecase/fleet.py --show)
 USECASE_DIR := $(CRUD)/usecase
 USECASE_OUTS := $(foreach i,$(USECASE_HOSTS),$(USECASE_DIR)/$(i).json)
+USECASE_OUTS += $(USECASE_DIR)/docker-compose.yml
 
 # default needs to go after parse_target() but before gen_rules()
-default: testcreds $(hcp_caboodle_trixie) docker-compose.yml $(USECASE_OUTS)
+default: testcreds $(hcp_caboodle_trixie) $(USECASE_OUTS)
 
 $(eval $(call gen_rules))
 
 $(USECASE_DIR): | $(CRUD)
 MDIRS += $(USECASE_DIR)
-docker-compose.yml: usecase/fleet.json usecase/fleet.py
-	$Q./usecase/fleet.py
+$(USECASE_DIR)/docker-compose.yml: usecase/fleet.json usecase/fleet.py
+	$Q PYTHONPATH=hcp/python ./usecase/fleet.py --docker $@
 define usecase_host
 $(USECASE_DIR)/$1.json: | $(USECASE_DIR)
 $(USECASE_DIR)/$1.json: usecase/fleet.json usecase/fleet.py
-	$Q./usecase/fleet.py --hosts=$(USECASE_DIR) $1
+	$Q PYTHONPATH=hcp/python ./usecase/fleet.py --hosts=$(USECASE_DIR) $1
 endef
 $(foreach i,$(USECASE_HOSTS),$(eval $(call usecase_host,$i)))
 ifneq (,$(wildcard $(USECASE_DIR)))
 clean_usecase:
 	$Qrm $(USECASE_OUTS)
+	$Qrmdir $(USECASE_DIR)
 clean: clean_usecase
 endif
 

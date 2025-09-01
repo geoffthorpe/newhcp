@@ -65,8 +65,6 @@ if __name__ == '__main__':
 
     # Process the command-line
     args = parser.parse_args()
-    if not os.path.isdir(args.hosts):
-        raise Exception(f"Host config output directory ({args.hosts}) is not a directory")
 
     # Load the input
     _input = json.load(open(args.input, 'r'))
@@ -84,6 +82,8 @@ if __name__ == '__main__':
         print(' '.join(hosts + [ 'orchestrator', 'attestsvc' ]))
 
     elif args.host:
+        if not os.path.isdir(args.hosts):
+            raise Exception(f"Host config output directory ({args.hosts}) is not a directory")
         host = args.host
         # Produce {host}.json output
         if host != 'attestsvc' and host != 'orchestrator' and \
@@ -208,7 +208,6 @@ services:
           - ./usecase:/usecase:ro
           - ./_crud/usecase:/_usecase:ro
         environment:
-          - HCP_LAUNCHER_TGTS=${HCP_LAUNCHER_TGTS:-}
           - HCP_NOTRACEFILE=1
           - VERBOSE=${VERBOSE:-0}
           - PYTHONPATH=/hcp/python
