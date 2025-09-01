@@ -1,50 +1,6 @@
 #!/usr/bin/python3
 # vim: set expandtab shiftwidth=4 softtabstop=4:
 
-# A crude way to perform these tasks directly (using curl) is;
-#
-# add:      curl -v -F principals=<jsonlistofstrings> \
-#               -F profile=<jsonobject> \
-#               <kdcsvc-URL>/v1/add
-#       This causes the KDC to run;
-#           kadmin add --use-defaults --random-key princ1 princ2 ...
-#
-# add_ns:   curl -v -F principals=<jsonlistofstrings> -F profile=<jsonobject> \
-#               <kdcsvc-URL>/v1/add_ns
-#       This causes the KDC to run;
-#           kadmin add_new --key-rotation-epoch=-1d --key-rotation-period=5m \
-#               --max-ticket-life=1d --max-renewable-life=5d \
-#               --attributes= princ1 princ2 ...
-#
-# get:      curl -v -G -d principals=<jsonlistofstrings> \
-#               -d profile=<jsonobject> \
-#               <kdcsvc-URL>/v1/get
-#       This causes the KDC to run;
-#           kadmin get --long princ1 princ2 ...
-#       - The principals can have wildcards, as "get" is a query.
-#       - If no principals are provided, a single "*" asterisk argument is
-#         passed to kadmin.
-#       - If profile['verbose'] exists and is not empty (or this is set as a
-#         default on the KDC already), then the resulting JSON will have
-#         attributes for each principal, otherwise it will have a list of
-#         principal strings.
-#
-# del:      curl -v -F principals=<jsonlistofstrings> \
-#               <kdcsvc-URL>/v1/del
-#       This causes the KDC to run;
-#           kadmin del princ1 princ2 ...
-#
-# del_ns:   curl -v -F principals=<jsonlistofstrings> \
-#               <kdcsvc-URL>/v1/del_ns
-#       This causes the KDC to run;
-#           kadmin del_ns princ1 princ2 ...
-#
-# ext_keytab: curl -v -F principals=<jsonlistofstrings> \
-#               <kdcsvc-URL>/v1/ext_keytab
-#       This causes the KDC to run;
-#           kadmin ext_keytab -k <tmpfile> princ1 princ2 ... && \
-#               base64 --wrap=0 <tmpfile>
-
 import json
 import requests
 import os
