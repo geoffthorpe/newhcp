@@ -10,9 +10,7 @@ import tempfile
 import shutil
 import argparse
 
-from hcp.common import bail, log, hlog, \
-    hcp_config_extract, hcp_config_scope_get, hcp_config_scope_set, \
-    hcp_config_scope_shrink
+from hcp.common import bail, log, hlog, hcp_config_extract
 import hcp.api.enroll as api
 
 from gson.union import union

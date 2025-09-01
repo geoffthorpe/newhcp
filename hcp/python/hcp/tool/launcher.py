@@ -19,9 +19,7 @@ import time
 os.chdir('/')
 os.environ['PYTHONUNBUFFERED']='yes'
 
-from hcp.common import bail, log, hlog, \
-    hcp_config_extract, hcp_config_scope_get, hcp_config_scope_set, \
-    hcp_config_scope_shrink
+from hcp.common import bail, log, hlog, hcp_config_extract
 
 _id = hcp_config_extract('id', or_default = True, default = 'unknown_id')
 etcpath = f"/etc/hcp/{_id}"
@@ -130,11 +128,11 @@ for i in services:
     # Switch our config scope into the child item so that we pull out the
     # attributes without having to meddle with paths - we switch back at the
     # end.
-    config_backup = hcp_config_scope_get()
-    hcp_config_scope_shrink(f".{i}")
+    def local_extract(path, **kwargs):
+        return hcp_config_extract(f".{i}.{path}", **kwargs)
     # If there's no 'exec', then we don't care about 'until', 'tag', 'uid',
     # 'gid', or 'args'.
-    child['exec'] = hcp_config_extract('exec', or_default = True)
+    child['exec'] = local_extract('exec', or_default = True)
     if child['exec']:
         # 'exec' can be a string or a list of strings, normalize to latter.
         if isinstance(child['exec'], str):
@@ -144,16 +142,16 @@ for i in services:
         for e in child['exec']:
             if not isinstance(e, str):
                 bail(f"'{i}:exec' can only contain str (not {type(e)})")
-        child['until'] = hcp_config_extract('until', or_default = True)
+        child['until'] = local_extract('until', or_default = True)
         if child['until']:
             if not isinstance(child['until'], str):
                 bail(f"'{i}:until' should be a str (not a {type(child['until'])})")
-        child['tag'] = hcp_config_extract('tag', or_default = True)
+        child['tag'] = local_extract('tag', or_default = True)
         if child['tag']:
             if not isinstance(child['tag'], str):
                 bail(f"'{i}:tag' should be a str (not a {type(child['tag'])})")
-        uid = hcp_config_extract('uid', or_default = True)
-        gid = hcp_config_extract('gid', or_default = True)
+        uid = local_extract('uid', or_default = True)
+        gid = local_extract('gid', or_default = True)
         if uid:
             if not isinstance(uid, str):
                 bail(f"'{i}:uid' must be a str (not a {type(uid)})")
@@ -164,14 +162,14 @@ for i in services:
         child['gid'] = gid
         args = []
         if uid:
-            args += [ 'runuser', '-w', 'HCP_CONFIG_FILE,HCP_CONFIG_SCOPE' ]
+            args += [ 'runuser', '-w', 'HCP_CONFIG_FILE' ]
             if gid:
                 args += [ '-g', gid ]
             args += [ '-u', uid ]
             args += [ '--' ]
         args += child['exec']
         child['exec'] = args
-        xtra = hcp_config_extract('args', or_default = True)
+        xtra = local_extract('args', or_default = True)
         if xtra:
             if not isinstance(xtra, list):
                 bail(f"'{i}:args' must be a list (not a {type(xtra)})")
@@ -179,12 +177,12 @@ for i in services:
                 if not isinstance(check, str):
                     bail(f"'{i}:args' must only contain strings")
         child['args'] = xtra
-        nowait = hcp_config_extract('nowait', or_default = True)
+        nowait = local_extract('nowait', or_default = True)
         if nowait:
             child['nowait'] = True
         else:
             child['nowait'] = False
-    child['setup'] = hcp_config_extract('setup', or_default = True)
+    child['setup'] = local_extract('setup', or_default = True)
     if child['setup']:
         # 'setup' can be a single dict or an array of dicts. We convert the
         # simple case to a single-entry array so that things are normalized.
@@ -228,7 +226,7 @@ for i in services:
                 s['tag'] = None
         child['setup'] = setup
     # If we have 'env', it matters for both setup and/or exec
-    child['env'] = hcp_config_extract('env', or_default = True)
+    child['env'] = local_extract('env', or_default = True)
     if child['env']:
         child['newenv'] = derive_env(child['env'], f"{i}:env", baseenv)
     # Child curated, now where does it go, and does it fit there?
@@ -237,8 +235,6 @@ for i in services:
     if child['exec']:
         children_start += [ child ]
     children_all += [ child ]
-    # And don't forget to revert back to our config!
-    hcp_config_scope_set(config_backup)
 
 # bail() will call sys.exit() directly, whereas mybail() throws our custom
 # exception. If we haven't yet started any processes to clean up, we use the

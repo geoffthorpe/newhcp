@@ -19,9 +19,7 @@ import time
 os.chdir('/')
 os.environ['PYTHONUNBUFFERED']='yes'
 
-from hcp.common import bail, log, hlog, \
-    hcp_config_extract, hcp_config_scope_get, hcp_config_scope_set, \
-    hcp_config_scope_shrink
+from hcp.common import bail, log, hlog, hcp_config_extract
 
 # Process an 'env' section (the object, once parsed from JSON), and derive a
 # new environment object from an existing one by applying to it the 'pathadd',

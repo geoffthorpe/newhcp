@@ -164,72 +164,29 @@ else
 		export HCP_CONFIG_FILE=$newpath
 	fi
 fi
-function hcp_config_scope_set {
-	if [[ -z $HCP_CONFIG_FILE ]]; then
-		bail "!HCP_CONFIG_FILE"
-	fi
-	mypath=$(normalize_path "$1")
-	hlog 2 "hcp_config_scope_set: $mypath"
-	# Deliberately fail (ie. don't proceed) if mypath doesn't exist.
-	cat "$HCP_CONFIG_FILE" | jq -r "$mypath" > /dev/null 2>&1
-	export HCP_CONFIG_SCOPE=$mypath
-}
-function hcp_config_scope_get {
-	if [[ -z $HCP_CONFIG_FILE ]]; then
-		bail "!HCP_CONFIG_FILE"
-	fi
-	# If HCP_CONFIG_SCOPE isn't set, it's possible we're the first context
-	# started. In which case the world we're given is supposed to be our
-	# starting context, in which case our initial region is ".".
-	if [[ ! -n $HCP_CONFIG_SCOPE ]]; then
-		hlog 2 "hcp_config_scope_get: default HCP_CONFIG_SCOPE='.'"
-		hcp_config_scope_set "."
-	fi
-	hlog 2 "hcp_config_scope_get: returning $HCP_CONFIG_SCOPE"
-	echo $HCP_CONFIG_SCOPE
-}
-# We want to trigger the lazy-initialization of hcp_config_scope_get() on first
-# use of the API, but not before (we don't want to do it at all in those cases
-# where the API is unused). If the first API call is hcp_config_scope_get()
-# itself, problem self-solved, otherwise we just call it quietly at the start
-# of other APIs to get the desired behavior.
-function hcp_config_scope_shrink {
-	if [[ -z $HCP_CONFIG_FILE ]]; then
-		bail "!HCP_CONFIG_FILE"
-	fi
-	hcp_config_scope_get > /dev/null
-	mypath=$(normalize_path "$1")
-	hlog 2  "hcp_config_scope_shrink: $mypath"
-	if [[ $HCP_CONFIG_SCOPE != "." ]]; then
-		mypath="$HCP_CONFIG_SCOPE$mypath"
-	fi
-	hcp_config_scope_set "$mypath"
-}
 function hcp_config_extract {
 	if [[ -z $HCP_CONFIG_FILE ]]; then
 		bail "!HCP_CONFIG_FILE"
 	fi
-	hcp_config_scope_get > /dev/null
 	mypath=$(normalize_path "$1")
-	result=$(cat "$HCP_CONFIG_FILE" | jq -r "$HCP_CONFIG_SCOPE" | jq -r "$mypath")
-	hlog 3 "hcp_config_extract: $HCP_CONFIG_FILE,$HCP_CONFIG_SCOPE,$mypath"
+	result=$(cat "$HCP_CONFIG_FILE" | jq -r "$mypath")
+	hlog 3 "hcp_config_extract: $HCP_CONFIG_FILE,$mypath"
 	echo "$result"
 }
 function hcp_config_extract_or {
 	if [[ -z $HCP_CONFIG_FILE ]]; then
 		bail "!HCP_CONFIG_FILE"
 	fi
-	hcp_config_scope_get > /dev/null
 	# We need a string that will never occur and yet contains no odd
 	# characters that will screw up 'jq'. Thankfully this is just a
 	# temporary thing until bash->python is complete.
 	s="astringthatneveroccursever"
 	mypath=$(normalize_path "$1")
-	result=$(cat "$HCP_CONFIG_FILE" | jq -r "$HCP_CONFIG_SCOPE" | jq -r "$mypath // \"$s\"")
+	result=$(cat "$HCP_CONFIG_FILE" | jq -r "$mypath // \"$s\"")
 	if [[ $result == $s ]]; then
 		result=$2
 	fi
-	log "hcp_config_extract_or: $HCP_CONFIG_FILE,$HCP_CONFIG_SCOPE,$mypath,$2"
+	log "hcp_config_extract_or: $HCP_CONFIG_FILE,$mypath,$2"
 	echo "$result"
 }
 
@@ -241,7 +198,6 @@ function hcp_config_user_init {
 	if [[ ! -f /home/$USERNAME/hcp_config ]]; then
 		cat > /home/$USERNAME/hcp_config <<EOF
 export HCP_CONFIG_FILE="$HCP_CONFIG_FILE"
-export HCP_CONFIG_SCOPE="$HCP_CONFIG_SCOPE"
 EOF
 		chown $USERNAME /home/$USERNAME/hcp_config
 	fi

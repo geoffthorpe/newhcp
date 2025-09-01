@@ -89,7 +89,7 @@ for a in ssh_algos:
 
 print(f"Generating sshd config ({etcsshdconfig})")
 myenv = {}
-for i in [ 'KRB5_CONFIG', 'KRB5_KTNAME', 'HCP_CONFIG_FILE', 'HCP_CONFIG_SCOPE' ]:
+for i in [ 'KRB5_CONFIG', 'KRB5_KTNAME', 'HCP_CONFIG_FILE' ]:
 	if i in os.environ:
 		myenv[i] = os.environ[i]
 if len(myenv) > 0:
