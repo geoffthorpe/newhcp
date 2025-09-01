@@ -66,83 +66,56 @@ def my_get_assets(ekpubhash, outdir):
         hxcmd.append('--lifetime=' + str(profile['lifetime'] if 'lifetime' in profile else '1d'))
         hxcmd.append('--generate-key=' + (profile['key-type'] if 'key-type' in profile else 'rsa'))
         hxcmd.append('--key-bits=' + str(profile['key-bits'] if 'key-bits' in profile else '2048'))
+        def do_cert(filename, arguments):
+            cmd = hxcmd.copy() + arguments + \
+                [ f"--certificate=FILE:{tempdir}/{filename}" ]
+            c = subprocess.run(cmd)
+            if c.returncode != 0:
+                raise Exception(f"hxtool failed: {cmd}")
+            add_secret(enrollpath, f"{tempdir}/{filename}", f"{outdir}/{filename}")
+            result.append([f"{filename}", False])
         for certtype in certgen:
             if certtype == 'https-server':
                 hostnames = profile['https-server-hostnames'] if \
                     'https-server-hostnames' in profile else [profile['hostname']]
                 for hostname in hostnames:
-                    cmd = hxcmd.copy() + \
-                        [ '--type=https-server', f"--hostname={hostname}",
-                          '--ca-certificate=FILE:/ca_default_private',
-                          f"--certificate=FILE:{tempdir}/https-server-{hostname}.pem" ]
-                    c = subprocess.run(cmd)
-                    if c.returncode != 0:
-                        raise Exception(f"hxtool failed: {cmd}")
-                    add_secret(enrollpath, f"{tempdir}/https-server-{hostname}.pem",
-                               f"{outdir}/https-server-{hostname}.pem")
-                    result.append([f"https-server-{hostname}.pem", False])
+                    do_cert(f"https-server-{hostname}.pem",
+                            [ '--type=https-server', f"--hostname={hostname}",
+                              '--ca-certificate=FILE:/ca_default_private' ])
             elif certtype == 'https-client':
                 clients = profile['https-clients'] if \
                     'https-clients' in profile else ['nobody']
                 for client in clients:
-                    cmd = hxcmd.copy() + \
-                        [ '--type=https-client',
-                          '--ca-certificate=FILE:/ca_httpsclient_private',
-                          f"--subject=UID={client}",
-                          f"--email={client}@{domain}",
-                          f"--certificate=FILE:{tempdir}/https-client-{client}.pem" ]
-                    c = subprocess.run(cmd)
-                    if c.returncode != 0:
-                        raise Exception(f"hxtool failed: {cmd}")
-                    add_secret(enrollpath, f"{tempdir}/https-client-{client}.pem",
-                               f"{outdir}/https-client-{client}.pem")
-                    result.append([f"https-client-{client}.pem", False])
+                    do_cert(f"https-client-{client}.pem",
+                            [ '--type=https-client',
+                              '--ca-certificate=FILE:/ca_httpsclient_private',
+                              f"--subject=UID={client}",
+                              f"--email={client}@{domain}" ])
             elif certtype == 'pkinit-client':
                 clients = profile['pkinit-clients'] if \
                     'pkinit-clients' in profile else ['nobody']
                 for client in clients:
                     if not realm:
                         raise Exception("No realm for pkinit-client")
-                    cmd = hxcmd.copy() + \
-                        [ '--type=pkinit-client',
-                          '--ca-certificate=FILE:/ca_default_private',
-                          f"--pk-init-principal={client}@{realm}",
-                          f"--certificate=FILE:{tempdir}/pkinit-client-{client}.pem" ]
-                    c = subprocess.run(cmd)
-                    if c.returncode != 0:
-                        raise Exception(f"hxtool failed: {cmd}")
-                    add_secret(enrollpath, f"{tempdir}/pkinit-client-{client}.pem",
-                               f"{outdir}/pkinit-client-{client}.pem")
-                    result.append([f"pkinit-client-{client}.pem", False])
+                    do_cert(f"pkinit-client-{client}.pem",
+                            [ '--type=pkinit-client',
+                              '--ca-certificate=FILE:/ca_default_private',
+                              f"--pk-init-principal={client}@{realm}" ])
             elif certtype == 'pkinit-kdc':
                 if not realm:
                     raise Exception("No realm for pkinit-kdc")
-                cmd = hxcmd.copy() + \
-                    [ '--type=pkinit-kdc',
-                      '--ca-certificate=FILE:/ca_default_private',
-                      f"--pk-init-principal=krbtgt/{realm}@{realm}",
-                      f"--certificate=FILE:{tempdir}/pkinit-kdc-{realm}.pem" ]
-                c = subprocess.run(cmd)
-                if c.returncode != 0:
-                    raise Exception(f"hxtool failed: {cmd}")
-                add_secret(enrollpath, f"{tempdir}/pkinit-kdc-{realm}.pem",
-                           f"{outdir}/pkinit-kdc-{realm}.pem")
-                result.append([f"pkinit-kdc-{realm}.pem", False])
+                do_cert(f"pkinit-kdc-{realm}.pem",
+                        [ '--type=pkinit-kdc',
+                          '--ca-certificate=FILE:/ca_default_private',
+                          f"--pk-init-principal=krbtgt/{realm}@{realm}" ])
             elif certtype == 'pkinit-iprop':
                 if not realm:
                     raise Exception("No realm for pkinit-iprop")
-                cmd = hxcmd.copy() + \
-                    [ '--type=pkinit-client',
-                      '--ca-certificate=FILE:/ca_default_private',
-                      f"--pk-init-principal=iprop/{hostname}@{realm}",
-                      f"--subject=CN=iprop",
-                      f"--certificate=FILE:{tempdir}/pkinit-iprop-{realm}.pem" ]
-                c = subprocess.run(cmd)
-                if c.returncode != 0:
-                    raise Exception(f"hxtool failed: {cmd}")
-                add_secret(enrollpath, f"{tempdir}/pkinit-iprop-{realm}.pem",
-                           f"{outdir}/pkinit-iprop-{realm}.pem")
-                result.append([f"pkinit-iprop-{realm}.pem", False])
+                do_cert(f"pkinit-iprop-{realm}.pem",
+                        [ '--type=pkinit-client',
+                          '--ca-certificate=FILE:/ca_default_private',
+                          f"--pk-init-principal=iprop/{hostname}@{realm}",
+                          f"--subject=CN=iprop" ])
             else:
                 raise Exception(f"unrecognized certtype: {certtype}")
         if krb5conf:
