@@ -13,7 +13,7 @@ import argparse
 from hcp.common import bail, log, hlog, \
     hcp_config_extract, hcp_config_scope_get, hcp_config_scope_set, \
     hcp_config_scope_shrink
-import HcpApiEnroll
+import hcp.api.enroll as api
 
 from gson.union import union
 from gson.expander import expand
@@ -37,11 +37,11 @@ class FleetHost:
         if c.returncode != 0:
             raise Exception("Failed to hash ekpub")
         self.ekpubhash = c.stdout[0:64]
-        retcode, result = HcpApiEnroll.enroll_query(self.api,
-                                                    self.ekpubhash,
-                                                    True,
-                                                    requests_verify = self.api_cacert,
-                                                    requests_cert = self.api_clientcert)
+        retcode, result = api.enroll_query(self.api,
+                                           self.ekpubhash,
+                                           True,
+                                           requests_verify = self.api_cacert,
+                                           requests_cert = self.api_clientcert)
         if not retcode or 'entries' not in result:
             raise Exception("Failed to query enrollsvc")
         self.enrolled = len(result['entries']) > 0
@@ -131,11 +131,11 @@ class FleetHost:
         if self.enrolled:
             print(f"{self.name}: TPM already enrolled")
             return
-        retcode, result = HcpApiEnroll.enroll_add(self.api,
-                                                  self.ekpub,
-                                                  profile = json.dumps(self.enroll_profile),
-                                                  requests_verify  = self.api_cacert,
-                                                  requests_cert = self.api_clientcert)
+        retcode, result = api.enroll_add(self.api,
+                                         self.ekpub,
+                                         profile = json.dumps(self.enroll_profile),
+                                         requests_verify  = self.api_cacert,
+                                         requests_cert = self.api_clientcert)
         if not retcode:
             raise Exception("Failed to get enrollsvc response")
         if 'ekpubhash' not in result:
@@ -149,11 +149,11 @@ class FleetHost:
             return
         if not self.enrolled:
             print(f"{self.name}: TPM isn't enrolled")
-        retcode, result = HcpApiEnroll.enroll_delete(self.api,
-                                                     self.ekpubhash,
-                                                     True,
-                                                     requests_verify = self.api_cacert,
-                                                     requests_cert = self.api_clientcert)
+        retcode, result = api.enroll_delete(self.api,
+                                            self.ekpubhash,
+                                            True,
+                                            requests_verify = self.api_cacert,
+                                            requests_cert = self.api_clientcert)
         if not retcode or 'entries' not in result:
             raise Exception("Failed to get enrollsvc response")
         if len(result['entries']) == 0:
@@ -202,7 +202,7 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
     if args.verbosity:
-        HcpApiEnroll.set_loglevel(int(args.verbosity))
+        api.set_loglevel(int(args.verbosity))
     if args.create and args.delete:
         raise Exception("Cannot create and delete in the same command")
     if args.enroll and args.unenroll:

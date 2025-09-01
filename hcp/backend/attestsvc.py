@@ -15,7 +15,7 @@ import glob
 import shutil
 import hcp.attestsvc as attestsvc
 from hcp.backend.common import *
-import HcpApiKdc as kapi
+import hcp.api.kdc as kapi
 from hcp.common import hcp_config_extract
 
 app = attestsvc.app

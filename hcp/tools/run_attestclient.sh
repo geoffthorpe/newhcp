@@ -36,22 +36,22 @@ tmp=$(mktemp -d)
 export ATTESTSVC_API_URL="$API"
 export ATTESTSVC_API_CACERT="$CACERT"
 
-export PATH=/hcp/python:$PATH
+export API=/hcp/python/hcp/api/attest.py
 
 echo "Obtaining 'initial' from server..."
-HcpApiAttest.py initiate "$tmp/initial"
+$API initiate "$tmp/initial"
 jq . "$tmp/initial"
 
 echo "Producing quote from TPM..."
-HcpApiAttest.py quote "$tmp/initial" "$tmp/quote"
+$API quote "$tmp/initial" "$tmp/quote"
 
 echo "Completing attestation with server..."
-HcpApiAttest.py complete "$tmp/initial" "$tmp/quote" "$tmp/bundle.tar.gz"
+$API complete "$tmp/initial" "$tmp/quote" "$tmp/bundle.tar.gz"
 
 echo "Unsealing returned assets..."
 mkdir -p "$ASSETDIR"
-HcpApiAttest.py unseal --callback /hcp/tools/cb_attestclient.sh \
-			"$VERIFKEY" "$tmp/bundle.tar.gz" "$ASSETDIR"
+$API unseal --callback /hcp/tools/cb_attestclient.sh \
+		"$VERIFKEY" "$tmp/bundle.tar.gz" "$ASSETDIR"
 
 echo "Done"
 touch "$ASSETDIR/touch"

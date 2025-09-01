@@ -63,7 +63,7 @@ def tpm2_secret_session(_dir):
                '--session', f"{_dir}/session.ctx",
                '--object-context', 'endorsement'])
 
-# TODO: this code was copied from HcpApiEnroll.py and suffers from the same
+# TODO: this code was copied from hcp.api.enroll.py and suffers from the same
 # akwardnesses. What's said there applies here.
 
 def requester_loop(request_fn, retries = 0, pause = 0):
