@@ -6,7 +6,7 @@ import os
 import sys
 import argparse
 
-def write_service(fp, name, data, with_tpm = True):
+def docker_write_service(fp, name, data, with_tpm = True):
     fp.write(f"    {name}:\n")
     fp.write('        extends: common_nontpm\n')
     fp.write(f"        hostname: {data['vars']['hostname']}\n")
@@ -19,7 +19,7 @@ def write_service(fp, name, data, with_tpm = True):
     fp.write('        environment:\n')
     fp.write(f"          - HCP_CONFIG_FILE=/usecase/hosts/{name}.json\n\n")
 
-def write_tpm(fp, name, data, with_tpm = True):
+def docker_write_tpm(fp, name, data, with_tpm = True):
     fp.write(f"    {name}_tpm:\n")
     fp.write('        extends: common_tpm\n')
     fp.write(f"        hostname: tpm.{data['vars']['hostname']}\n")
@@ -38,20 +38,20 @@ TBD
     parser = argparse.ArgumentParser(description=fleet_desc,
                                      epilog=fleet_epilog)
     fleet_help_input = 'path to JSON input, default = usecase/config/fleet.json'
-    fleet_help_output = 'path to output, default = docker-compose.yml'
+    fleet_help_docker = 'path to docker-compose output, default = docker-compose.yml'
     parser.add_argument('--input', metavar = '<PATH>',
                         default = 'usecase/config/fleet.json',
                         help = fleet_help_input)
-    parser.add_argument('--output', metavar = '<PATH>',
+    parser.add_argument('--docker', metavar = '<PATH>',
                         default = 'docker-compose.yml',
-                        help = fleet_help_output)
+                        help = fleet_help_docker)
 
     # Process the command-line
     args = parser.parse_args()
 
     _input = json.load(open(args.input, 'r'))
     hosts = [ x for x in _input['fleet'] ]
-    with open(args.output, 'w') as fp:
+    with open(args.docker, 'w') as fp:
         fp.write("""version: "2.4"
 
 volumes:
@@ -110,8 +110,8 @@ services:
           - HCP_CONFIG_FILE=/usecase/hosts/orchestrator.json
 
 """)
-        write_service(fp, 'attestsvc', _input['attestsvc'],
-                      with_tpm = False)
+        docker_write_service(fp, 'attestsvc', _input['attestsvc'],
+                             with_tpm = False)
         for host in hosts:
-            write_service(fp, host, _input['fleet'][host])
-            write_tpm(fp, host, _input['fleet'][host])
+            docker_write_service(fp, host, _input['fleet'][host])
+            docker_write_tpm(fp, host, _input['fleet'][host])
