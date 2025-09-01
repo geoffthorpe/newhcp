@@ -52,8 +52,6 @@
         "rootproto": { "attestsvc": null },
         "services": {
             "webapi": {
-                "fqdn": "{hostname}",
-                "https_authentication": "none",
                 "https_certificate": "/cred_attestsvc"
             }
         },
@@ -70,7 +68,6 @@
             "rootproto": { "enrollsvc": null },
             "services": {
                 "webapi": {
-                    "fqdn": "{hostname}",
                     "https_authentication": "clientcert",
                     "https_certificate": "/assets/https-server-{hostname}.pem",
                     "https_client_CA": "/ca_enrollsvc"
@@ -96,7 +93,6 @@
             "services": {
                 "webapi": {
                     "app": "/hcp/kdcsvc/mgmt_api.py",
-                    "fqdn": "{hostname}",
                     "https_certificate": "/assets/https-server-{hostname}.pem",
                     "https_authentication": "clientcert",
                     "setup": { "touchfile": "/tmp/touch-kdcsvc-local-setup-HCPHACKING.XYZ" }
@@ -136,7 +132,6 @@
             "services": {
                 "webapi": {
                     "app": "/hcp/kdcsvc/mgmt_api.py",
-                    "fqdn": "{hostname}",
                     "https_certificate": "/assets/https-server-{hostname}.pem",
                     "https_authentication": "clientcert",
                     "https_client_CA": "/ca_kdcsvc",
@@ -159,10 +154,7 @@
             },
             "services": {
                 "attester": null,
-                "sshd": {
-                    "fqdn": "{hostname}",
-                    "port": 22
-                },
+                "sshd": null,
                 "tpm": null
             },
             "env": [ "tpm2tools", "krb5", "sshd" ]
@@ -176,10 +168,7 @@
             },
             "services": {
                 "attester": null,
-                "sshd": {
-                    "fqdn": "{hostname}",
-                    "port": 22
-                },
+                "sshd": null,
                 "tpm": null
             },
             "env": [ "tpm2tools", "krb5", "sshd" ]
@@ -190,7 +179,6 @@
             "services": {
                 "webapi": {
                     "app": "/hcp/python/HcpFlaskDummy.py",
-                    "fqdn": "{hostname}",
                     "https_certificate": "/assets/https-server-{hostname}.pem",
                     "https_authentication": "clientcert",
                     "https_client_CA": "/ca_httpsclient",
@@ -211,7 +199,6 @@
             "services": {
                 "webapi": {
                     "app": "/hcp/python/HcpFlaskDummy.py",
-                    "fqdn": "{hostname}",
                     "https_certificate": "/assets/https-server-{hostname}.pem",
                     "https_authentication": "kerberos",
                     "setup": { "touchfile": "/assets/https-server-{hostname}.pem" }
