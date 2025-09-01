@@ -32,7 +32,127 @@ def docker_write_tpm(fp, name, data, with_tpm = True):
         fp.write(f"          - tpm_{name}:/tpm_{name}\n")
         fp.write(f"          - tpmsocket_{name}:/tpmsocket_{name}\n")
     fp.write('        environment:\n')
-    fp.write(f"          - HCP_CONFIG_FILE=/_usecase/{name}.json\n\n")
+    fp.write(f"          - HCP_CONFIG_FILE=/_usecase/{name}_tpm.json\n\n")
+
+def produce_host_config(host, _input, outputdir):
+    if host != 'attestsvc' and host != 'orchestrator' and \
+                            host not in hosts:
+        raise Exception(f"'{host}' is not a known fleet host id")
+    print(f"Producing '{host}' config file")
+    has_tpm = host in _input['fleet']
+    if has_tpm:
+        data = _input['fleet'][host]
+    else: # host == attestsvc or host == orchestrator
+        data = _input[host]
+    hostname = data['hostname'] if 'hostname' in data else 'nada'
+    servicenames = [ k for k in data['services']] \
+        if 'services' in data else []
+    if 'tpm' in servicenames:
+        servicenames.pop(servicenames.index('tpm'))
+    if 'xtra_services' in data:
+        servicenames += data['xtra_services']
+    # 'output' is the structure that gets jsonified at the end
+    output = {
+        'vars': {
+            'id': host,
+            'hostname': hostname
+        },
+        'mutate': [
+            { 'method': 'load', 'jspath': '/usecase/proto/root.json' },
+            { 'method': 'union' }
+        ],
+        'services': servicenames,
+        'default_targets': [ 'setup-global', 'setup-local',
+                             'start-services', 'start-tool' ]
+    }
+    output_tpm = {
+        'vars': {
+            'id': f"tpm.{host}",
+            'hostname': f"tpm.{hostname}",
+            'machine': host
+        },
+        'mutate': [
+            { 'method': 'load', 'jspath': '/usecase/proto/root.json' },
+            { 'method': 'union' },
+            { 'method': 'load', 'register': 'd',
+              'jspath': '/usecase/proto/defaults.json' },
+            { 'method': 'union', 'regpath': 'vars',
+              'srcregister': 'd', 'underlay': True },
+            { 'method': 'load', 'regpath': 'swtpm',
+              'jspath': '/usecase/proto/tpm_sidecar.json' },
+            { 'method': 'expand' }
+        ],
+        'services': [ 'swtpm' ],
+        'default_targets': [ 'setup-global', 'start-services' ]
+    }
+    if 'attester' in data['services']:
+        output['default_targets'] = [ 'start-attester' ] + output['default_targets']
+    if 'vars' in _input:
+        for k in _input['vars']:
+            if k not in output['vars']:
+                output['vars'][k] = _input['vars'][k]
+    # add a root prototype (merged into the top-level, rather than into
+    # a named sub-object) if requested.
+    if 'rootproto' in data:
+        for service in data['rootproto']:
+            rp = data['rootproto'][service]
+            if rp:
+                for k in rp:
+                    output['vars'][f"{service}_{k}"] = rp[k]
+            output['mutate'].append({
+                'method': 'load',
+                'register': 'a',
+                'jspath': f"/usecase/proto/{service}.json"})
+            output['mutate'].append({
+                'method': 'union',
+                'srcregister': 'a'})
+    # load and merge prototype defaults
+    output['mutate'].append({
+        'method': 'load',
+        'register': 'd',
+        'jspath': '/usecase/proto/defaults.json'})
+    output['mutate'].append({
+        'method': 'union',
+        'regpath': 'vars',
+        'srcregister': 'd',
+        'underlay': True})
+    # add per-service mutations
+    services = data['services'] if 'services' in data else {}
+    for service in services:
+        _vars = services[service]
+        # Merge any variables into the 'vars' sub-object
+        if _vars:
+            for k in _vars:
+                output['vars'][f"{service}_{k}"] = _vars[k]
+        # Add the non-root prototype
+        proto = f"/usecase/proto/{service}_sidecar.json" \
+            if service == 'tpm' else f"/usecase/proto/{service}.json"
+        output['mutate'].append({
+            'method': 'load',
+            'regpath': service,
+            'jspath': proto})
+    # add per-host environment includes
+    env = data['env'] if 'env' in data else []
+    for e in env:
+        output['mutate'].append({
+            'method': 'load',
+            'register': 'e',
+            'jspath': f"/usecase/proto/env_{e}.json"})
+        output['mutate'].append({
+            'method': 'union',
+            'srcregister': 'e',
+            'regpath': 'env'})
+    # if there's an "args_for", put it in the output
+    if 'args_for' in data:
+        output['args_for'] = data['args_for']
+    # perform parameter-expansion
+    output['mutate'].append({ 'method': 'expand' })
+    # Generate host config (and make it human-readable)
+    with open(f"{outputdir}/{host}.json", 'w') as fp:
+        json.dump(output, fp, indent = 4)
+    if has_tpm:
+        with open(f"{outputdir}/{host}_tpm.json", 'w') as fp:
+            json.dump(output_tpm, fp, indent = 4)
 
 if __name__ == '__main__':
     fleet_desc = 'Parser of fleet.json'
@@ -84,102 +204,7 @@ if __name__ == '__main__':
     elif args.host:
         if not os.path.isdir(args.hosts):
             raise Exception(f"Host config output directory ({args.hosts}) is not a directory")
-        host = args.host
-        # Produce {host}.json output
-        if host != 'attestsvc' and host != 'orchestrator' and \
-                                host not in hosts:
-            raise Exception(f"'{host}' is not a known fleet host id")
-        print(f"Producing '{host}' config file")
-        if host in hosts:
-            data = _input['fleet'][host]
-        else: # host == attestsvc or host == orchestrator
-            data = _input[host]
-        hostname = data['hostname'] if 'hostname' in data else 'nada'
-        servicenames = [ k for k in data['services']] \
-            if 'services' in data else []
-        if 'tpm' in servicenames:
-            servicenames.pop(servicenames.index('tpm'))
-        if 'xtra_services' in data:
-            servicenames += data['xtra_services']
-        # 'output' is the structure that gets jsonified at the end
-        output = {
-            'vars': {
-                'id': host,
-                'hostname': hostname
-            },
-            'mutate': [
-                { 'method': 'load', 'jspath': '/usecase/proto/root.json' },
-                { 'method': 'union' }
-            ],
-            'services': servicenames,
-            'default_targets': [ 'setup-global', 'setup-local',
-                                 'start-services', 'start-tool' ]
-        }
-        if 'attester' in data['services']:
-            output['default_targets'] = [ 'start-attester' ] + output['default_targets']
-        if 'vars' in _input:
-            for k in _input['vars']:
-                if k not in output['vars']:
-                    output['vars'][k] = _input['vars'][k]
-        # add a root prototype (merged into the top-level, rather than into
-        # a named sub-object) if requested.
-        if 'rootproto' in data:
-            for service in data['rootproto']:
-                rp = data['rootproto'][service]
-                if rp:
-                    for k in rp:
-                        output['vars'][f"{service}_{k}"] = rp[k]
-                output['mutate'].append({
-                    'method': 'load',
-                    'register': 'a',
-                    'jspath': f"/usecase/proto/{service}.json"})
-                output['mutate'].append({
-                    'method': 'union',
-                    'srcregister': 'a'})
-        # load and merge prototype defaults
-        output['mutate'].append({
-            'method': 'load',
-            'register': 'd',
-            'jspath': '/usecase/proto/defaults.json'})
-        output['mutate'].append({
-            'method': 'union',
-            'regpath': 'vars',
-            'srcregister': 'd',
-            'underlay': True})
-        # add per-service mutations
-        services = data['services'] if 'services' in data else {}
-        for service in services:
-            _vars = services[service]
-            # Merge any variables into the 'vars' sub-object
-            if _vars:
-                for k in _vars:
-                    output['vars'][f"{service}_{k}"] = _vars[k]
-            # Add the non-root prototype
-            proto = f"/usecase/proto/{service}_sidecar.json" \
-                if service == 'tpm' else f"/usecase/proto/{service}.json"
-            output['mutate'].append({
-                'method': 'load',
-                'regpath': service,
-                'jspath': proto})
-        # add per-host environment includes
-        env = data['env'] if 'env' in data else []
-        for e in env:
-            output['mutate'].append({
-                'method': 'load',
-                'register': 'e',
-                'jspath': f"/usecase/proto/env_{e}.json"})
-            output['mutate'].append({
-                'method': 'union',
-                'srcregister': 'e',
-                'regpath': 'env'})
-        # if there's an "args_for", put it in the output
-        if 'args_for' in data:
-            output['args_for'] = data['args_for']
-        # perform parameter-expansion
-        output['mutate'].append({ 'method': 'expand' })
-        # Generate host config (and make it human-readable)
-        with open(f"{args.hosts}/{host}.json", 'w') as fp:
-            json.dump(output, fp, indent = 4)
+        produce_host_config(args.host, _input, args.hosts)
 
     else:
 
@@ -219,8 +244,6 @@ services:
     common_tpm:
         extends: common
         network_mode: "none"
-        environment:
-          - HCP_CONFIG_SCOPE=.tpm
 
     common_nontpm:
         extends: common
