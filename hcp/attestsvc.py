@@ -179,6 +179,24 @@ def my_complete():
         if c.returncode != 0:
             sys.stderr.write(f"WARNING: failed attestation from {initial['ekpubhash']}\n")
             return make_response("Error: unable to verify quote", 400)
+
+        # TODO: hooks here to backend to evaluate the PCRs...
+        c = subprocess.run(['tpm2', 'print',
+                            '--type', 'TPMS_ATTEST',
+                            f"{tempdir}/quote.out"],
+                           capture_output = True, text = True)
+        if c.returncode != 0:
+            sys.stderr.write(f"WARNING: failed to parse quote\n")
+            return make_response("Error: failed to parse quote", 400)
+        with open(f"{tempdir}/quote.yaml", 'w') as fp:
+            fp.write(c.stdout)
+        with open(f"{tempdir}/quote.yaml", 'r') as fp:
+            parsedquote = yaml.safe_load(fp)
+        with open(f"{tempdir}/quote.json", 'w') as fp:
+            json.dump(parsedquote, fp)
+        if not os.path.isfile('/tmp/out.checkquote.tar.gz'):
+            subprocess.run(['tar', 'zcf', '/tmp/out.checkquote.tar.gz', tempdir])
+
         # Now, produce the assets
         with tempfile.TemporaryDirectory() as outdir:
             manifest = []
