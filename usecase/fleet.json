@@ -87,15 +87,14 @@
             "rootproto": {
                 "kdcsvc": {
                     "secondaries": [ "kdc_secondary.{domain}" ],
-                    "pkinit_identity": "/assets/pkinit-kdc-HCPHACKING.XYZ.pem"
+                    "pkinit_identity": "/assets/pkinit-kdc-{realm}.pem"
                 }
             },
             "services": {
                 "webapi": {
                     "app": "/hcp/kdcsvc/mgmt_api.py",
                     "https_certificate": "/assets/https-server-{hostname}.pem",
-                    "https_authentication": "clientcert",
-                    "setup": { "touchfile": "/tmp/touch-kdcsvc-local-setup-HCPHACKING.XYZ" }
+                    "https_authentication": "clientcert"
                 },
                 "attester": null,
                 "kdcsvc_TGS": { "port": "3089" },
@@ -126,7 +125,7 @@
                     "dir": "/kdc_secondary",
                     "mode": "secondary",
                     "primary": "kdc_primary.{domain}",
-                    "pkinit_identity": "/assets/pkinit-kdc-HCPHACKING.XYZ.pem"
+                    "pkinit_identity": "/assets/pkinit-kdc-{realm}.pem"
                 }
             },
             "services": {
@@ -134,8 +133,7 @@
                     "app": "/hcp/kdcsvc/mgmt_api.py",
                     "https_certificate": "/assets/https-server-{hostname}.pem",
                     "https_authentication": "clientcert",
-                    "https_client_CA": "/ca_kdcsvc",
-                    "setup": { "touchfile": "/tmp/touch-kdcsvc-local-setup-HCPHACKING.XYZ" }
+                    "https_client_CA": "/ca_kdcsvc"
                 },
                 "attester": null,
                 "kdcsvc_TGS": { "port": "3088" },
@@ -181,8 +179,7 @@
                     "app": "/hcp/python/HcpFlaskDummy.py",
                     "https_certificate": "/assets/https-server-{hostname}.pem",
                     "https_authentication": "clientcert",
-                    "https_client_CA": "/ca_httpsclient",
-                    "setup": { "touchfile": "/assets/https-server-{hostname}.pem" }
+                    "https_client_CA": "/ca_httpsclient"
                 },
                 "attester": null,
                 "tpm": null
@@ -200,8 +197,7 @@
                 "webapi": {
                     "app": "/hcp/python/HcpFlaskDummy.py",
                     "https_certificate": "/assets/https-server-{hostname}.pem",
-                    "https_authentication": "kerberos",
-                    "setup": { "touchfile": "/assets/https-server-{hostname}.pem" }
+                    "https_authentication": "kerberos"
                 },
                 "attester": null,
                 "tpm": null

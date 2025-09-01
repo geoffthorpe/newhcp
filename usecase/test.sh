@@ -8,6 +8,8 @@ set -e
 	echo "WARN: no PROJECT set, defaulting to '$PROJECT'"
 DCFLAGS="-p $PROJECT"
 
+DOMAIN=hcphacking.xyz
+
 echo "Running basic sanity test"
 
 [[ -n $V ]] && OUT=/dev/stdout || OUT=/dev/null
@@ -77,7 +79,7 @@ if [[ ! -d "\$path" ]]; then
 	cp "/tpmsocket_enrollsvc/tpm.files/ek.pub" "\$path/"
 	cat "/usecase/fleet.json" \
 		| jq .defaults.enroll_profile \
-		| sed -e "s/{hostname}/enrollsvc.hcphacking.xyz/g" \
+		| sed -e "s/{hostname}/enrollsvc.$DOMAIN/g" \
 		> "\$path/profile"
 	chown -R www-data "/backend/db/\${hash:0:2}"
 fi
@@ -92,7 +94,7 @@ do_run run orchestrator \
 		--cacert /ca_default \
 		--clientcert /cred_enrollclient \
 		--retries 10 --pause 1 \
-		https://enrollsvc.hcphacking.xyz/healthcheck
+		https://enrollsvc.$DOMAIN/healthcheck
 
 echo "Enrolling KDC TPMs"
 do_run run orchestrator -e kdc_primary kdc_secondary
@@ -108,7 +110,7 @@ do_run exec attestsvc \
 		--cacert /ca_default \
 		--clientcert /cred_kdcclient \
 		--retries 10 --pause 1 \
-		https://kdc_secondary.hcphacking.xyz/healthcheck
+		https://kdc_secondary.$DOMAIN/healthcheck
 
 echo "Enrolling the remaining TPMs"
 do_run run orchestrator -e
@@ -144,24 +146,24 @@ do_run exec shell \
 #         and we feed commands to it.
 #         - Run 'hostname', the output will return through the ssh shell.
 # - pass the output through 'xargs' (a trick to strip whitespace)
-# - we confirm that all of the above generated "shell.hcphacking.xyz".
+# - we confirm that all of the above generated "shell.$DOMAIN".
 echo "Running an SSO ssh session alicia -> shell"
 result=$(do_run execT alicia bash <<EOF
 source /hcp/common/hcp.sh
 kinit -C FILE:/assets/pkinit-client-alicia.pem alicia \
-	ssh -l alicia shell.hcphacking.xyz bash <<DONE
+	ssh -l alicia shell.$DOMAIN bash <<DONE
 hostname
 DONE
 EOF
 )
 result=$(echo $result|xargs)
-if [[ $result != 'shell.hcphacking.xyz' ]]; then
+if [[ $result != shell.$DOMAIN ]]; then
 	echo "Error, unexpected output: $result" >&2
 	exit 1
 fi
 
 echo "Running a client-certificate authentication alicia -> auth_certificate"
-result=$(docker-compose exec alicia curl --cacert /ca_default --cert /assets/https-client-alicia.pem https://certificate.auth.hcphacking.xyz/get | jq .is_secure)
+result=$(docker-compose exec alicia curl --cacert /ca_default --cert /assets/https-client-alicia.pem https://certificate.auth.$DOMAIN/get | jq .is_secure)
 if [[ $result != 'true' ]]; then
 	echo "Error, unexpected output: $result" >&2
 	exit 1
@@ -171,7 +173,7 @@ echo "Running a kerberos-SPNEGO authentication alicia -> auth_kerberos"
 result=$(do_run execT alicia bash <<EOF
 source /hcp/common/hcp.sh
 kinit -C FILE:/assets/pkinit-client-alicia.pem alicia \
-	curl --cacert /ca_default --negotiate -u : https://kerberos.auth.hcphacking.xyz/get \
+	curl --cacert /ca_default --negotiate -u : https://kerberos.auth.$DOMAIN/get \
 	| jq .is_secure
 EOF
 )

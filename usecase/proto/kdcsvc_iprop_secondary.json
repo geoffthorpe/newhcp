@@ -1,13 +1,13 @@
 {
     "setup": {
-        "touchfile": "/tmp/touch-kdcsvc-local-setup-HCPHACKING.XYZ"
+        "touchfile": "/tmp/touch-kdcsvc-local-setup-{realm}"
     },
     "exec": [
         "/hcp/python/HcpSvcRestarter.py", "-t", "5",
         "kinit",
         "-C",
-        "FILE:/assets/pkinit-iprop-HCPHACKING.XYZ.pem",
-        "iprop/{id}.hcphacking.xyz@HCPHACKING.XYZ",
+        "FILE:/assets/pkinit-iprop-{realm}.pem",
+        "iprop/{id}.{domain}@{realm}",
         "/install-heimdal/libexec/ipropd-slave"
     ],
     "args": [

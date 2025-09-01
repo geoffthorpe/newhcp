@@ -76,6 +76,9 @@ if __name__ == '__main__':
         raise Exception("'attestsvc' is not a valid fleet host id")
     if 'orchestrator' in hosts:
         raise Exception("'orchestrator' is not a valid fleet host id")
+    if 'vars' not in _input or 'domain' not in _input['vars']:
+        raise Exception("No 'domain'")
+    domain = _input['vars']['domain']
 
     if args.show:
         print(' '.join(hosts + [ 'orchestrator', 'attestsvc' ]))
@@ -114,6 +117,10 @@ if __name__ == '__main__':
         }
         if 'attester' in data['services']:
             output['default_targets'] = [ 'start-attester' ] + output['default_targets']
+        if 'vars' in _input:
+            for k in _input['vars']:
+                if k not in output['vars']:
+                    output['vars'][k] = _input['vars'][k]
         # add a root prototype (merged into the top-level, rather than into
         # a named sub-object) if requested.
         if 'rootproto' in data:
@@ -227,7 +234,9 @@ services:
 
     orchestrator:
         extends: common_nontpm
-        hostname: orchestrator.hcphacking.xyz
+        hostname: orchestrator.""")
+            fp.write(domain)
+            fp.write("""
         volumes:
           - ./_testcreds/cred_enrollclient:/cred_enrollclient:ro
 """)

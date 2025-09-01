@@ -23,6 +23,8 @@ app = attestsvc.app
 requests_verify = hcp_config_extract('.backend.cacert', must_exist = True)
 requests_cert = hcp_config_extract('.backend.clientcert', must_exist = True)
 
+domain = hcp_config_extract('.default_domain', must_exist = True)
+
 def add_secret(enrollpath, _input, output):
     c = subprocess.run(['/hcp/safeboot/api_seal',
                         f"{enrollpath}/ek.pub",
@@ -82,13 +84,12 @@ def my_get_assets(ekpubhash, outdir):
             elif certtype == 'https-client':
                 clients = profile['https-clients'] if \
                     'https-clients' in profile else ['nobody']
-                # TODO: get rid of "hcphacking.xyz" - configurable
                 for client in clients:
                     cmd = hxcmd.copy() + \
                         [ '--type=https-client',
                           '--ca-certificate=FILE:/ca_httpsclient_private',
                           f"--subject=UID={client}",
-                          f"--email={client}@hcphacking.xyz",
+                          f"--email={client}@{domain}",
                           f"--certificate=FILE:{tempdir}/https-client-{client}.pem" ]
                     c = subprocess.run(cmd)
                     if c.returncode != 0:
@@ -99,14 +100,13 @@ def my_get_assets(ekpubhash, outdir):
             elif certtype == 'pkinit-client':
                 clients = profile['pkinit-clients'] if \
                     'pkinit-clients' in profile else ['nobody']
-                # TODO: get rid of "HCPHACKING.XYZ" - configurable
                 for client in clients:
                     if not realm:
                         raise Exception("No realm for pkinit-client")
                     cmd = hxcmd.copy() + \
                         [ '--type=pkinit-client',
                           '--ca-certificate=FILE:/ca_default_private',
-                          f"--pk-init-principal={client}@HCPHACKING.XYZ",
+                          f"--pk-init-principal={client}@{realm}",
                           f"--certificate=FILE:{tempdir}/pkinit-client-{client}.pem" ]
                     c = subprocess.run(cmd)
                     if c.returncode != 0:

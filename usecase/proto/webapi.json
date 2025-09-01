@@ -14,5 +14,8 @@
     "app": "{webapi_app}",
     "uwsgi_env": "{webapi_uwsgi_env}",
     "uwsgi_uid": "{webapi_uwsgi_uid}",
-    "uwsgi_gid": "{webapi_uwsgi_gid}"
+    "uwsgi_gid": "{webapi_uwsgi_gid}",
+    "setup": {
+        "touchfile": "{webapi_touchfile}"
+    }
 }
