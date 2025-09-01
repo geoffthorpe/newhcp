@@ -153,7 +153,7 @@ os.makedirs(myetc)
 # Stand up an nginx HTTPS/TLS front-end iff there's a "myhttps" config
 if myhttps:
     h.hlog(1, f"Converting template nginx config: {etcnginx}")
-    shutil.copytree('/hcp/conf/nginx', etcnginx)
+    shutil.copytree('/usecase/conf/nginx', etcnginx)
     with open(f"{etcnginx}/nginx.conf.template", "r") as _input:
         with open(f"{etcnginx}/nginx.conf", "w") as _output:
             while _output.write(_input.read().replace(
