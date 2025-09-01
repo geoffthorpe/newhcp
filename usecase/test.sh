@@ -67,7 +67,7 @@ do_run up enrollsvc_tpm
 
 echo "Waiting for enrollsvc TPM to advertise ek.pub"
 do_run run enrollsvc \
-	/hcp/python/HcpToolWaitTouchfile.py "/tpmsocket_enrollsvc/tpm.files/ek.pub"
+	/hcp/python/hcp/tool/waitTouchfile.py "/tpmsocket_enrollsvc/tpm.files/ek.pub"
 
 echo "Self-enrolling enrollsvc TPM"
 do_run run enrollsvc bash <<EOF
@@ -90,7 +90,7 @@ do_run up enrollsvc
 
 echo "Waiting for enrollsvc availability"
 do_run run orchestrator \
-	/hcp/python/HcpToolWaitWeb.py \
+	/hcp/python/hcp/tool/waitWeb.py \
 		--cacert /ca_default \
 		--clientcert /cred_enrollclient \
 		--retries 10 --pause 1 \
@@ -106,7 +106,7 @@ do_run up kdc_primary kdc_primary_tpm kdc_secondary kdc_secondary_tpm
 
 echo "Waiting for kdc_secondary to be available"
 do_run exec attestsvc \
-	/hcp/python/HcpToolWaitWeb.py \
+	/hcp/python/hcp/tool/waitWeb.py \
 		--cacert /ca_default \
 		--clientcert /cred_kdcclient \
 		--retries 10 --pause 1 \
@@ -124,10 +124,10 @@ do_run up shell shell_tpm alicia alicia_tpm \
 # By waiting for sshd launch, we implicitly wait for attestation.
 echo "Waiting for alicia to be attested"
 do_run exec alicia \
-	/hcp/python/HcpToolWaitTouchfile.py /assets/pkinit-client-alicia.pem
+	/hcp/python/hcp/tool/waitTouchfile.py /assets/pkinit-client-alicia.pem
 echo "Waiting for shell to be attested and sshd running"
 do_run exec shell \
-	/hcp/python/HcpToolWaitTouchfile.py /run/sshd/started
+	/hcp/python/hcp/tool/waitTouchfile.py /run/sshd/started
 
 # The next little blob of script requires some explanation.
 # - we start a bash instance on 'alicia' and feed commands to it.

@@ -212,7 +212,7 @@ services:
           - VERBOSE=${VERBOSE:-0}
           - PYTHONPATH=/hcp/python
         healthcheck:
-            test: /hcp/python/HcpToolHealthcheck.py
+            test: /hcp/python/hcp/tool/healthcheck.py
             timeout: 10s
             interval: 20s
 

@@ -6,7 +6,7 @@
     "waitdb": {
         "setup": [ {
             "tag": "global",
-            "exec": [ "/hcp/python/HcpToolWaitTouchfile.py", "/backend/.db-created" ],
+            "exec": [ "/hcp/python/hcp/tool/waitTouchfile.py", "/backend/.db-created" ],
             "touchfile": "/backend/.db-created"
         } ]
     }
