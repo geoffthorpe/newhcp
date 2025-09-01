@@ -1,10 +1,10 @@
 {
     "_": "  vim: set expandtab shiftwidth=4 softtabstop=4: ",
+    "vars": {
+        "realm": "HCPHACKING.XYZ",
+        "domain": "hcphacking.xyz"
+    },
     "defaults": {
-        "vars": {
-            "realm": "HCPHACKING.XYZ",
-            "domain": "hcphacking.xyz"
-        },
         "tpm_create": true,
         "tpm_enroll": true,
         "enroll_api": "https://enrollsvc.{domain}",
