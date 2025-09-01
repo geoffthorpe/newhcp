@@ -59,7 +59,7 @@
                 "https_certificate": "/cred_attestsvc"
             }
         },
-        "hack1": [ "createdb", "copykey", "webapi" ]
+        "hack1": [ "xtra", "webapi" ]
     },
     "fleet": {
         "enrollsvc": {
