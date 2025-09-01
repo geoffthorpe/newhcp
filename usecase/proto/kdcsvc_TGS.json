@@ -1,6 +1,6 @@
 {
     "setup": { "touchfile": "/tmp/touch-kdcsvc-local-setup-{kdcsvc_realm}" },
-    "exec": "/hcp/python/HcpSvcRestarter.py",
+    "exec": "/hcp/python/hcp/svc/restarter.py",
     "__TODO_healthcheck": null,
     "args": [
         "-t", "0",

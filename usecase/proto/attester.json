@@ -1,5 +1,5 @@
 {
-    "exec": "/hcp/python/HcpSvcAttester.py",
+    "exec": "/hcp/python/hcp/svc/attester.py",
     "__TODO_healthcheck": null,
     "tag": "{attester_tag}",
     "period": "{attester_period}",

@@ -3,7 +3,7 @@
         "touchfile": "/tmp/touch-kdcsvc-local-setup-{realm}"
     },
     "exec": [
-        "/hcp/python/HcpSvcRestarter.py", "-t", "5",
+        "/hcp/python/hcp/svc/restarter.py", "-t", "5",
         "kinit",
         "-C",
         "FILE:/assets/pkinit-iprop-{realm}.pem",
