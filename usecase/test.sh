@@ -9,6 +9,7 @@ set -e
 DCFLAGS="-p $PROJECT"
 
 DOMAIN=$(jq -r .vars.domain usecase/fleet.json)
+LAUNCHER=/hcp/python/hcp/tool/launcher.py
 
 echo "Running basic sanity test"
 
@@ -148,7 +149,7 @@ do_run exec shell \
 # - pass the output through 'xargs' (a trick to strip whitespace)
 # - we confirm that all of the above generated "shell.$DOMAIN".
 echo "Running an SSO ssh session alicia -> shell"
-result=$(do_run execT alicia bash <<EOF
+result=$(do_run execT alicia $LAUNCHER bash <<EOF
 source /hcp/common/hcp.sh
 kinit -C FILE:/assets/pkinit-client-alicia.pem alicia \
 	ssh -l alicia shell.$DOMAIN bash <<DONE
@@ -170,7 +171,7 @@ if [[ $result != 'true' ]]; then
 fi
 
 echo "Running a kerberos-SPNEGO authentication alicia -> auth_kerberos"
-result=$(do_run execT alicia bash <<EOF
+result=$(do_run execT alicia $LAUNCHER bash <<EOF
 source /hcp/common/hcp.sh
 kinit -C FILE:/assets/pkinit-client-alicia.pem alicia \
 	curl --cacert /ca_default --negotiate -u : https://kerberos.auth.$DOMAIN/get \

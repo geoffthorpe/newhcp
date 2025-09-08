@@ -135,32 +135,6 @@ function normalize_path {
 	fi
 	echo "$mypath"
 }
-workloadpath=/tmp/workloads
-if [[ ! -n $HCP_CONFIG_FILE ]]; then
-	if [[ -n $HOME && -d $HOME && -f "$HOME/hcp_config" ]]; then
-		source "$HOME/hcp_config"
-		hlog 2 "hcp_config: loaded from $HOME/hcp_config"
-	else
-		echo "Warning, no HCP_CONFIG_FILE set, use of APIs may 'exit'" >&2
-	fi
-elif [[ $HCP_CONFIG_FILE == ${workloadpath}/* ]]; then
-	hlog 2 "hcp_config: already relocated ($curpath)"
-else
-	if [[ $WHOAMI != root ]]; then
-		echo "Warning, HCP_CONFIG_FILE ($HCP_CONFIG_FILE) not relocated" >&2
-	else
-		fname=$(basename "$HCP_CONFIG_FILE")
-		newpath="$workloadpath/$fname"
-		hlog 2 "hcp_config: relocating"
-		hlog 2 "- from: $HCP_CONFIG_FILE"
-		hlog 2 "-   to: $newpath"
-		mkdir -p -m 755 $workloadpath
-		cat "$HCP_CONFIG_FILE" | /hcp/python/gson/mutater.py > "$newpath.tmp"
-		chmod 444 "$newpath.tmp"
-		mv "$newpath.tmp" "$newpath"
-		export HCP_CONFIG_FILE=$newpath
-	fi
-fi
 function hcp_config_extract {
 	if [[ -z $HCP_CONFIG_FILE ]]; then
 		bail "!HCP_CONFIG_FILE"

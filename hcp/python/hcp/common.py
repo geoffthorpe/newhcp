@@ -96,36 +96,6 @@ def bail(s, exitcode = 1):
 	hlog(0, f"FAIL: {s}")
 	sys.exit(exitcode)
 
-# We use this hook to handle replace all calls to json.load(open(...)) in order
-# to detect and automatically process any ".scope" stanza.
-def jsonload(p):
-	return mut.mutate(json.load(open(p, 'r')))
-
-# - HCP_CONFIG_FILE is the path to the JSON config file.
-# - hcp_config_extract() pulls fields from the JSON, at the given path.
-# Note that hcp_config_*() functions will handle a path that has no leading '.'
-workloadpath = '/tmp/workloads'
-if 'HCP_CONFIG_FILE' not in os.environ:
-	hlog(1, "Warning, no HCP_CONFIG_FILE, use of APIs may 'exit'")
-else:
-	curpath = os.environ['HCP_CONFIG_FILE']
-	if curpath.startswith(workloadpath) or curpath.startswith('/etc'):
-		hlog(2, f"hcp_config: already relocated ({curpath})")
-	else:
-		username = getpass.getuser()
-		if username != 'root':
-			hlog(0, f"Warning, HCP_CONFIG_FILE ({curpath}) not relocated")
-		else:
-			filename = os.path.basename(curpath)
-			newpath = f"{workloadpath}/{filename}"
-			hlog(2, "hcp_config: relocating")
-			hlog(2, f"- from: {curpath}")
-			hlog(2, f"-   to: {newpath}")
-			os.makedirs(workloadpath, exist_ok = True, mode = 0o755)
-			world = jsonload(curpath)
-			with open(newpath, 'w') as f:
-				json.dump(world, f)
-			os.environ['HCP_CONFIG_FILE'] = newpath
 # Don't forget, this API shares semantics with pat.extract_path(). Most
 # notably, it returns a 2-tuple by default;
 #  (boolean success, {dict|list|str|int|None} resultdata)
@@ -140,7 +110,8 @@ def hcp_config_extract(path, **kwargs):
 	if not path.startswith('.'):
 		path = f".{path}"
 	hlog(3, f"hcp_config_extract: {path}")
-	world = jsonload(os.environ['HCP_CONFIG_FILE'])
+	with open(os.environ['HCP_CONFIG_FILE'], 'r') as fp:
+		world = json.load(fp)
 	return pat.extract_path(world, path, **kwargs)
 
 def env_get(k):

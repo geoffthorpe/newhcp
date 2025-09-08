@@ -6,7 +6,9 @@ import os
 import sys
 import subprocess
 import time
+import tempfile
 from gson.union import union
+import gson.mutater as mut
 import hcp.common
 
 # The number of seconds to pause when waiting for a blocking command to complete
@@ -98,10 +100,26 @@ class Nexus:
     def returncode(self):
         return self._returncode
 
-def launch(configpath, args):
+def launch(args):
+    if 'HCP_CONFIG_FILE' not in os.environ:
+        raise Exception('No host config given')
+    configpath = os.environ['HCP_CONFIG_FILE']
+    if not os.path.isfile(configpath):
+        raise Exception(f"Host config not found: {config}")
+
+    orig = os.environ['HCP_CONFIG_FILE']
+    with open(orig, 'r') as fp:
+        preworld = json.load(fp)
+    world = mut.mutate(preworld)
+    _tempdir = tempfile.TemporaryDirectory()
+    n = f"{_tempdir.name}/workload.json"
+    with open(n, 'w') as fp:
+        json.dump(world, fp)
+    os.environ['HCP_CONFIG_FILE'] = n
+
     # Load the config, extract any top-level 'env', 'args_for', 'result_from',
     # 'foreground', and '_' (the latter is a convention for comments)
-    config = json.loads(open(configpath, 'r').read())
+    config = world
     env = config.pop('env') if 'env' in config else {}
     args_for = config.pop('args_for') if 'args_for' in config else None
     result_from = config.pop('result_from') if 'result_from' in config else None
@@ -179,11 +197,5 @@ if __name__ == '__main__':
 
     sys.argv.pop(0)
     
-    if 'HCP_CONFIG_FILE' not in os.environ:
-        raise Exception('No host config given')
-    config = os.environ['HCP_CONFIG_FILE']
-    if not os.path.isfile(config):
-        raise Exception(f"Host config not found: {config}")
-
-    ret = launch(config, sys.argv)
+    ret = launch(sys.argv)
     sys.exit(ret)
