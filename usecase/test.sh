@@ -163,6 +163,24 @@ if [[ $result != shell.$DOMAIN ]]; then
 	exit 1
 fi
 
+# This time, we ssh back to alicia from within the ssh session to shell
+echo "Running an SSO ssh boomerang alicia -> shell -> alicia"
+result=$(do_run execT alicia $LAUNCHER bash <<EOF
+source /hcp/common/hcp.sh
+kinit -C FILE:/assets/pkinit-client-alicia.pem alicia \
+	ssh -l alicia shell.$DOMAIN bash <<DONE
+ssh alicia.$DOMAIN bash <<INNER
+hostname
+INNER
+DONE
+EOF
+)
+result=$(echo $result|xargs)
+if [[ $result != alicia.$DOMAIN ]]; then
+	echo "Error, unexpected output: $result" >&2
+	exit 1
+fi
+
 echo "Running a client-certificate authentication alicia -> auth_certificate"
 result=$(docker-compose exec alicia curl --cacert /ca_default --cert /assets/https-client-alicia.pem https://certificate.auth.$DOMAIN/get | jq .is_secure)
 if [[ $result != 'true' ]]; then
