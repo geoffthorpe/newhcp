@@ -1,14 +1,5 @@
 {
     "kdcsvc": {
-        "setup": [ {
-                "tag": "global",
-                "exec": "/hcp/kdcsvc/setup_global.sh",
-                "touchfile": "{kdcsvc_dir}/initialized"
-            }, {
-                "tag": "local",
-                "exec": "/hcp/kdcsvc/setup_local.sh",
-                "touchfile": "/tmp/touch-kdcsvc-local-setup-{kdcsvc_realm}"
-            } ],
         "state": "{kdcsvc_dir}",
         "mode": "{kdcsvc_mode}",
         "secondaries": "{kdcsvc_secondaries}",
@@ -37,6 +28,20 @@
                 },
                 "add_ns": {
                 }
+            }
+        },
+        "toplevel": {
+            "setup_global": {
+                "priority": 20,
+                "exec": "/hcp/kdcsvc/setup_global.sh",
+                "block": "{kdcsvc_dir}/initialized",
+                "will_exit": true
+            },
+            "setup_local": {
+                "priority": 40,
+                "exec": "/hcp/kdcsvc/setup_local.sh",
+                "block": "/tmp/touch-kdcsvc-local-setup-{kdcsvc_realm}",
+                "will_exit": true
             }
         }
     }

@@ -1,7 +1,8 @@
 {
+    "priority": 10,
     "exec": "/hcp/python/hcp/svc/attester.py",
+    "block": "{attester_assetdir}/touch",
     "__TODO_healthcheck": null,
-    "tag": "{attester_tag}",
     "period": "{attester_period}",
     "retry": "{attester_retry}",
     "tool": "{attester_tool}",
@@ -9,6 +10,5 @@
     "verifier": "{attester_verifier}",
     "assetdir": "{attester_assetdir}",
     "cacert": "{attester_cacert}",
-    "callback": "{attester_callback}",
-    "until": "{attester_assetdir}/touch"
+    "callback": "{attester_callback}"
 }

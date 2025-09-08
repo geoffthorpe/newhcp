@@ -1,8 +1,7 @@
 {
-    "setup": "{webapi_setup}",
+    "priority": 60,
     "exec": [ "/hcp/webapi.py", "-C", "{webapi_name}" ],
     "healthcheck": [ "/hcp/webapi.py", "--healthcheck", "-C", "{webapi_name}" ],
-    "tag": "{webapi_tag}",
     "servername": "{webapi_fqdn}",
     "port": "{webapi_port}",
     "https": {
@@ -14,8 +13,5 @@
     "app": "{webapi_app}",
     "uwsgi_env": "{webapi_uwsgi_env}",
     "uwsgi_uid": "{webapi_uwsgi_uid}",
-    "uwsgi_gid": "{webapi_uwsgi_gid}",
-    "setup": {
-        "touchfile": "{webapi_touchfile}"
-    }
+    "uwsgi_gid": "{webapi_uwsgi_gid}"
 }

@@ -1,9 +1,9 @@
 {
+    "priority": 70,
     "exec": "/hcp/sshd.py",
+    "block": "/run/sshd/started",
     "healthcheck": [ "/hcp/sshd.py", "--healthcheck" ],
-    "tag": "{sshd_tag}",
     "port": "{sshd_port}",
     "hostname": "{sshd_fqdn}",
-    "xtra": "{sshd_xtra}",
-    "until": "/run/sshd/started"
+    "xtra": "{sshd_xtra}"
 }

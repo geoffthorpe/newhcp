@@ -1,5 +1,3 @@
 {
-    "services": "{services}",
-    "default_targets": "{default_targets}",
     "env": { "PYTHONPATH": "/hcp/python" }
 }

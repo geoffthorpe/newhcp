@@ -1,5 +1,5 @@
 {
+    "priority": 90,
     "exec": "/hcp/python/hcp/tool/orchestrator.py",
-    "tag": "tool",
     "fleet": "{orchestrator_fleet}"
 }

@@ -1,12 +1,12 @@
 source /hcp/common/hcp.sh
 
-export HCP_ID=$(hcp_config_extract_or "id" "unknown_id")
+export HCP_ID=$(hcp_config_extract "vars.id")
 
 # We pull the 'kdcsvc' config once and then interrogate it locally.
 export HCP_KDCSVC_JSON=$(hcp_config_extract ".kdcsvc")
+export HCP_KDCSVC_GLOBAL_INIT=$(echo "$HCP_KDCSVC_JSON" | jq -r ".toplevel.setup_global.block")
+export HCP_KDCSVC_LOCAL_INIT=$(echo "$HCP_KDCSVC_JSON" | jq -r ".toplevel.setup_local.block")
 export HCP_KDCSVC_STATE=$(echo "$HCP_KDCSVC_JSON" | jq -r ".state")
-export HCP_KDCSVC_GLOBAL_INIT=$(echo "$HCP_KDCSVC_JSON" | jq -r ".setup[0].touchfile")
-export HCP_KDCSVC_LOCAL_INIT=$(echo "$HCP_KDCSVC_JSON" | jq -r ".setup[1].touchfile")
 export HCP_KDCSVC_MODE=$(echo "$HCP_KDCSVC_JSON" | jq -r ".mode")
 export HCP_KDCSVC_SECONDARIES=$(echo "$HCP_KDCSVC_JSON" | jq -r ".secondaries // []")
 export HCP_KDCSVC_REALM=$(echo "$HCP_KDCSVC_JSON" | jq -r ".realm")

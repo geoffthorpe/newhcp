@@ -1,15 +1,18 @@
 {
-    "setup": {
-        "tag": "global",
-        "exec": [
-            "/hcp/python/hcp/tool/waitTouchfile.py",
-            "/tpm_{machine}/tpm/ek.pub"
-        ],
-        "touchfile": "/tpm_{machine}/tpm/ek.pub"
-    },
+    "priority": 50,
     "exec": "/hcp/swtpm.py",
     "healthcheck": [ "/hcp/swtpm.py", "--healthcheck" ],
     "state": "/tpm_{machine}",
     "sockdir": "/tpmsocket_{machine}",
-    "tag": "services"
+    "toplevel": {
+        "tpm-setup": {
+            "priority": 10,
+            "exec": [
+                "/hcp/python/hcp/tool/waitTouchfile.py",
+                "/tpm_{machine}/tpm/ek.pub"
+            ],
+            "block": "/tpm_{machine}/tpm/ek.pub",
+	    "will_exit": true
+        }
+    }
 }

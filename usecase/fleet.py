@@ -47,10 +47,6 @@ def produce_host_config(host, _input, outputdir):
     hostname = data['hostname'] if 'hostname' in data else 'nada'
     servicenames = [ k for k in data['services']] \
         if 'services' in data else []
-    if 'tpm' in servicenames:
-        servicenames.pop(servicenames.index('tpm'))
-    if 'xtra_services' in data:
-        servicenames += data['xtra_services']
     # 'output' is the structure that gets jsonified at the end
     output = {
         'vars': {
@@ -62,10 +58,7 @@ def produce_host_config(host, _input, outputdir):
         'mutate': [
             { 'method': 'load', 'jspath': '/usecase/proto/root.json' },
             { 'method': 'union' }
-        ],
-        'services': servicenames,
-        'default_targets': [ 'setup-global', 'setup-local',
-                             'start-services', 'start-tool' ]
+        ]
     }
     output_tpm = {
         'vars': {
@@ -85,12 +78,8 @@ def produce_host_config(host, _input, outputdir):
             { 'method': 'load', 'regpath': 'swtpm',
               'jspath': '/usecase/proto/tpm_sidecar.json' },
             { 'method': 'expand' }
-        ],
-        'services': [ 'swtpm' ],
-        'default_targets': [ 'setup-global', 'start-services' ]
+        ]
     }
-    if 'attester' in data['services']:
-        output['default_targets'] = [ 'start-attester' ] + output['default_targets']
     if 'vars' in _input:
         for k in _input['vars']:
             if k not in output['vars']:
@@ -129,12 +118,10 @@ def produce_host_config(host, _input, outputdir):
             for k in _vars:
                 output['vars'][f"{service}_{k}"] = _vars[k]
         # Add the non-root prototype
-        proto = f"/usecase/proto/{service}_sidecar.json" \
-            if service == 'tpm' else f"/usecase/proto/{service}.json"
         output['mutate'].append({
             'method': 'load',
             'regpath': service,
-            'jspath': proto})
+            'jspath': f"/usecase/proto/{service}.json"})
     # add per-host environment includes
     env = data['env'] if 'env' in data else []
     for e in env:
@@ -146,9 +133,14 @@ def produce_host_config(host, _input, outputdir):
             'method': 'union',
             'srcregister': 'e',
             'regpath': 'env'})
-    # if there's an "args_for", put it in the output
+    # if there is any of "args_for/result_from/foreground" in the input, put it
+    # in the output too
     if 'args_for' in data:
         output['args_for'] = data['args_for']
+    if 'result_from' in data:
+        output['result_from'] = data['result_from']
+    if 'foreground' in data:
+        output['foreground'] = data['foreground']
     # perform parameter-expansion
     output['mutate'].append({ 'method': 'expand' })
     # Generate host config (and make it human-readable)

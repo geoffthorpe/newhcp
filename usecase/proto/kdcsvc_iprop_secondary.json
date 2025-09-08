@@ -1,21 +1,16 @@
 {
-    "setup": {
-        "touchfile": "/tmp/touch-kdcsvc-local-setup-{realm}"
-    },
+    "priority": 80,
     "exec": [
         "/hcp/python/hcp/svc/restarter.py", "-t", "5",
         "kinit",
         "-C",
         "FILE:/assets/pkinit-iprop-{realm}.pem",
         "iprop/{id}.{domain}@{realm}",
-        "/install-heimdal/libexec/ipropd-slave"
-    ],
-    "args": [
+        "/install-heimdal/libexec/ipropd-slave",
         "--config-file={kdcsvc_dir}/etc/kdc.conf",
         "--no-keytab",
         "--verbose",
         "{kdcsvc_primary}"
     ],
-    "__TODO_healthcheck": null,
-    "tag": "{kdcsvc_tag}"
+    "__TODO_healthcheck": null
 }

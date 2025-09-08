@@ -4,10 +4,9 @@
     },
 
     "waitdb": {
-        "setup": [ {
-            "tag": "global",
-            "exec": [ "/hcp/python/hcp/tool/waitTouchfile.py", "/backend/.db-created" ],
-            "touchfile": "/backend/.db-created"
-        } ]
+        "priority": 20,
+        "exec": [ "/hcp/python/hcp/tool/waitTouchfile.py", "/backend/.db-created" ],
+        "block": "/backend/.db-created",
+        "will_exit": true
     }
 }
