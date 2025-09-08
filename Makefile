@@ -85,7 +85,7 @@ $(USECASE_DIR)/docker-compose.yml: usecase/fleet.json usecase/fleet.py
 define usecase_host
 $(USECASE_DIR)/$1.json: | $(USECASE_DIR)
 $(USECASE_DIR)/$1.json: usecase/fleet.json usecase/fleet.py
-	$Q PYTHONPATH=hcp/python ./usecase/fleet.py --hosts=$(USECASE_DIR) $1
+	$Q PYTHONPATH=hcp/python ./usecase/fleet.py --mutate --hosts=$(USECASE_DIR) $1
 endef
 $(foreach i,$(USECASE_HOSTS),$(eval $(call usecase_host,$i)))
 ifneq (,$(wildcard $(USECASE_DIR)))

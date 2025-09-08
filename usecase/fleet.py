@@ -7,6 +7,7 @@ import sys
 import argparse
 
 from gson.expander import expand
+from gson.mutater import mutate
 
 def docker_write_service(fp, name, data, with_tpm = True):
     print(f"Writing service '{name}' to docker compose file")
@@ -34,7 +35,7 @@ def docker_write_tpm(fp, name, data, with_tpm = True):
     fp.write('        environment:\n')
     fp.write(f"          - HCP_CONFIG_FILE=/_usecase/{name}_tpm.json\n\n")
 
-def produce_host_config(host, _input, outputdir):
+def produce_host_config(host, _input, outputdir, write_mutate):
     if host != 'attestsvc' and host != 'orchestrator' and \
                             host not in hosts:
         raise Exception(f"'{host}' is not a known fleet host id")
@@ -56,7 +57,7 @@ def produce_host_config(host, _input, outputdir):
             'realm': _input['vars']['realm']
         },
         'mutate': [
-            { 'method': 'load', 'jspath': '/usecase/proto/root.json' },
+            { 'method': 'load', 'jspath': 'usecase/proto/root.json' },
             { 'method': 'union' }
         ]
     }
@@ -69,14 +70,14 @@ def produce_host_config(host, _input, outputdir):
             'realm': _input['vars']['realm']
         },
         'mutate': [
-            { 'method': 'load', 'jspath': '/usecase/proto/root.json' },
+            { 'method': 'load', 'jspath': 'usecase/proto/root.json' },
             { 'method': 'union' },
             { 'method': 'load', 'register': 'd',
-              'jspath': '/usecase/proto/defaults.json' },
+              'jspath': 'usecase/proto/defaults.json' },
             { 'method': 'union', 'regpath': 'vars',
               'srcregister': 'd', 'underlay': True },
             { 'method': 'load', 'regpath': 'swtpm',
-              'jspath': '/usecase/proto/tpm_sidecar.json' },
+              'jspath': 'usecase/proto/tpm_sidecar.json' },
             { 'method': 'expand' }
         ]
     }
@@ -95,7 +96,7 @@ def produce_host_config(host, _input, outputdir):
             output['mutate'].append({
                 'method': 'load',
                 'register': 'a',
-                'jspath': f"/usecase/proto/{service}.json"})
+                'jspath': f"usecase/proto/{service}.json"})
             output['mutate'].append({
                 'method': 'union',
                 'srcregister': 'a'})
@@ -103,7 +104,7 @@ def produce_host_config(host, _input, outputdir):
     output['mutate'].append({
         'method': 'load',
         'register': 'd',
-        'jspath': '/usecase/proto/defaults.json'})
+        'jspath': 'usecase/proto/defaults.json'})
     output['mutate'].append({
         'method': 'union',
         'regpath': 'vars',
@@ -121,14 +122,14 @@ def produce_host_config(host, _input, outputdir):
         output['mutate'].append({
             'method': 'load',
             'regpath': service,
-            'jspath': f"/usecase/proto/{service}.json"})
+            'jspath': f"usecase/proto/{service}.json"})
     # add per-host environment includes
     env = data['env'] if 'env' in data else []
     for e in env:
         output['mutate'].append({
             'method': 'load',
             'register': 'e',
-            'jspath': f"/usecase/proto/env_{e}.json"})
+            'jspath': f"usecase/proto/env_{e}.json"})
         output['mutate'].append({
             'method': 'union',
             'srcregister': 'e',
@@ -143,7 +144,17 @@ def produce_host_config(host, _input, outputdir):
         output['foreground'] = data['foreground']
     # perform parameter-expansion
     output['mutate'].append({ 'method': 'expand' })
-    # Generate host config (and make it human-readable)
+    # Write the mutate file if requested
+    if write_mutate:
+        with open(f"{outputdir}/{host}.mutate.json", 'w') as fp:
+            json.dump(output, fp, indent = 4)
+        if has_tpm:
+            with open(f"{outputdir}/{host}_tpm.mutate.json", 'w') as fp:
+                json.dump(output_tpm, fp, indent = 4)
+    # Mutate
+    output = mutate(output)
+    output_tpm = mutate(output_tpm)
+    # Generate host config
     with open(f"{outputdir}/{host}.json", 'w') as fp:
         json.dump(output, fp, indent = 4)
     if has_tpm:
@@ -165,6 +176,7 @@ if __name__ == '__main__':
     fleet_help_input = 'path to JSON input, default = usecase/fleet.json'
     fleet_help_docker = 'path to docker-compose output, default = docker-compose.yml'
     fleet_help_hosts = 'path to directory for host configs, default = _crud/usecase'
+    fleet_help_mutate = 'write the intermediate \'mutate\' file also'
     fleet_help_show = 'display the fleet host-ids (modifies no files)'
     fleet_help_host = 'name of host to produce config for (there is no default)'
     parser.add_argument('--input', metavar = '<PATH>',
@@ -176,6 +188,7 @@ if __name__ == '__main__':
     parser.add_argument('--hosts', metavar = '<PATH>',
                         default = '_crud/usecase',
                         help = fleet_help_hosts)
+    parser.add_argument('--mutate', action = 'store_true', help = fleet_help_mutate)
     parser.add_argument('--show', action = 'store_true', help = fleet_help_show)
     parser.add_argument('host', nargs = '?', help = fleet_help_host)
 
@@ -200,7 +213,7 @@ if __name__ == '__main__':
     elif args.host:
         if not os.path.isdir(args.hosts):
             raise Exception(f"Host config output directory ({args.hosts}) is not a directory")
-        produce_host_config(args.host, _input, args.hosts)
+        produce_host_config(args.host, _input, args.hosts, args.mutate)
 
     else:
 
