@@ -44,12 +44,12 @@
         "hostname": "attestsvc.{domain}",
         "volumes": [
             "backend:/backend",
-            "./_testcreds/ca_default_private:/ca_default_private:ro",
-            "./_testcreds/ca_httpsclient_private:/ca_httpsclient_private:ro",
-            "./_testcreds/cred_attestsvc:/cred_attestsvc:ro",
-            "./_testcreds/cred_kdcclient:/cred_kdcclient:ro",
-            "./_testcreds/key_attestnoncer:/key_attestnoncer:ro",
-            "./_testcreds/signer_asset:/signer_asset:ro"
+            "./_crud/testcreds/ca_default_private:/ca_default_private:ro",
+            "./_crud/testcreds/ca_httpsclient_private:/ca_httpsclient_private:ro",
+            "./_crud/testcreds/cred_attestsvc:/cred_attestsvc:ro",
+            "./_crud/testcreds/cred_kdcclient:/cred_kdcclient:ro",
+            "./_crud/testcreds/key_attestnoncer:/key_attestnoncer:ro",
+            "./_crud/testcreds/signer_asset:/signer_asset:ro"
         ],
         "rootproto": { "attestsvc": null },
         "services": {
@@ -63,8 +63,8 @@
             "hostname": "enrollsvc.{domain}",
             "volumes": [
                 "backend:/backend",
-                "./_testcreds/ca_enrollsvc:/ca_enrollsvc:ro",
-                "./_testcreds/cred_enrollsvc:/cred_enrollsvc:ro"
+                "./_crud/testcreds/ca_enrollsvc:/ca_enrollsvc:ro",
+                "./_crud/testcreds/cred_enrollsvc:/cred_enrollsvc:ro"
             ],
             "rootproto": { "enrollsvc": null },
             "services": {
@@ -115,7 +115,7 @@
             },
             "volumes": [
                 "kdc_secondary:/kdc_secondary",
-                "./_testcreds/ca_kdcsvc:/ca_kdcsvc:ro"
+                "./_crud/testcreds/ca_kdcsvc:/ca_kdcsvc:ro"
             ],
             "rootproto": {
                 "kdcsvc": {
@@ -166,7 +166,7 @@
         },
         "auth_certificate": {
             "hostname": "certificate.auth.{domain}",
-            "volumes": [ "./_testcreds/ca_httpsclient:/ca_httpsclient:ro" ],
+            "volumes": [ "./_crud/testcreds/ca_httpsclient:/ca_httpsclient:ro" ],
             "services": {
                 "webapi": {
                     "app": "/hcp/python/hcp/flask/dummy.py",

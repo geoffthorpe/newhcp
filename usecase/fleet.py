@@ -259,9 +259,9 @@ services:
         networks:
           - hcpnetwork
         volumes:
-          - ./_testcreds/ca_default:/ca_default:ro
-          - ./_testcreds/verifier_asset:/verifier_asset:ro
-          - ./_testcreds/cred_healthhttpsclient:/cred_healthhttpsclient:ro
+          - ./_crud/testcreds/ca_default:/ca_default:ro
+          - ./_crud/testcreds/verifier_asset:/verifier_asset:ro
+          - ./_crud/testcreds/cred_healthhttpsclient:/cred_healthhttpsclient:ro
 
     orchestrator:
         extends: common_nontpm
@@ -269,7 +269,7 @@ services:
             fp.write(domain)
             fp.write("""
         volumes:
-          - ./_testcreds/cred_enrollclient:/cred_enrollclient:ro
+          - ./_crud/testcreds/cred_enrollclient:/cred_enrollclient:ro
 """)
             for host in hosts:
                 fp.write(f"          - tpm_{host}:/tpm_{host}\n")

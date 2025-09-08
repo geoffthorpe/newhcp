@@ -1,6 +1,8 @@
 # This should be included from the main Makefile, ie. not used directly
 
-TESTCREDS_OUT := $(TOP)/_testcreds
+TESTCREDS_OUT := $(CRUD)/testcreds
+$(TESTCREDS_OUT): | $(CRUD)
+MDIRS += $(TESTCREDS_OUT)
 TESTCREDS_DONE :=
 COMMA := ,
 
@@ -85,9 +87,6 @@ $(eval $(call add_cred_hxtool,kdcsvc,kdcclient, \
 
 $(eval $(call add_cred_randkey,attestnoncer,key))
 $(eval $(call add_cred_keypair,asset))
-
-$(TESTCREDS_OUT):
-	$Qmkdir $@
 
 testcreds: $(TESTCREDS_DONE)
 ifneq (,$(wildcard $(TESTCREDS_OUT)))
