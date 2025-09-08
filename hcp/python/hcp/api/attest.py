@@ -138,7 +138,8 @@ def quote(initial, output):
     with tempfile.TemporaryDirectory() as tempdir:
         with open(f"{tempdir}/nonce", 'w') as fp:
             fp.write(init['nonce'].strip())
-        if tpm2_flushall() and \
+        if sr(['tpm2', 'dictionarylockout', '-c']) and \
+            tpm2_flushall() and \
             sr(['tpm2', 'createek',
                 '--ek-context', f"{tempdir}/ek.ctx",
                 '--key-algorithm', 'rsa',
