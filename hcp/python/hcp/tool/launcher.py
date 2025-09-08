@@ -114,6 +114,8 @@ def launch(args):
     with open(n, 'w') as fp:
         json.dump(world, fp)
     os.environ['HCP_CONFIG_FILE'] = n
+    os.chmod(_tempdir.name, 0o755)
+    os.chmod(n, 0o444)
 
     # Load the config, extract any top-level 'env', 'args_for', 'result_from',
     # 'foreground', and '_' (the latter is a convention for comments)
