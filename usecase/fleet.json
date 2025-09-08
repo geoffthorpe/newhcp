@@ -153,6 +153,7 @@
         },
         "alicia": {
             "hostname": "alicia.{domain}",
+            "tpm": "cotenant",
             "enroll_profile": {
                 "certgen": [ "pkinit-client", "https-client" ],
                 "pkinit-clients": [ "alicia" ],
@@ -169,6 +170,7 @@
         },
         "auth_certificate": {
             "hostname": "certificate.auth.{domain}",
+            "tpm": "cotenant",
             "volumes": [ "./_crud/testcreds/ca_httpsclient:/ca_httpsclient:ro" ],
             "services": {
                 "webapi": {
@@ -183,6 +185,7 @@
         },
         "auth_kerberos": {
             "hostname": "kerberos.auth.{domain}",
+            "tpm": "cotenant",
             "enroll_profile": {
                 "ktgen": {
                     "http": [ "HTTP/{hostname}" ]

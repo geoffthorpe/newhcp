@@ -116,10 +116,10 @@ do_run exec attestsvc \
 echo "Enrolling the remaining TPMs"
 do_run run orchestrator -e
 
+# Note, we have arbitrarily chosen 'alicia' and the two 'auth_*'
+# machines to use contenant TPMs (not sidecars)
 echo "Starting remaining hosts"
-do_run up shell shell_tpm alicia alicia_tpm \
-	auth_certificate auth_certificate_tpm \
-	auth_kerberos auth_kerberos_tpm
+do_run up shell shell_tpm alicia auth_certificate auth_kerberos
 
 
 # By waiting for sshd launch, we implicitly wait for attestation.

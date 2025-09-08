@@ -9,21 +9,24 @@ import argparse
 from gson.expander import expand
 from gson.mutater import mutate
 
-def docker_write_service(fp, name, data, with_tpm = True):
+def docker_write_service(fp, name, data, with_sidecar = True, with_cotenant = False):
     print(f"Writing service '{name}' to docker compose file")
     fp.write(f"    {name}:\n")
     fp.write('        extends: common_nontpm\n')
     fp.write(f"        hostname: {data['hostname']}\n")
-    fp.write('        volumes:\n')
-    if with_tpm:
-        fp.write(f"          - tpmsocket_{name}:/tpmsocket_{name}\n")
     vols = data['volumes'] if 'volumes' in data else []
+    if with_sidecar or with_cotenant or len(vols) > 0:
+        fp.write('        volumes:\n')
+    if with_cotenant:
+        fp.write(f"          - tpm_{name}:/tpm_{name}\n")
+    elif with_sidecar:
+        fp.write(f"          - tpmsocket_{name}:/tpmsocket_{name}\n")
     for item in vols:
         fp.write(f"          - {item}\n")
     fp.write('        environment:\n')
     fp.write(f"          - HCP_CONFIG_FILE=/_usecase/{name}.json\n\n")
 
-def docker_write_tpm(fp, name, data, with_tpm = True):
+def docker_write_sidecar(fp, name, data, with_tpm = True):
     print(f"Writing service '{name}_tpm' to docker compose file")
     fp.write(f"    {name}_tpm:\n")
     fp.write('        extends: common_tpm\n')
@@ -40,12 +43,15 @@ def produce_host_config(host, _input, outputdir, write_mutate):
                             host not in hosts:
         raise Exception(f"'{host}' is not a known fleet host id")
     print(f"Producing '{host}' config file")
-    has_tpm = host in _input['fleet']
-    if has_tpm:
+    in_fleet = host in _input['fleet']
+    if in_fleet:
         data = _input['fleet'][host]
     else: # host == attestsvc or host == orchestrator
         data = _input[host]
     hostname = data['hostname'] if 'hostname' in data else 'nada'
+    tpm_mode = data['tpm']
+    if tpm_mode not in [ 'none', 'sidecar', 'cotenant', 'unmanaged' ]:
+        raise Exception(f"Unrecognised tpm_mode: {tpm_mode}")
     servicenames = [ k for k in data['services']] \
         if 'services' in data else []
     # 'output' is the structure that gets jsonified at the end
@@ -61,26 +67,27 @@ def produce_host_config(host, _input, outputdir, write_mutate):
             { 'method': 'union' }
         ]
     }
-    output_tpm = {
-        'vars': {
-            'id': f"tpm.{host}",
-            'hostname': f"tpm.{hostname}",
-            'machine': host,
-            'domain': _input['vars']['domain'],
-            'realm': _input['vars']['realm']
-        },
-        'mutate': [
-            { 'method': 'load', 'jspath': 'usecase/proto/root.json' },
-            { 'method': 'union' },
-            { 'method': 'load', 'register': 'd',
-              'jspath': 'usecase/proto/defaults.json' },
-            { 'method': 'union', 'regpath': 'vars',
-              'srcregister': 'd', 'underlay': True },
-            { 'method': 'load', 'regpath': 'swtpm',
-              'jspath': 'usecase/proto/tpm_sidecar.json' },
-            { 'method': 'expand' }
-        ]
-    }
+    if tpm_mode == 'sidecar':
+        output_tpm = {
+            'vars': {
+                'id': f"tpm.{host}",
+                'hostname': f"tpm.{hostname}",
+                'machine': host,
+                'domain': _input['vars']['domain'],
+                'realm': _input['vars']['realm']
+            },
+            'mutate': [
+                { 'method': 'load', 'jspath': 'usecase/proto/root.json' },
+                { 'method': 'union' },
+                { 'method': 'load', 'register': 'd',
+                  'jspath': 'usecase/proto/defaults.json' },
+                { 'method': 'union', 'regpath': 'vars',
+                  'srcregister': 'd', 'underlay': True },
+                { 'method': 'load', 'regpath': 'swtpm',
+                  'jspath': 'usecase/proto/tpm_sidecar.json' },
+                { 'method': 'expand' }
+            ]
+        }
     if 'vars' in _input:
         for k in _input['vars']:
             if k not in output['vars']:
@@ -111,6 +118,11 @@ def produce_host_config(host, _input, outputdir, write_mutate):
         'srcregister': 'd',
         'underlay': True})
     # add per-service mutations
+    if tpm_mode == 'cotenant':
+        output['mutate'].append({
+            'method': 'load',
+            'regpath': 'swtpm',
+            'jspath': 'usecase/proto/tpm_cotenant.json'})
     services = data['services'] if 'services' in data else {}
     for service in services:
         _vars = services[service]
@@ -148,16 +160,17 @@ def produce_host_config(host, _input, outputdir, write_mutate):
     if write_mutate:
         with open(f"{outputdir}/{host}.mutate.json", 'w') as fp:
             json.dump(output, fp, indent = 4)
-        if has_tpm:
+        if tpm_mode == 'sidecar':
             with open(f"{outputdir}/{host}_tpm.mutate.json", 'w') as fp:
                 json.dump(output_tpm, fp, indent = 4)
     # Mutate
     output = mutate(output)
-    output_tpm = mutate(output_tpm)
+    if tpm_mode == 'sidecar':
+        output_tpm = mutate(output_tpm)
     # Generate host config
     with open(f"{outputdir}/{host}.json", 'w') as fp:
         json.dump(output, fp, indent = 4)
-    if has_tpm:
+    if tpm_mode == 'sidecar':
         with open(f"{outputdir}/{host}_tpm.json", 'w') as fp:
             json.dump(output_tpm, fp, indent = 4)
 
@@ -199,12 +212,17 @@ if __name__ == '__main__':
     _input = json.load(open(args.input, 'r'))
     _input = expand(_input)
     hosts = [ x for x in _input['fleet'] ]
+    for x in hosts:
+        h = _input['fleet'][x]
+        h['tpm'] = h['tpm'] if 'tpm' in h else 'sidecar'
     if 'attestsvc' in hosts:
         raise Exception("'attestsvc' is not a valid fleet host id")
     if 'orchestrator' in hosts:
         raise Exception("'orchestrator' is not a valid fleet host id")
     if 'vars' not in _input or 'domain' not in _input['vars']:
         raise Exception("No 'domain'")
+    _input['attestsvc']['tpm'] = 'none'
+    _input['orchestrator']['tpm'] = 'none'
     domain = _input['vars']['domain']
 
     if args.show:
@@ -225,8 +243,11 @@ volumes:
     backend:
 """)
             for host in hosts:
-                fp.write(f"    tpm_{host}:\n")
-                fp.write(f"    tpmsocket_{host}:\n")
+                tpmmode = _input['fleet'][host]['tpm']
+                if tpmmode != 'none' and tpmmode != 'unmanaged':
+                    fp.write(f"    tpm_{host}:\n")
+                if tpmmode == 'sidecar':
+                    fp.write(f"    tpmsocket_{host}:\n")
             for item in _input['volumes']:
                 fp.write(f"    {item}:\n")
             fp.write("""
@@ -272,13 +293,19 @@ services:
           - ./_crud/testcreds/cred_enrollclient:/cred_enrollclient:ro
 """)
             for host in hosts:
-                fp.write(f"          - tpm_{host}:/tpm_{host}\n")
+                tpmmode = _input['fleet'][host]['tpm']
+                if tpmmode != 'none' and tpmmode != 'unmanaged':
+                    fp.write(f"          - tpm_{host}:/tpm_{host}\n")
             fp.write("""        environment:
           - HCP_CONFIG_FILE=/_usecase/orchestrator.json
 
 """)
             docker_write_service(fp, 'attestsvc', _input['attestsvc'],
-                                 with_tpm = False)
+                                 with_sidecar = False, with_cotenant = False)
             for host in hosts:
-                docker_write_service(fp, host, _input['fleet'][host])
-                docker_write_tpm(fp, host, _input['fleet'][host])
+                tpmmode = _input['fleet'][host]['tpm']
+                docker_write_service(fp, host, _input['fleet'][host],
+                                     with_sidecar = tpmmode == 'sidecar',
+                                     with_cotenant = tpmmode == 'cotenant')
+                if tpmmode == 'sidecar':
+                    docker_write_sidecar(fp, host, _input['fleet'][host])
