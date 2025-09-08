@@ -55,7 +55,9 @@ def produce_host_config(host, _input, outputdir):
     output = {
         'vars': {
             'id': host,
-            'hostname': hostname
+            'hostname': hostname,
+            'domain': _input['vars']['domain'],
+            'realm': _input['vars']['realm']
         },
         'mutate': [
             { 'method': 'load', 'jspath': '/usecase/proto/root.json' },
@@ -69,7 +71,9 @@ def produce_host_config(host, _input, outputdir):
         'vars': {
             'id': f"tpm.{host}",
             'hostname': f"tpm.{hostname}",
-            'machine': host
+            'machine': host,
+            'domain': _input['vars']['domain'],
+            'realm': _input['vars']['realm']
         },
         'mutate': [
             { 'method': 'load', 'jspath': '/usecase/proto/root.json' },

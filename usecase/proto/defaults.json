@@ -1,6 +1,4 @@
 {
-    "default_domain": "{domain}",
-    "default_realm": "{realm}",
     "NODEFAULT_default_targets": [ "start-services" ],
     "attester_tag": "attester",
     "attester_period": 120,

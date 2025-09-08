@@ -9,7 +9,7 @@ import shutil
 
 import hcp.common as h
 
-myinstance = h.hcp_config_extract(".id", must_exist = True)
+myinstance = h.hcp_config_extract(".vars.id", must_exist = True)
 myport = h.hcp_config_extract('.sshd.port', or_default = True, default = 22)
 myxtra = h.hcp_config_extract('.sshd.xtra', or_default = True, default = [])
 myhostname = h.hcp_config_extract('.sshd.hostname', or_default = True, default = 'localhost')

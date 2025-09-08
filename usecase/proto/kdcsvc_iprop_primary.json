@@ -7,7 +7,7 @@
     "args": [
         "--config-file={kdcsvc_dir}/etc/kdc.conf",
         "--keytab=HDBGET:",
-        "--hostname={id}.{default_domain}",
+        "--hostname={id}.{domain}",
         "--verbose"
     ],
     "__TODO_healthcheck": null,

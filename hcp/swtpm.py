@@ -10,30 +10,11 @@ import json
 
 import hcp.common as h
 
-myworld = h.hcp_config_extract(".", must_exist = True)
+myinstance = h.hcp_config_extract('vars.id', must_exist = True)
+mydomain = h.hcp_config_extract('vars.domain', must_exist = True)
 
-def param(field, _type, required = False, default = None,
-		obj = myworld, objpath = ''):
-	if field in obj:
-		v = obj[field]
-		if not isinstance(v, _type):
-			h.bail(f"'{objpath}.{field}' must be {_type}, not {type(v)}")
-		return v
-	if required:
-		h.bail(f"'{objpath}.{field}' missing but required")
-	return default
-
-myinstance = param('id', str, required = True)
-mydomain = param('default_domain', str, required = True)
-
-myswtpm = param('swtpm', dict, required = True)
-
-def swtpm_param(field, _type, required = True, default = None):
-	return param(field, _type, required = required, default = default,
-			obj = myswtpm, objpath = f".swtpm")
-
-mystate = swtpm_param('state', str)
-mysockdir = swtpm_param('sockdir', str)
+mystate = h.hcp_config_extract('swtpm.state', must_exist = True)
+mysockdir = h.hcp_config_extract('swtpm.sockdir', must_exist = True)
 
 mytpmsocket = f"{mysockdir}/tpm"
 mytcti = f"swtpm:path={mytpmsocket}"

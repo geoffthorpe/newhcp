@@ -23,7 +23,7 @@ app = attestsvc.app
 requests_verify = hcp_config_extract('.backend.cacert', must_exist = True)
 requests_cert = hcp_config_extract('.backend.clientcert', must_exist = True)
 
-domain = hcp_config_extract('.default_domain', must_exist = True)
+domain = hcp_config_extract('.vars.domain', must_exist = True)
 
 def add_secret(enrollpath, _input, output):
     c = subprocess.run(['/hcp/safeboot/api_seal',

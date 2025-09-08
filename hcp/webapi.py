@@ -32,6 +32,8 @@ parser.add_argument("-C", "--config-section", type = str, default = "webapi",
         help = "Section name in the JSON config")
 args = parser.parse_args()
 myworld = h.hcp_config_extract(".", must_exist = True)
+myinstance = h.hcp_config_extract('vars.id', must_exist = True)
+mydomain = h.hcp_config_extract('vars.domain', must_exist = True)
 
 def param(field, _type, required = False, default = None,
         obj = myworld, objpath = ''):
@@ -44,8 +46,6 @@ def param(field, _type, required = False, default = None,
         h.bail(f"'{objpath}.{field}' missing but required")
     return default
 
-myinstance = param('id', str, required = True)
-mydomain = param('default_domain', str, required = True)
 mywebapi = param(args.config_section, dict, required = True)
 
 def webapi_param(field, _type, required = False, default = None):
