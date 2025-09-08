@@ -7,9 +7,6 @@ RUN echo "$MYTZ" > /etc/timezone
 RUN chmod 644 /etc/timezone
 RUN cd /etc && rm -f localtime && ln -s /usr/share/zoneinfo/$$MYTZ localtime
 
-#COPY chowner.sh /
-#RUN chmod 755 /chowner.sh
-
 RUN apt-get install -y vim net-tools \
 	openssl xxd procps iproute2 iputils-ping curl wget acl \
 	lsof git jq procmail file time sudo dnsutils \
