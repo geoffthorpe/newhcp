@@ -53,44 +53,16 @@ elif lights_out != None:
     bail(f"'lights_out' should be a str or list (not a {type(lights_out)})")
 
 # Process an 'env' section (the object, once parsed from JSON), and derive a
-# new environment object from an existing one by applying to it the 'pathadd',
-# 'set', 'unset' subjections of the 'env'.
+# new environment object from an existing one by applying this to it.
 def derive_env(envobj, pathstr, baseenv):
     if not isinstance(envobj, dict):
         bail(f"'{pathstr}' must be a dict (not a {type(envobj)}")
-    for s in envobj:
-        if s not in [ 'pathadd', 'set', 'unset' ]:
-            bail(f"'{pathstr}' supports pathadd/set/unset (not '{s}')")
-        v = envobj[s]
-        if not isinstance(v, dict):
-            bail(f"'{pathstr}:{s}' must be a dict (not a {type(v)})")
-        for e in v:
-            if not isinstance(e, str):
-                bail(f"'{pathstr}:{s}', '{e}' must be a str (not a {type(e)})")
-            ev = v[e]
-            if s == 'unset':
-                if ev != None:
-                    bail(f"'{pathstr}:{s}:{e}' must be None (not {type(ev)})")
     newenv = baseenv.copy()
-    if 'unset' in envobj:
-        es = envobj['unset']
-        for k in es:
-            if k in newenv:
-                newenv.pop(k)
-    if 'set' in envobj:
-        es = envobj['set']
-        for k in es:
-            if isinstance(es[k], str):
-                newenv[k] = es[k]
-            else:
-                newenv[k] = json.dumps(es[k])
-    if 'pathadd' in envobj:
-        ep = envobj['pathadd']
-        for k in ep:
-            if k in newenv and len(newenv[k]) > 0:
-                newenv[k] = f"{newenv[k]}:{ep[k]}"
-            else:
-                newenv[k] = ep[k]
+    for k in envobj:
+        if isinstance(envobj[k], str):
+            newenv[k] = envobj[k]
+        else:
+            newenv[k] = json.dumps(envobj[k])
     return newenv
 
 # Given an environment object, set the environment accordingly

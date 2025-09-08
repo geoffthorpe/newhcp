@@ -140,9 +140,6 @@ if [[ ! -n $HCP_CONFIG_FILE ]]; then
 	if [[ -n $HOME && -d $HOME && -f "$HOME/hcp_config" ]]; then
 		source "$HOME/hcp_config"
 		hlog 2 "hcp_config: loaded from $HOME/hcp_config"
-	elif [[ -f /etc/hcp-monolith-container.env ]]; then
-		source /etc/hcp-monolith-container.env
-		hlog 2 "hcp_config: loaded from /etc/hcp-monolith-container.env"
 	else
 		echo "Warning, no HCP_CONFIG_FILE set, use of APIs may 'exit'" >&2
 	fi
@@ -301,12 +298,12 @@ function dict_timedelta {
 for i in $(find / -maxdepth 1 -mindepth 1 -type d -name "install-*"); do
 	add_install_path "$i"
 done
-envjson_set=$(hcp_config_extract ".env.set")
-if [[ $envjson_set != 'null' ]]; then
-	envjson_set_keys=$(echo "$envjson_set" | jq 'keys[]')
-	for i in $envjson_set_keys; do
+envjson=$(hcp_config_extract ".env")
+if [[ $envjson != 'null' ]]; then
+	envjson_keys=$(echo "$envjson" | jq 'keys[]')
+	for i in $envjson_keys; do
 		j=$(echo "$i" | jq -r .)
-		v=$(echo "$envjson_set" | jq -r ".$j")
+		v=$(echo "$envjson" | jq -r ".$j")
 		export $j="$v"
 	done
 fi

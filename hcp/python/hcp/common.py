@@ -106,10 +106,6 @@ def jsonload(p):
 # Note that hcp_config_*() functions will handle a path that has no leading '.'
 workloadpath = '/tmp/workloads'
 if 'HCP_CONFIG_FILE' not in os.environ:
-	# TODO: hcp.sh handles cases we don't - probably want to change its use
-	# of a bash-sourcible file to something python can consume too. Eg. it
-	# could write env-vars to a JSON file, which both bash(+jq) and python
-	# could handle.
 	hlog(1, "Warning, no HCP_CONFIG_FILE, use of APIs may 'exit'")
 else:
 	curpath = os.environ['HCP_CONFIG_FILE']

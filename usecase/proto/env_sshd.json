@@ -1,4 +1,4 @@
 {
-    "set": { "KRB5_KTNAME": "/assets/keytab-sshd" }
+    "KRB5_KTNAME": "/assets/keytab-sshd"
 }
 
