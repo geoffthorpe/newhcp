@@ -1,7 +1,7 @@
 # Stateless KDC service
 
 This service takes advantage of two powerful new features in the Heimdal
-kerberos implementation, namely namespace principals and synthetic principals.
+kerberos implementation: namespace principals and synthetic principals.
 The result is that service and client/role principals do not need to be known
 and registered in the KDC database - the service is "stateless" in that sense.
 Instead, users and service owners are provisioned with X509v3 certificates that
@@ -23,8 +23,8 @@ The reference usecase uses two namespace principals, as can be seen in the
 following output;
 
 ```
-$ docker-compose exec attestsvc /hcp/python/HcpApiKdc.py \
-    --api https://secondary.kdc.hcphacking.xyz \
+$ docker-compose exec attestsvc /hcp/python/hcp/api/kdc.py \
+    --api https://kdc_secondary.hcphacking.xyz \
     --cacert /ca_default \
     --clientcert /cred_kdcclient \
     get > foo.json
@@ -52,12 +52,8 @@ $ jq . foo.json
 The last two principals have the `WELLKNOWN/HOSTBASED-NAMESPACE` prefix - they
 are the namespace principals. The first of the two has an underscore as the
 service identifier, which acts as a wild-card. The latter of the two has the
-`host` service identifier, as used for SSH services, and that namespace
-principal is configured to allow delegation. Service principals that match the
-network address `<something>.hcphacking.xyz` and the realm `HCPHACKING.XYZ` but
-do not have the `host` service identifier will match on (and be derived from)
-the underscored namespace principal, which is configured not to allow
-delegation.
+`host` service identifier, as used for SSH services - that namespace principal
+is configured to allow delegation.
 
 Note, the `kdcsvc` API endpoint provides keytabs for service principals.
 
@@ -66,7 +62,7 @@ Note, the `kdcsvc` API endpoint provides keytabs for service principals.
   certificate. It is therefore essential to use an appropriately privileged CA
   for such credentials. In the reference usecase, the `attestsvc` service uses
   client certificate authentication to obtain keytab assets for arbitrary
-  enrolled hosts and this is how `shell` gets its keytab, namely via
+  enrolled hosts from kdc\_secondary. So `shell` gets its keytab via
   attestation.
 
 The following steps are performed automatically within `attestsvc`, to get the
@@ -75,8 +71,8 @@ the keytabs being returned to `shell` rotate with time.
 ```
 $ docker-compose exec attestsvc bash
 root@attestsvc:/# \
-        /hcp/python/HcpApiKdc.py \
-                --api https://secondary.kdc.hcphacking.xyz \
+        /hcp/python/hcp/api/kdc.py \
+                --api https://kdc_secondary.hcphacking.xyz \
                 --cacert /ca_default \
                 --clientcert /cred_kdcclient \
                 ext_keytab host/shell.hcphacking.xyz | \
@@ -92,8 +88,8 @@ root@attestsvc:/#
 root@attestsvc:/# # Sleep 1 hour, the default rotation period for namespace principals
 root@attestsvc:/# sleep 3600
 root@attestsvc:/# \
-        /hcp/python/HcpApiKdc.py \
-                --api https://secondary.kdc.hcphacking.xyz \
+        /hcp/python/hcp/api/kdc.py \
+                --api https://kdc_secondary.hcphacking.xyz \
                 --cacert /enrollcertchecker/CA.cert \
                 --clientcert /enrollclient/client.pem \
                 ext_keytab host/shell.hcphacking.xyz | \
@@ -154,7 +150,7 @@ Nov 25 19:48:25 2024  Nov 25 19:53:25 2024  krbtgt/HCPHACKING.XYZ@HCPHACKING.XYZ
 
 ## `kdcsvc`
 
-### The kdcsvc API, and `/hcp/python/HcpApiKdc.py`
+### The kdcsvc API, and `/hcp/python/hcp/api/kdc.py`
 
 The KDC Service runs a `webapi` instance whose interface is derived from the
 command-line interface of the kadmin tool. It supports the following actions on
@@ -178,11 +174,11 @@ stateless usage. The KDC's database can register and use (and replicate)
 conventional principals, even if the reference usecase only makes use of the
 new, dynamically-generated kinds of principals.
 
-To help with the use of the KDC web API, the `/hcp/python/HcpApiKdc.py` library
-and tool can be used. The earlier section on namespace principals shows an
-example usage - one can get further usage information about how to invoke the
-tool by adding a `--help` argument. (For importing it into other python code,
-the easiest reference is to read the code itself.)
+To help with the use of the KDC web API, the `/hcp/python/hcp/api/kdc.py`
+library and tool can be used. The earlier section on namespace principals shows
+an example usage - one can get further usage information about how to invoke
+the tool by adding a `--help` argument. (For importing it into other python
+code, the easiest reference is to read the code itself.)
 
 ### kdcsvc replication
 
@@ -202,10 +198,14 @@ configured, it is automatically set up to run the `ipropd-slave` server to
 provide a replication sink and pull database updates from the primary.
 
 ```
-$ cat usecase/hosts/kdc_primary.json | grep secondaries
-        "kdcsvc_secondaries": [ "secondary.kdc.hcphacking.xyz" ],
-$ cat usecase/hosts/kdc_secondary.json | grep primary
-        "kdcsvc_primary": "primary.kdc.hcphacking.xyz",
+$ docker-compose exec kdc_primary jq .kdcsvc.secondaries \
+        /tmp/workloads/kdc_primary.json
+[
+  "kdc_secondary.hcphacking.xyz"
+]
+$ docker-compose exec kdc_secondary jq .vars.kdcsvc_primary \
+        /tmp/workloads/kdc_secondary.json
+"kdc_primary.hcphacking.xyz"
 ```
 
 ### primary versus secondary
@@ -219,7 +219,7 @@ authentication layers to decide the matter.
 
 The key run-time usage of KDCs is in the issuance of TGTs and service-tickets,
 which is typically controlled by the `krb5.conf` file used by Kerberos tools
-and libraries. The reference usecase generates krb5.conf files in the
-Enrollment service and distributes + installs them via attestation, and all KDC
-usage is directed to the secondary with the exception of the KDCs themselves,
-which are both configured to use the primary as authoratative.
+and libraries. The reference usecase generates krb5.conf files and installs
+them via attestation, and all KDC usage is directed to the secondary with the
+exception of the KDCs themselves, which are both configured to use the primary
+as authoratative.

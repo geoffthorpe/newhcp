@@ -55,7 +55,8 @@ docker-compose exec kdc_secondary bash
 ```
 docker-compose exec alicia bash
 root@alicia:/# su -w HCP_CONFIG_FILE,KRB5_CONFIG - alicia
-alicia@alicia:~$ kinit -C FILE:/assets/pkinit-client-alicia.pem alicia bash
+alicia@alicia:~$ kinit -C FILE:/assets/pkinit-client-alicia.pem \
+                     alicia bash
 alicia@alicia:~$ klist
 Credentials cache: FILE:/tmp/krb5cc_yorGFK
         Principal: alicia@HCPHACKING.XYZ
@@ -81,19 +82,28 @@ docker-compose down -v
 
 ## What it is and what it does
 
-### **[HCP (Host Cryptographic Provisioning)](doc/hcp.md)**
+### HCP (Host Cryptographic Provisioning)
 
-Reference implementation of a TPM-enrollment-based attestation framework for provisioning hosts with secret and non-secret assets. [Click here for more detail.](doc/hcp.md) Here is a diagram overview of HCP's reference usecase;
+Reference implementation of a TPM-enrollment-based attestation framework for
+provisioning hosts with secret and non-secret assets. Here is a diagram
+overview of HCP's reference usecase;
 
-![HCP overview diagram](doc/hcp-overview.svg)
+![HCP overview diagram](doc/HCP.drawio.svg)
 
 ### Software TPM service
 
-Consumes TPM state created by the `orchestrator` tool. Can be instantiated as a side-car container (using a shared-mount for host communication - no networking) or as a cotenant service within the host container.
+Consumes TPM state created by the `orchestrator` tool. Can be instantiated as a
+side-car container (using a shared-mount for host communication - no
+networking) or as a cotenant service within the host container.
 
 ### **[Stateless KDC (Kerberos Domain Controller) service](doc/stateless-kdc.md)**
 
-Demonstrates how PKI-based identity can underpin a Kerberos network, because none of the service or client (role/user) identities in the reference usecase are registered with the KDC, instead their Kerberos credentials are obtained from X509v3 certificates containing their authorized identity. Think of it as "stateless, certificate-based Kerberos". [Click here for more detail.](doc/stateless-kdc.md)
+Demonstrates how PKI-based identity can underpin a Kerberos network, because
+none of the service or client (role/user) identities in the reference usecase
+are registered with the KDC, instead their Kerberos credentials are obtained
+from X509v3 certificates containing their authorized identity. Think of it as
+"stateless, certificate-based Kerberos".
+[Click here for more detail.](doc/stateless-kdc.md)
 
 * namespace principals (service credentials)
 * synthetic principals (client credentials)
@@ -101,14 +111,24 @@ Demonstrates how PKI-based identity can underpin a Kerberos network, because non
 
 ### Stateless SSH (sshd) service
 
-A cotenant service that allows a host's user accounts to become ssh-accessible using Kerberos (GSS-API) authentication. Together with the Stateless KDC service, this shows an end-to-end SSO solution running on top of an HCP-bootstrapped network.
+A cotenant service that allows a host's user accounts to become ssh-accessible
+using Kerberos (GSS-API) authentication. Together with the Stateless KDC
+service, this shows an end-to-end SSO solution running on top of an
+HCP-bootstrapped network.
 
 ### WebAPI service
 
-A web-API-hosting service (based on uwsgi) for representing Flask applications and, if enabled, providing a HTTPS reverse-proxy (based on nginx) using TLS certificates obtained from TPM enrollment. This service runs co-tenant inside all the other services that provide web APIs (dog-food).
+A web-API-hosting service (based on uwsgi) for representing Flask applications
+and, if enabled, providing a HTTPS reverse-proxy (based on nginx) using TLS
+certificates obtained from TPM enrollment. This service runs co-tenant inside
+all the other services that provide web APIs (we dogfood webapi extensively).
 
 ### **[Tooling](doc/tooling.md)**
 
-* Workload launcher, for defining and running workloads, consisting of services and dependencies. This consumes a basic JSON description of what has to be setup and started and runs like a container init daemon.
-* JSON manipulations, for parameter expansion (HcpJsonExpander), programmatic manipulation (HcpJsonScope), etc.
+* Workload launcher, for defining and running workloads, consisting of services
+  and dependencies. This consumes a basic JSON description of what has to be
+  setup and started and runs like a container init daemon.
+* JSON manipulations, for path handling (`gson.path`), recursive unions
+  (`gson.union`), parameter expansion (`gson.expander`), and programmatic
+  manipulation (`gson.mutater`), etc.
 * Extensible workflow, for building and running.
