@@ -156,7 +156,10 @@
             "enroll_profile": {
                 "certgen": [ "pkinit-client", "https-client" ],
                 "pkinit-clients": [ "alicia" ],
-                "https-clients": [ "alicia", "boz" ]
+                "https-clients": [ "alicia", "boz" ],
+                "ktgen": {
+                    "sshd": [ "host/{hostname}" ]
+                }
             },
             "services": {
                 "attester": null,
