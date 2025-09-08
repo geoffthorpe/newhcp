@@ -8,6 +8,7 @@ import subprocess
 import time
 import tempfile
 from gson.union import union
+from gson.mutater import mutate
 import hcp.common
 
 # The number of seconds to pause when waiting for a blocking command to complete
@@ -108,7 +109,8 @@ def launch(args):
 
     orig = os.environ['HCP_CONFIG_FILE']
     with open(orig, 'r') as fp:
-        world = json.load(fp)
+        preworld = json.load(fp)
+    world = mutate(preworld)
     _tempdir = tempfile.TemporaryDirectory()
     n = f"{_tempdir.name}/workload.json"
     with open(n, 'w') as fp:
