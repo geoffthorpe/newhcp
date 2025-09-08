@@ -23,7 +23,7 @@ def docker_write_service(fp, name, data, with_sidecar = True, with_cotenant = Fa
     for item in vols:
         fp.write(f"          - {item}\n")
     fp.write('        environment:\n')
-    fp.write(f"          - HCP_CONFIG_FILE=/_usecase/{name}.json\n\n")
+    fp.write(f"          - HCP_CONFIG_MUTATE=/_usecase/{name}.json\n\n")
 
 def docker_write_sidecar(fp, name, data, with_tpm = True):
     print(f"Writing service '{name}_tpm' to docker compose file")
@@ -35,7 +35,7 @@ def docker_write_sidecar(fp, name, data, with_tpm = True):
         fp.write(f"          - tpm_{name}:/tpm_{name}\n")
         fp.write(f"          - tpmsocket_{name}:/tpmsocket_{name}\n")
     fp.write('        environment:\n')
-    fp.write(f"          - HCP_CONFIG_FILE=/_usecase/{name}_tpm.json\n\n")
+    fp.write(f"          - HCP_CONFIG_MUTATE=/_usecase/{name}_tpm.json\n\n")
 
 def produce_host_config(host, _input, outputdir):
     if host != 'attestsvc' and host != 'orchestrator' and \
@@ -283,7 +283,7 @@ services:
                 if tpmmode != 'none' and tpmmode != 'unmanaged':
                     fp.write(f"          - tpm_{host}:/tpm_{host}\n")
             fp.write("""        environment:
-          - HCP_CONFIG_FILE=/_usecase/orchestrator.json
+          - HCP_CONFIG_MUTATE=/_usecase/orchestrator.json
 
 """)
             docker_write_service(fp, 'attestsvc', _input['attestsvc'],

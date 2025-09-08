@@ -101,13 +101,13 @@ class Nexus:
         return self._returncode
 
 def launch(args):
-    if 'HCP_CONFIG_FILE' not in os.environ:
-        raise Exception('No host config given')
-    configpath = os.environ['HCP_CONFIG_FILE']
+    if 'HCP_CONFIG_MUTATE' not in os.environ:
+        raise Exception('No host config mutate given')
+    configpath = os.environ['HCP_CONFIG_MUTATE']
     if not os.path.isfile(configpath):
         raise Exception(f"Host config not found: {config}")
 
-    orig = os.environ['HCP_CONFIG_FILE']
+    orig = os.environ['HCP_CONFIG_MUTATE']
     with open(orig, 'r') as fp:
         preworld = json.load(fp)
     world = mutate(preworld)

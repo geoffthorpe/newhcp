@@ -272,12 +272,17 @@ function dict_timedelta {
 for i in $(find / -maxdepth 1 -mindepth 1 -type d -name "install-*"); do
 	add_install_path "$i"
 done
-envjson=$(hcp_config_extract ".env")
-if [[ $envjson != 'null' ]]; then
-	envjson_keys=$(echo "$envjson" | jq 'keys[]')
-	for i in $envjson_keys; do
-		j=$(echo "$i" | jq -r .)
-		v=$(echo "$envjson" | jq -r ".$j")
-		export $j="$v"
-	done
+if [[ -z $HCP_CONFIG_FILE ]]; then
+	echo "Warning: HCP_CONFIG_FILE not set. To fix, run a launcher subshell." >&2
+	echo "Warning: E.g.  /hcp/python/hcp/tool/launcher.py bash" >&2
+else
+	envjson=$(hcp_config_extract ".env")
+	if [[ $envjson != 'null' ]]; then
+		envjson_keys=$(echo "$envjson" | jq 'keys[]')
+		for i in $envjson_keys; do
+			j=$(echo "$i" | jq -r .)
+			v=$(echo "$envjson" | jq -r ".$j")
+			export $j="$v"
+		done
+	fi
 fi
