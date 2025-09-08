@@ -140,7 +140,7 @@ def produce_host_config(host, _input, outputdir):
         output['mutate'].append({
             'method': 'load',
             'register': 'e',
-            'jspath': f"usecase/proto/env_{e}.json"})
+            'jspath': f"/usecase/proto/env_{e}.json"})
         output['mutate'].append({
             'method': 'union',
             'srcregister': 'e',
