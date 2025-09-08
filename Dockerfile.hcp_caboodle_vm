@@ -1,0 +1,21 @@
+RUN apt-get install -y --no-install-recommends \
+	linux-image-amd64 systemd-sysv
+RUN apt-get install -y ifupdown2 isc-dhcp-client
+RUN echo "root:root" | chpasswd
+RUN echo "/dev/sdb swap swap defaults 0 0" >> /etc/fstab
+RUN echo "RESUME=none" > /etc/initramfs-tools/conf.d/resume
+RUN update-initramfs -u -k all
+RUN systemctl set-default multi-user.target
+
+RUN mkdir -p /hosthack
+RUN echo "hosthack /hosthack 9p trans=virtio 0 0" >> /etc/fstab
+
+RUN mkdir -p /etc/network
+RUN echo "auto ens3" >> /etc/network/interfaces
+RUN echo "allow-hotplug ens3" >> /etc/network/interfaces
+RUN echo "iface ens3 inet dhcp" >> /etc/network/interfaces
+
+COPY systemd-shim.sh /
+RUN chmod 755 /systemd-shim.sh
+COPY hcp.service /etc/systemd/system/
+RUN systemctl enable hcp.service

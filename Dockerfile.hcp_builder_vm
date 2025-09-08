@@ -1,0 +1,4 @@
+RUN apt-get install -y extlinux fdisk qemu-utils e2fsprogs
+COPY create_image.sh /bin
+COPY syslinux.cfg /
+RUN chmod 755 /bin/create_image.sh

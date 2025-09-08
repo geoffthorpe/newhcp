@@ -9,9 +9,11 @@ import argparse
 from gson.expander import expand
 
 def docker_write_service(fp, name, data, with_sidecar = True, with_cotenant = False):
+    is_vm = data['vm'] if 'vm' in data else False
+    baseimg = 'common_vm' if is_vm else 'common_nontpm'
     print(f"Writing service '{name}' to docker compose file")
     fp.write(f"    {name}:\n")
-    fp.write('        extends: common_nontpm\n')
+    fp.write(f"        extends: {baseimg}\n")
     fp.write(f"        hostname: {data['hostname']}\n")
     vols = data['volumes'] if 'volumes' in data else []
     if with_sidecar or with_cotenant or len(vols) > 0:
@@ -269,6 +271,15 @@ services:
           - ./_crud/testcreds/ca_default:/ca_default:ro
           - ./_crud/testcreds/verifier_asset:/verifier_asset:ro
           - ./_crud/testcreds/cred_healthhttpsclient:/cred_healthhttpsclient:ro
+
+    common_vm:
+        extends: common_nontpm
+        image: hcp_qemu:trixie
+        volumes:
+          - ./_crud/kernel:/kernel:ro
+          - /tmp/.X11-unix:/tmp/.X11-unix:rw
+        environment:
+          - DISPLAY=${DISPLAY}
 
     orchestrator:
         extends: common_nontpm

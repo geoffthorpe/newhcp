@@ -7,6 +7,10 @@
 
 WHOAMI=$(whoami)
 
+if [[ -f /_env/env ]]; then
+	source /_env/env
+fi
+
 hcp_default_log_level=1
 hcp_current_log_level=0
 hcp_current_tracefile=""
