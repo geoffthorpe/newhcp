@@ -278,7 +278,7 @@ for i in $(find / -maxdepth 1 -mindepth 1 -type d -name "install-*"); do
 done
 if [[ -z $HCP_CONFIG_FILE ]]; then
 	echo "Warning: HCP_CONFIG_FILE not set. To fix, run a launcher subshell." >&2
-	echo "Warning: E.g.  /hcp/python/hcp/tool/launcher.py bash" >&2
+	echo "Warning: E.g.  /launcher bash" >&2
 else
 	envjson=$(hcp_config_extract ".env")
 	if [[ $envjson != 'null' ]]; then

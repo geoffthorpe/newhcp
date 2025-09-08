@@ -24,5 +24,8 @@ RUN adduser --disabled-password --quiet --gecos "Test User 1,,,," user1
 RUN adduser --disabled-password --quiet --gecos "Test User 2,,,," user2
 RUN adduser --disabled-password --quiet --gecos "Test User 3,,,," user3
 
+# Save some typing by putting a symlink in the root dir
+RUN ln -s /hcp/python/hcp/tool/launcher.py /launcher
+
 # Set the launcher as our entrypoint
 ENTRYPOINT ["/hcp/python/hcp/tool/launcher.py"]

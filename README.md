@@ -53,7 +53,7 @@ docker-compose exec kdc_secondary bash
 ### Step 1 of 2: get a Kerberos-authenticated shell
 
 ```
-docker-compose exec alicia bash
+docker-compose exec alicia /launcher bash
 root@alicia:/# su -w HCP_CONFIG_FILE,KRB5_CONFIG - alicia
 alicia@alicia:~$ kinit -C FILE:/assets/pkinit-client-alicia.pem \
                      alicia bash
