@@ -138,9 +138,58 @@
             },
             "env": [ "tpm2tools", "krb5" ]
         },
+        "auth_certificate": {
+            "hostname": "certificate.auth.{domain}",
+            "tpm": "cotenant",
+            "volumes": [ "./_crud/testcreds/ca_httpsclient:/ca_httpsclient:ro" ],
+            "services": {
+                "webapi": {
+                    "app": "/hcp/python/hcp/flask/dummy.py",
+                    "https_certificate": "/assets/https-server-{hostname}.pem",
+                    "https_authentication": "clientcert",
+                    "https_client_CA": "/ca_httpsclient"
+                },
+                "attester": null
+            },
+            "env": [ "tpm2tools", "krb5" ]
+        },
+        "auth_kerberos": {
+            "hostname": "kerberos.auth.{domain}",
+            "tpm": "cotenant",
+            "enroll_profile": {
+                "ktgen": {
+                    "http": [ "HTTP/{hostname}" ]
+                }
+            },
+            "services": {
+                "webapi": {
+                    "app": "/hcp/python/hcp/flask/dummy.py",
+                    "https_certificate": "/assets/https-server-{hostname}.pem",
+                    "https_authentication": "kerberos"
+                },
+                "attester": null
+            },
+            "env": [ "tpm2tools", "krb5", "httpskrb5" ]
+        },
         "shell": {
             "hostname": "shell.{domain}",
             "enroll_profile": {
+                "ktgen": {
+                    "sshd": [ "host/{hostname}" ]
+                }
+            },
+            "services": {
+                "attester": null,
+                "sshd": null
+            },
+            "env": [ "tpm2tools", "krb5", "sshd" ]
+        },
+        "bigbrother": {
+            "hostname": "bigbrother.{domain}",
+            "enroll_profile": {
+                "certgen": [ "pkinit-client", "https-client" ],
+                "pkinit-clients": [ "root" ],
+                "https-clients": [ "root" ],
                 "ktgen": {
                     "sshd": [ "host/{hostname}" ]
                 }
@@ -158,22 +207,6 @@
                 "certgen": [ "pkinit-client", "https-client" ],
                 "pkinit-clients": [ "alicia" ],
                 "https-clients": [ "alicia", "boz" ],
-                "ktgen": {
-                    "sshd": [ "host/{hostname}" ]
-                }
-            },
-            "services": {
-                "attester": null,
-                "sshd": null
-            },
-            "env": [ "tpm2tools", "krb5", "sshd" ]
-        },
-        "bigbrother": {
-            "hostname": "bigbrother.{domain}",
-            "enroll_profile": {
-                "certgen": [ "pkinit-client", "https-client" ],
-                "pkinit-clients": [ "root" ],
-                "https-clients": [ "root" ],
                 "ktgen": {
                     "sshd": [ "host/{hostname}" ]
                 }
@@ -219,39 +252,6 @@
                 "sshd": null
             },
             "env": [ "tpm2tools", "krb5", "sshd" ]
-        },
-        "auth_certificate": {
-            "hostname": "certificate.auth.{domain}",
-            "tpm": "cotenant",
-            "volumes": [ "./_crud/testcreds/ca_httpsclient:/ca_httpsclient:ro" ],
-            "services": {
-                "webapi": {
-                    "app": "/hcp/python/hcp/flask/dummy.py",
-                    "https_certificate": "/assets/https-server-{hostname}.pem",
-                    "https_authentication": "clientcert",
-                    "https_client_CA": "/ca_httpsclient"
-                },
-                "attester": null
-            },
-            "env": [ "tpm2tools", "krb5" ]
-        },
-        "auth_kerberos": {
-            "hostname": "kerberos.auth.{domain}",
-            "tpm": "cotenant",
-            "enroll_profile": {
-                "ktgen": {
-                    "http": [ "HTTP/{hostname}" ]
-                }
-            },
-            "services": {
-                "webapi": {
-                    "app": "/hcp/python/hcp/flask/dummy.py",
-                    "https_certificate": "/assets/https-server-{hostname}.pem",
-                    "https_authentication": "kerberos"
-                },
-                "attester": null
-            },
-            "env": [ "tpm2tools", "krb5", "httpskrb5" ]
         }
     }
 }
