@@ -7,7 +7,17 @@ import sys
 import subprocess
 import time
 import tempfile
-from gson.union import union
+
+# Special handling, as launcher is often the first contact between
+# an environment and the HCP machinery. If PYTHONPATH has been lost
+# (eg. through an 'su - <user>' command), this should get it back.
+try:
+    from gson.union import union
+except:
+    sys.path.append('/hcp/python')
+    os.environ['PYTHONPATH'] = '/hcp/python' # For future sub-shells
+    from gson.union import union
+
 from gson.mutater import mutate
 import hcp.common
 
@@ -102,6 +112,10 @@ class Nexus:
 
 def launch(args):
     if 'HCP_CONFIG_MUTATE' not in os.environ:
+        print('HCP_CONFIG_MUTATE was lost. E.g. for \'su\', don\'t forget',
+              file = sys.stderr)
+        print('to use:  su -w HCP_CONFIG_MUTATE - <user>',
+              file = sys.stderr)
         raise Exception('No host config mutate given')
     configpath = os.environ['HCP_CONFIG_MUTATE']
     if not os.path.isfile(configpath):
