@@ -1,0 +1,4 @@
+RUN apt-get install -y e2fsprogs
+COPY uml_create_image.sh /bin
+COPY syslinux.cfg /
+RUN chmod 755 /bin/uml_create_image.sh

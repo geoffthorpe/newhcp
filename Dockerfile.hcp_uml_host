@@ -1,0 +1,3 @@
+RUN apt-get install -y vdeplug vde2 libvdeplug-slirp uml-utilities
+COPY /uml_run.sh /
+RUN chmod 700 /uml_run.sh

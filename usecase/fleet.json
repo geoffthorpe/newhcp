@@ -168,10 +168,26 @@
             },
             "env": [ "tpm2tools", "krb5", "sshd" ]
         },
+        "bigbrother": {
+            "hostname": "bigbrother.{domain}",
+            "enroll_profile": {
+                "certgen": [ "pkinit-client", "https-client" ],
+                "pkinit-clients": [ "root" ],
+                "https-clients": [ "root" ],
+                "ktgen": {
+                    "sshd": [ "host/{hostname}" ]
+                }
+            },
+            "services": {
+                "attester": null,
+                "sshd": null
+            },
+            "env": [ "tpm2tools", "krb5", "sshd" ]
+        },
         "barton": {
             "hostname": "barton.{domain}",
             "tpm": "cotenant",
-            "vm": true,
+            "vm": "qemu",
             "volumes": [ "./_crud:/crud:ro" ],
             "enroll_profile": {
                 "certgen": [ "pkinit-client", "https-client" ],
@@ -186,12 +202,14 @@
             },
             "env": [ "tpm2tools", "krb5", "sshd" ]
         },
-        "bigbrother": {
-            "hostname": "bigbrother.{domain}",
+        "catarina": {
+            "hostname": "catarina.{domain}",
+            "tpm": "cotenant",
+            "vm": "uml",
+            "volumes": [ "./_crud:/crud:ro" ],
             "enroll_profile": {
                 "certgen": [ "pkinit-client", "https-client" ],
-                "pkinit-clients": [ "root" ],
-                "https-clients": [ "root" ],
+                "pkinit-clients": [ "catarina" ],
                 "ktgen": {
                     "sshd": [ "host/{hostname}" ]
                 }

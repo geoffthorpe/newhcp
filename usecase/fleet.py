@@ -10,8 +10,10 @@ import copy
 from gson.expander import expand
 
 def docker_write_service(fp, name, data, with_sidecar = True, with_cotenant = False):
-    is_vm = data['vm'] if 'vm' in data else False
-    baseimg = 'common_vm' if is_vm else 'common_nontpm'
+    vm = data['vm'] if 'vm' in data else None
+    baseimg = 'common_qemu' if vm == 'qemu' else \
+              'common_uml' if vm == 'uml' else \
+              'common_nontpm'
     print(f"Writing service '{name}' to docker compose file")
     fp.write(f"    {name}:\n")
     fp.write(f"        extends: {baseimg}\n")
@@ -26,7 +28,7 @@ def docker_write_service(fp, name, data, with_sidecar = True, with_cotenant = Fa
     for item in vols:
         fp.write(f"          - {item}\n")
     fp.write('        environment:\n')
-    mutate = f"{name}_runner" if is_vm else name
+    mutate = f"{name}_runner" if vm else name
     fp.write(f"          - HCP_CONFIG_MUTATE=/_usecase/{mutate}.json\n\n")
 
 def docker_write_sidecar(fp, name, data, with_tpm = True):
@@ -55,7 +57,7 @@ def produce_host_config(host, _input, outputdir):
     tpm_mode = data['tpm']
     if tpm_mode not in [ 'none', 'sidecar', 'cotenant', 'unmanaged' ]:
         raise Exception(f"Unrecognised tpm_mode: {tpm_mode}")
-    is_vm = data['vm'] if 'vm' in data else False
+    vm = data['vm'] if 'vm' in data else None
     servicenames = [ k for k in data['services']] \
         if 'services' in data else []
     output = {
@@ -70,7 +72,7 @@ def produce_host_config(host, _input, outputdir):
             { 'method': 'union' }
         ]
     }
-    if is_vm:
+    if vm:
         output_runner = {
             'vars': {
                 'id': host,
@@ -85,8 +87,8 @@ def produce_host_config(host, _input, outputdir):
                   'jspath': '/usecase/proto/defaults.json' },
                 { 'method': 'union', 'regpath': 'vars',
                   'srcregister': 'd', 'underlay': True },
-                { 'method': 'load', 'regpath': 'qemu',
-                  'jspath': '/usecase/proto/qemu.json' },
+                { 'method': 'load', 'regpath': vm,
+                  'jspath': f"/usecase/proto/{vm}.json" },
                 { 'method': 'set', 'register': 'e',
                   'value': {
                       'VM_HCP_CONFIG_MUTATE': f"/_usecase/{host}.json"
@@ -171,7 +173,7 @@ def produce_host_config(host, _input, outputdir):
         output['foreground'] = data['foreground']
     # perform parameter-expansion
     output['mutate'].append({ 'method': 'expand' })
-    if is_vm:
+    if vm:
         output_runner['mutate'].append({ 'method': 'expand' })
     # Write the host config (the mutate input for it, in any case)
     with open(f"{outputdir}/{host}.json", 'w') as fp:
@@ -179,7 +181,7 @@ def produce_host_config(host, _input, outputdir):
     if tpm_mode == 'sidecar':
         with open(f"{outputdir}/{host}_tpm.json", 'w') as fp:
             json.dump(output_tpm, fp, indent = 4)
-    if is_vm:
+    if vm:
         with open(f"{outputdir}/{host}_runner.json", 'w') as fp:
             json.dump(output_runner, fp, indent = 4)
 
@@ -291,9 +293,23 @@ services:
           - ./_crud/testcreds/verifier_asset:/verifier_asset:ro
           - ./_crud/testcreds/cred_healthhttpsclient:/cred_healthhttpsclient:ro
 
-    common_vm:
+    common_qemu:
         extends: common_nontpm
-        image: hcp_qemu_guest:trixie
+        image: hcp_qemu_host:trixie
+        volumes:
+          - /tmp/.X11-unix:/tmp/.X11-unix:rw
+          - ./_crud/testcreds/ca_default:/ca_default:ro
+          - ./_crud/testcreds/verifier_asset:/verifier_asset:ro
+          - ./_crud/testcreds/cred_healthhttpsclient:/cred_healthhttpsclient:ro
+          - /dev:/dev
+          - /sys:/sys
+        privileged: true
+        environment:
+          - DISPLAY=${DISPLAY}
+
+    common_uml:
+        extends: common_nontpm
+        image: hcp_uml_host:trixie
         volumes:
           - /tmp/.X11-unix:/tmp/.X11-unix:rw
           - ./_crud/testcreds/ca_default:/ca_default:ro

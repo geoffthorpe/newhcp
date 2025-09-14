@@ -1,0 +1,5 @@
+{
+    "priority": 90,
+    "exec": "/uml_run.sh",
+    "block": true
+}

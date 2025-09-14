@@ -10,6 +10,7 @@ TOP ?= $(shell pwd)
 DEBVERSION ?= trixie
 DEBSUPPORTED := bookworm trixie
 QEMUSUPPORT := yes
+UMLSUPPORT := yes
 TAG ?= $(DEBVERSION)
 TIMEZONE ?= US/Eastern
 DBCMD := docker build --build-arg MYTZ=$(TIMEZONE)
@@ -23,6 +24,10 @@ TARGETS :=
 ifdef QEMUSUPPORT
 QEMU_DISK_SIZE_MB := 4096
 endif
+ifdef UMLSUPPORT
+UML_KERN_VER := 6.6.106
+UML_DISK_SIZE_MB := 2096
+endif
 
 # Make this the first target
 default:
@@ -30,9 +35,14 @@ default:
 ifneq ($(QEMUSUPPORT),yes)
 QEMUSUPPORT :=
 endif
+ifneq ($(UMLSUPPORT),yes)
+UMLSUPPORT :=
+endif
 
 qemusupport:
 	$Q$(if $(QEMUSUPPORT),/bin/true,/bin/false)
+umlsupport:
+	$Q$(if $(UMLSUPPORT),/bin/true,/bin/false)
 
 include Makefile.macros
 
@@ -77,15 +87,13 @@ $($D_SYNC): ./heimdal/$(HEIMDAL_OUT)
 endef
 
 ifdef QEMUSUPPORT
-
 define cb_hcp_builder_qemu
 $(eval D := $(strip $1))
 $(eval _CTX := $(strip $2))
-$($D_SYNC): ./ctx/create_image.sh ./ctx/syslinux.cfg
-	$Qrsync -a ./ctx/create_image.sh ./ctx/syslinux.cfg $(_CTX)/
+$($D_SYNC): ./ctx/qemu_create_image.sh ./ctx/syslinux.cfg
+	$Qrsync -a ./ctx/qemu_create_image.sh ./ctx/syslinux.cfg $(_CTX)/
 	$Qtouch $$@
 endef
-
 define cb_hcp_qemu_guest
 $(eval D := $(strip $1))
 $(eval _CTX := $(strip $2))
@@ -93,7 +101,6 @@ $($D_SYNC): ./ctx/systemd-shim.sh ./ctx/hcp.service
 	$Qrsync -a ./ctx/systemd-shim.sh ./ctx/hcp.service $(_CTX)/
 	$Qtouch $$@
 endef
-
 define cb_hcp_qemu_host
 $(eval D := $(strip $1))
 $(eval _CTX := $(strip $2))
@@ -101,7 +108,37 @@ $($D_SYNC): ./ctx/qemu_run.sh
 	$Qrsync -a ./ctx/qemu_run.sh $(_CTX)/
 	$Qtouch $$@
 endef
+endif
 
+ifdef UMLSUPPORT
+define cb_hcp_builder_uml
+$(eval D := $(strip $1))
+$(eval _CTX := $(strip $2))
+$($D_SYNC): ./ctx/uml_create_image.sh ./ctx/syslinux.cfg
+	$Qrsync -a ./ctx/uml_create_image.sh ./ctx/syslinux.cfg $(_CTX)/
+	$Qtouch $$@
+endef
+define cb_hcp_builder_uml_kernel
+$(eval D := $(strip $1))
+$(eval _CTX := $(strip $2))
+$($D_SYNC): ./ctx/uml-kernel.config
+	$Qrsync -a ./ctx/uml-kernel.config $(_CTX)/
+	$Qtouch $$@
+endef
+define cb_hcp_uml_guest
+$(eval D := $(strip $1))
+$(eval _CTX := $(strip $2))
+$($D_SYNC): ./ctx/systemd-shim.sh ./ctx/hcp.service
+	$Qrsync -a ./ctx/systemd-shim.sh ./ctx/hcp.service $(_CTX)/
+	$Qtouch $$@
+endef
+define cb_hcp_uml_host
+$(eval D := $(strip $1))
+$(eval _CTX := $(strip $2))
+$($D_SYNC): ./ctx/uml_run.sh
+	$Qrsync -a ./ctx/uml_run.sh $(_CTX)/
+	$Qtouch $$@
+endef
 endif
 
 $(eval $(call parse_target,hcp_baseline,debian))
@@ -112,6 +149,12 @@ ifdef QEMUSUPPORT
 $(eval $(call parse_target,hcp_builder_qemu,hcp_baseline,cb_hcp_builder_qemu))
 $(eval $(call parse_target,hcp_qemu_guest,hcp_environment,cb_hcp_qemu_guest))
 $(eval $(call parse_target,hcp_qemu_host,hcp_environment,cb_hcp_qemu_host))
+endif
+ifdef UMLSUPPORT
+$(eval $(call parse_target,hcp_builder_uml,hcp_baseline,cb_hcp_builder_uml))
+$(eval $(call parse_target,hcp_builder_uml_kernel,hcp_builder_heimdal,cb_hcp_builder_uml_kernel))
+$(eval $(call parse_target,hcp_uml_guest,hcp_environment,cb_hcp_uml_guest))
+$(eval $(call parse_target,hcp_uml_host,hcp_environment,cb_hcp_uml_host))
 endif
 
 # The usecase requires host configs (and docker-compose.yml) to be generated
@@ -127,6 +170,9 @@ default: $(foreach i,environment,$(hcp_$i_$(DEBVERSION)))
 ifdef QEMUSUPPORT
 default: $(foreach i,builder_qemu qemu_guest qemu_host,$(hcp_$i_$(DEBVERSION)))
 endif
+ifdef UMLSUPPORT
+default: $(foreach i,builder_uml builder_uml_kernel uml_guest uml_host,$(hcp_$i_$(DEBVERSION)))
+endif
 
 $(eval $(call gen_rules))
 
@@ -134,11 +180,38 @@ ifdef QEMUSUPPORT
 $(CRUD)/hcp_qemu_guest.tar: $(hcp_qemu_guest_$(DEBVERSION)) $(TOP)/Makefile
 	$Qdocker export -o $@ `docker run --entrypoint="" -d hcp_qemu_guest:$(DEBVERSION) /bin/true`
 $(CRUD)/hcp_qemu_guest.img: $(CRUD)/hcp_qemu_guest.tar $(hcp_builder_qemu_$(DEBVERSION))
-	$Qdocker run -it -v $(CRUD):/crud:rw \
+	$Qdocker run -it --rm -v $(CRUD):/crud:rw \
 		--privileged --cap-add SYS_ADMIN \
 		hcp_builder_qemu:$(DEBVERSION) \
-		bash -c 'mkdir -p /poo && tar -C /poo --numeric-owner -xf /crud/hcp_qemu_guest.tar && create_image.sh $(shell id -u) $(shell id -g) $(QEMU_DISK_SIZE_MB)'
+		bash -c 'mkdir -p /poo && tar -C /poo --numeric-owner -xf /crud/hcp_qemu_guest.tar && qemu_create_image.sh $(shell id -u) $(shell id -g) $(QEMU_DISK_SIZE_MB)'
 default: $(CRUD)/hcp_qemu_guest.img
+endif
+
+ifdef UMLSUPPORT
+$(CRUD)/hcp_uml_guest.tar: $(hcp_uml_guest_$(DEBVERSION)) $(TOP)/Makefile
+	$Qdocker export -o $@ `docker run --entrypoint="" -d hcp_uml_guest:$(DEBVERSION) /bin/true`
+$(CRUD)/hcp_uml_guest.img: $(CRUD)/hcp_uml_guest.tar $(hcp_builder_uml_$(DEBVERSION))
+	$Qdocker run -it --rm -v $(CRUD):/crud:rw \
+		--privileged --cap-add SYS_ADMIN \
+		hcp_builder_uml:$(DEBVERSION) \
+		bash -c 'mkdir -p /poo && tar -C /poo --numeric-owner -xf /crud/hcp_uml_guest.tar && uml_create_image.sh $(shell id -u) $(shell id -g) $(UML_DISK_SIZE_MB)'
+default: $(CRUD)/hcp_uml_guest.img
+$(CRUD)/linux-$(UML_KERN_VER).tar.xz:
+	$Qcd $(CRUD) && wget https://cdn.kernel.org/pub/linux/kernel/v6.x/linux-$(UML_KERN_VER).tar.xz
+$(CRUD)/linux-$(UML_KERN_VER): $(CRUD)/linux-$(UML_KERN_VER).tar.xz
+	$Qcd $(CRUD) && unxz -k linux-$(UML_KERN_VER).tar.xz && tar xf linux-$(UML_KERN_VER).tar
+$(CRUD)/linux: $(hcp_builder_uml_kernel_$(DEBVERSION)) | $(CRUD)/linux-$(UML_KERN_VER)
+	$Qdocker run -it --rm -v $(CRUD):/crud:rw \
+		hcp_builder_uml_kernel:$(DEBVERSION) \
+		bash -c 'cd /crud/linux-$(UML_KERN_VER) && cp /uml-kernel.config .config && make oldconfig ARCH=um && make ARCH=um -j 8 && cp linux /crud'
+# Interactive shell to manually compile the kernel
+uml_kernel_build_shell: $(hcp_builder_uml_kernel_$(DEBVERSION)) | $(CRUD)/linux-$(UML_KERN_VER)
+	$Qecho "Kernel source tree is in: /crud/linux-$(UML_KERN_VER)"
+	$Qecho "Don't forget to export ARCH=um"
+	$Qdocker run -it --rm -v $(CRUD):/crud:rw \
+		hcp_builder_uml_kernel:$(DEBVERSION) \
+		bash
+default: $(CRUD)/linux
 endif
 
 $(USECASE_DIR): | $(CRUD)

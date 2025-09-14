@@ -1,0 +1,21 @@
+RUN apt-get install -y --no-install-recommends \
+	systemd-sysv kmod
+RUN apt-get install -y ifupdown2 isc-dhcp-client
+RUN echo "root:root" | chpasswd
+RUN echo "/dev/ubdb swap swap defaults 0 0" >> /etc/fstab
+
+#RUN echo "RESUME=none" > /etc/initramfs-tools/conf.d/resume
+#RUN update-initramfs -u -k all
+#RUN systemctl set-default multi-user.target
+
+RUN mkdir -p /hosthack
+RUN echo "none /hosthack hostfs defaults 0 0" >> /etc/fstab
+
+RUN mkdir -p /etc/network
+RUN echo "auto eth0" >> /etc/network/interfaces
+RUN echo "iface eth0 inet dhcp" >> /etc/network/interfaces
+
+COPY systemd-shim.sh /
+RUN chmod 755 /systemd-shim.sh
+COPY hcp.service /etc/systemd/system/
+RUN systemctl enable hcp.service
