@@ -18,6 +18,11 @@ RUN systemctl disable sshd
 # TODO: actually we're building nginx from source for now...
 #RUN systemctl disable nginx
 
+RUN echo "" > /etc/skel/newbashrc
+RUN echo "source /hcp/common/hcp.sh" >> /etc/skel/newbashrc
+RUN cat /etc/skel/.bashrc >> /etc/skel/newbashrc
+RUN mv /etc/skel/newbashrc /etc/skel/.bashrc
+
 RUN adduser --disabled-password --quiet --gecos "For remote logins,,,," luser
 RUN adduser --disabled-password --quiet --gecos "Alicia Nom-Composé,,,," alicia
 RUN adduser --disabled-password --quiet --gecos "Test User 1,,,," user1
