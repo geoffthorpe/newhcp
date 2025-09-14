@@ -5,6 +5,7 @@ import json
 import os
 import sys
 import argparse
+import copy
 
 from gson.expander import expand
 
@@ -25,7 +26,8 @@ def docker_write_service(fp, name, data, with_sidecar = True, with_cotenant = Fa
     for item in vols:
         fp.write(f"          - {item}\n")
     fp.write('        environment:\n')
-    fp.write(f"          - HCP_CONFIG_MUTATE=/_usecase/{name}.json\n\n")
+    mutate = f"{name}_runner" if is_vm else name
+    fp.write(f"          - HCP_CONFIG_MUTATE=/_usecase/{mutate}.json\n\n")
 
 def docker_write_sidecar(fp, name, data, with_tpm = True):
     print(f"Writing service '{name}_tpm' to docker compose file")
@@ -53,9 +55,9 @@ def produce_host_config(host, _input, outputdir):
     tpm_mode = data['tpm']
     if tpm_mode not in [ 'none', 'sidecar', 'cotenant', 'unmanaged' ]:
         raise Exception(f"Unrecognised tpm_mode: {tpm_mode}")
+    is_vm = data['vm'] if 'vm' in data else False
     servicenames = [ k for k in data['services']] \
         if 'services' in data else []
-    # 'output' is the structure that gets jsonified at the end
     output = {
         'vars': {
             'id': host,
@@ -68,6 +70,31 @@ def produce_host_config(host, _input, outputdir):
             { 'method': 'union' }
         ]
     }
+    if is_vm:
+        output_runner = {
+            'vars': {
+                'id': host,
+                'hostname': hostname,
+                'domain': _input['vars']['domain'],
+                'realm': _input['vars']['realm']
+            },
+            'mutate': [
+                { 'method': 'load', 'jspath': '/usecase/proto/root.json' },
+                { 'method': 'union' },
+                { 'method': 'load', 'register': 'd',
+                  'jspath': '/usecase/proto/defaults.json' },
+                { 'method': 'union', 'regpath': 'vars',
+                  'srcregister': 'd', 'underlay': True },
+                { 'method': 'load', 'regpath': 'qemu',
+                  'jspath': '/usecase/proto/qemu.json' },
+                { 'method': 'set', 'register': 'e',
+                  'value': {
+                      'VM_HCP_CONFIG_MUTATE': f"/_usecase/{host}.json"
+                  } },
+                { 'method': 'union', 'srcregister': 'e',
+                  'regpath': 'env' }
+            ]
+        }
     if tpm_mode == 'sidecar':
         output_tpm = {
             'vars': {
@@ -93,8 +120,6 @@ def produce_host_config(host, _input, outputdir):
         for k in _input['vars']:
             if k not in output['vars']:
                 output['vars'][k] = _input['vars'][k]
-    # add a root prototype (merged into the top-level, rather than into
-    # a named sub-object) if requested.
     if 'rootproto' in data:
         for service in data['rootproto']:
             rp = data['rootproto'][service]
@@ -108,22 +133,13 @@ def produce_host_config(host, _input, outputdir):
             output['mutate'].append({
                 'method': 'union',
                 'srcregister': 'a'})
-    # load and merge prototype defaults
-    output['mutate'].append({
-        'method': 'load',
-        'register': 'd',
-        'jspath': '/usecase/proto/defaults.json'})
-    output['mutate'].append({
-        'method': 'union',
-        'regpath': 'vars',
-        'srcregister': 'd',
-        'underlay': True})
-    # add per-service mutations
+    output['mutate'].append({ 'method': 'load', 'register': 'd',
+                              'jspath': '/usecase/proto/defaults.json'})
+    output['mutate'].append({ 'method': 'union', 'regpath': 'vars',
+                              'srcregister': 'd', 'underlay': True})
     if tpm_mode == 'cotenant':
-        output['mutate'].append({
-            'method': 'load',
-            'regpath': 'swtpm',
-            'jspath': '/usecase/proto/tpm_cotenant.json'})
+        output['mutate'].append({ 'method': 'load', 'regpath': 'swtpm',
+                                  'jspath': '/usecase/proto/tpm_cotenant.json'})
     services = data['services'] if 'services' in data else {}
     for service in services:
         _vars = services[service]
@@ -131,22 +147,16 @@ def produce_host_config(host, _input, outputdir):
         if _vars:
             for k in _vars:
                 output['vars'][f"{service}_{k}"] = _vars[k]
-        # Add the non-root prototype
         output['mutate'].append({
             'method': 'load',
             'regpath': service,
             'jspath': f"/usecase/proto/{service}.json"})
-    # add per-host environment includes
     env = data['env'] if 'env' in data else []
     for e in env:
-        output['mutate'].append({
-            'method': 'load',
-            'register': 'e',
-            'jspath': f"/usecase/proto/env_{e}.json"})
-        output['mutate'].append({
-            'method': 'union',
-            'srcregister': 'e',
-            'regpath': 'env'})
+        output['mutate'].append({ 'method': 'load', 'register': 'e',
+                                  'jspath': f"/usecase/proto/env_{e}.json"})
+        output['mutate'].append({ 'method': 'union', 'srcregister': 'e',
+                                  'regpath': 'env'})
     # if there is any of "args_for/result_from/foreground" in the input, put it
     # in the output too
     if 'args_for' in data:
@@ -163,6 +173,9 @@ def produce_host_config(host, _input, outputdir):
     if tpm_mode == 'sidecar':
         with open(f"{outputdir}/{host}_tpm.json", 'w') as fp:
             json.dump(output_tpm, fp, indent = 4)
+    if is_vm:
+        with open(f"{outputdir}/{host}_runner.json", 'w') as fp:
+            json.dump(output_runner, fp, indent = 4)
 
 if __name__ == '__main__':
     fleet_desc = 'Parser of fleet.json'
@@ -276,8 +289,10 @@ services:
         extends: common_nontpm
         image: hcp_caboodle_qemu:trixie
         volumes:
-          - ./_crud/kernel:/kernel:ro
           - /tmp/.X11-unix:/tmp/.X11-unix:rw
+          - ./_crud/testcreds/ca_default:/ca_default:ro
+          - ./_crud/testcreds/verifier_asset:/verifier_asset:ro
+          - ./_crud/testcreds/cred_healthhttpsclient:/cred_healthhttpsclient:ro
         environment:
           - DISPLAY=${DISPLAY}
 

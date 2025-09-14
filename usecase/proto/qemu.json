@@ -1,0 +1,5 @@
+{
+    "priority": 90,
+    "exec": "/qemu_run.sh",
+    "block": true
+}

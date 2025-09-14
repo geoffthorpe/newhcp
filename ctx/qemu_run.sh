@@ -11,7 +11,7 @@ mkswap /swapfile
 mkdir -p /_env
 
 echo "export PYTHONPATH=$PYTHONPATH" > /_env/env
-echo "export HCP_CONFIG_MUTATE=$HCP_CONFIG_MUTATE" >> /_env/env
+echo "export HCP_CONFIG_MUTATE=$VM_HCP_CONFIG_MUTATE" >> /_env/env
 echo "export HOSTNAME=$(hostname)" >> /_env/env
 
 vde_switch --sock=/tmp/myswitch --daemon
