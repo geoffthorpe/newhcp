@@ -203,7 +203,7 @@ if [[ $result != 'true' ]]; then
 	exit 1
 fi
 
-if [[ $VMSUPPORT == 'yes' ]]; then
+if [[ $QEMUSUPPORT == 'yes' ]]; then
 	echo "Starting barton (QEMU within container)"
 	do_run up barton
 
