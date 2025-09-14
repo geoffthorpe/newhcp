@@ -138,8 +138,10 @@ def produce_host_config(host, _input, outputdir):
     output['mutate'].append({ 'method': 'union', 'regpath': 'vars',
                               'srcregister': 'd', 'underlay': True})
     if tpm_mode == 'cotenant':
-        output['mutate'].append({ 'method': 'load', 'regpath': 'swtpm',
-                                  'jspath': '/usecase/proto/tpm_cotenant.json'})
+        #o = output_runner if is_vm else output
+        o = output
+        o['mutate'].append({ 'method': 'load', 'regpath': 'swtpm',
+                             'jspath': '/usecase/proto/tpm_cotenant.json'})
     services = data['services'] if 'services' in data else {}
     for service in services:
         _vars = services[service]
@@ -153,10 +155,12 @@ def produce_host_config(host, _input, outputdir):
             'jspath': f"/usecase/proto/{service}.json"})
     env = data['env'] if 'env' in data else []
     for e in env:
-        output['mutate'].append({ 'method': 'load', 'register': 'e',
-                                  'jspath': f"/usecase/proto/env_{e}.json"})
-        output['mutate'].append({ 'method': 'union', 'srcregister': 'e',
-                                  'regpath': 'env'})
+        #o = output_runner if is_vm and e == 'tpm2tools' else output
+        o = output
+        o['mutate'].append({ 'method': 'load', 'register': 'e',
+                             'jspath': f"/usecase/proto/env_{e}.json"})
+        o['mutate'].append({ 'method': 'union', 'srcregister': 'e',
+                             'regpath': 'env'})
     # if there is any of "args_for/result_from/foreground" in the input, put it
     # in the output too
     if 'args_for' in data:
@@ -167,6 +171,8 @@ def produce_host_config(host, _input, outputdir):
         output['foreground'] = data['foreground']
     # perform parameter-expansion
     output['mutate'].append({ 'method': 'expand' })
+    if is_vm:
+        output_runner['mutate'].append({ 'method': 'expand' })
     # Write the host config (the mutate input for it, in any case)
     with open(f"{outputdir}/{host}.json", 'w') as fp:
         json.dump(output, fp, indent = 4)
@@ -293,6 +299,9 @@ services:
           - ./_crud/testcreds/ca_default:/ca_default:ro
           - ./_crud/testcreds/verifier_asset:/verifier_asset:ro
           - ./_crud/testcreds/cred_healthhttpsclient:/cred_healthhttpsclient:ro
+          - /dev:/dev
+          - /sys:/sys
+        privileged: true
         environment:
           - DISPLAY=${DISPLAY}
 
