@@ -84,7 +84,7 @@ $($D_SYNC): ./ctx/systemd-shim.sh ./ctx/hcp.service
 	$Qtouch $$@
 endef
 
-define cb_hcp_qemu
+define cb_hcp_caboodle_qemu
 $(eval D := $(strip $1))
 $(eval _CTX := $(strip $2))
 $($D_SYNC): ./ctx/qemu_run.sh
@@ -101,7 +101,7 @@ $(eval $(call parse_target,hcp_caboodle,hcp_baseline,cb_hcp_caboodle))
 ifdef VMSUPPORT
 $(eval $(call parse_target,hcp_builder_vm,hcp_baseline,cb_hcp_builder_vm))
 $(eval $(call parse_target,hcp_caboodle_vm,hcp_caboodle,cb_hcp_caboodle_vm))
-$(eval $(call parse_target,hcp_qemu,hcp_baseline,cb_hcp_qemu))
+$(eval $(call parse_target,hcp_caboodle_qemu,hcp_caboodle,cb_hcp_caboodle_qemu))
 endif
 
 # The usecase requires host configs (and docker-compose.yml) to be generated
@@ -115,7 +115,7 @@ USECASE_OUTS += $(USECASE_DIR)/docker-compose.yml
 default: testcreds $(USECASE_OUTS)
 default: $(foreach i,caboodle,$(hcp_$i_$(DEBVERSION)))
 ifdef VMSUPPORT
-default: $(foreach i,builder_vm caboodle_vm qemu,$(hcp_$i_$(DEBVERSION)))
+default: $(foreach i,builder_vm caboodle_vm caboodle_qemu,$(hcp_$i_$(DEBVERSION)))
 endif
 
 $(eval $(call gen_rules))

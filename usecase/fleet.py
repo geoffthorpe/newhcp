@@ -274,7 +274,7 @@ services:
 
     common_vm:
         extends: common_nontpm
-        image: hcp_qemu:trixie
+        image: hcp_caboodle_qemu:trixie
         volumes:
           - ./_crud/kernel:/kernel:ro
           - /tmp/.X11-unix:/tmp/.X11-unix:rw
