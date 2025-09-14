@@ -52,11 +52,25 @@ docker-compose exec kdc_secondary bash
 
 ### Step 1 of 2: get a Kerberos-authenticated shell
 
+To get a TGT explicitly (as root, using alicia's certificate);
+
 ```
 docker-compose exec alicia /launcher bash
-root@alicia:/# su -w HCP_CONFIG_FILE,KRB5_CONFIG - alicia
-alicia@alicia:~$ kinit -C FILE:/assets/pkinit-client-alicia.pem \
+root@alicia:/# kinit -C FILE:/assets/pkinit-client-alicia.pem \
                      alicia bash
+root@alicia:/# klist
+Credentials cache: FILE:/tmp/krb5cc_yorGFK
+        Principal: alicia@HCPHACKING.XYZ
+
+  Issued                Expires               Principal
+Aug 19 17:26:57 2025  Aug 19 17:31:57 2025  krbtgt/HCPHACKING.XYZ@HCPHACKING.XYZ
+```
+
+To get a TGT implicitly (as alicia, 'kinit' runs automatically);
+
+```
+docker-compose exec alicia /launcher bash
+root@alicia:/# su -w HCP_CONFIG_MUTATE - alicia
 alicia@alicia:~$ klist
 Credentials cache: FILE:/tmp/krb5cc_yorGFK
         Principal: alicia@HCPHACKING.XYZ
@@ -66,6 +80,15 @@ Aug 19 17:26:57 2025  Aug 19 17:31:57 2025  krbtgt/HCPHACKING.XYZ@HCPHACKING.XYZ
 ```
 
 ### Step 2 of 2: ssh
+
+As root;
+
+```
+root@alicia:/# ssh -l alicia shell.hcphacking.xyz
+alicia@shell:~$
+```
+
+As alicia;
 
 ```
 alicia@alicia:~$ ssh shell.hcphacking.xyz

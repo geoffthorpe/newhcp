@@ -277,16 +277,24 @@ for i in $(find / -maxdepth 1 -mindepth 1 -type d -name "install-*"); do
 	add_install_path "$i"
 done
 if [[ -z $HCP_CONFIG_FILE ]]; then
-	echo "Warning: HCP_CONFIG_FILE not set. To fix, run a launcher subshell." >&2
-	echo "Warning: E.g.  /launcher bash" >&2
-else
-	envjson=$(hcp_config_extract ".env")
-	if [[ $envjson != 'null' ]]; then
-		envjson_keys=$(echo "$envjson" | jq 'keys[]')
-		for i in $envjson_keys; do
-			j=$(echo "$i" | jq -r .)
-			v=$(echo "$envjson" | jq -r ".$j")
-			export $j="$v"
-		done
+	echo "Auto-running launcher to get HCP environment" >&2
+	exec /launcher bash
+fi
+if [[ -z $KRB5CCNAME ]]; then
+	ME=$(whoami)
+	if [[ -f /assets/pkinit-client-$ME.pem ]]; then
+		echo "Auto-running kinit to get TGT for '$ME'" >&2
+		exec kinit -C FILE:/assets/pkinit-client-$ME.pem $ME bash
+	else
+		echo "No kinit/TGT available for '$ME'" >&2
 	fi
+fi
+envjson=$(hcp_config_extract ".env")
+if [[ $envjson != 'null' ]]; then
+	envjson_keys=$(echo "$envjson" | jq 'keys[]')
+	for i in $envjson_keys; do
+		j=$(echo "$i" | jq -r .)
+		v=$(echo "$envjson" | jq -r ".$j")
+		export $j="$v"
+	done
 fi
