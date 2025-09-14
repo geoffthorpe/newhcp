@@ -263,7 +263,7 @@ networks:
 
 services:
     common:
-        image: hcp_caboodle:trixie
+        image: hcp_environment:trixie
         init: true
         volumes:
           - ${TOP}/hcp:/hcp:ro
@@ -293,7 +293,7 @@ services:
 
     common_vm:
         extends: common_nontpm
-        image: hcp_caboodle_qemu:trixie
+        image: hcp_qemu_guest:trixie
         volumes:
           - /tmp/.X11-unix:/tmp/.X11-unix:rw
           - ./_crud/testcreds/ca_default:/ca_default:ro

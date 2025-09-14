@@ -8,7 +8,7 @@ UID_HOST=$1
 GID_HOST=$2
 VM_DISK_SIZE_MB=$3
 
-IMG=/crud/hcp_caboodle_vm.img
+IMG=/crud/hcp_qemu_guest.img
 
 echo_blue() {
     local font_blue="\033[94m"

@@ -10,6 +10,9 @@ DCFLAGS="-p $PROJECT"
 
 DOMAIN=$(jq -r .vars.domain usecase/fleet.json)
 
+QEMUSUPPORT=$(make qemusupport > /dev/null 2>&1 && echo yes || echo no)
+echo "QEMU support = $QEMUSUPPORT"
+
 echo "Running basic sanity test"
 
 [[ -n $V ]] && OUT=/dev/stdout || OUT=/dev/null
@@ -198,6 +201,13 @@ EOF
 if [[ $result != 'true' ]]; then
 	echo "Error, unexpected output: $result" >&2
 	exit 1
+fi
+
+if [[ $VMSUPPORT == 'yes' ]]; then
+	echo "Starting barton (QEMU within container)"
+	do_run up barton
+
+	# TODO: did barton even come up?? Do something
 fi
 
 echo "Success"

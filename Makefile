@@ -9,7 +9,7 @@ endif
 TOP ?= $(shell pwd)
 DEBVERSION ?= trixie
 DEBSUPPORTED := bookworm trixie
-VMSUPPORT := yes
+QEMUSUPPORT := yes
 TAG ?= $(DEBVERSION)
 TIMEZONE ?= US/Eastern
 DBCMD := docker build --build-arg MYTZ=$(TIMEZONE)
@@ -20,9 +20,19 @@ NGINX_OUT := nginx-install.tar.gz
 CRUD := $(TOP)/_crud
 MDIRS := $(CRUD)
 TARGETS :=
-ifdef VMSUPPORT
-VM_DISK_SIZE_MB := 4096
+ifdef QEMUSUPPORT
+QEMU_DISK_SIZE_MB := 4096
 endif
+
+# Make this the first target
+default:
+
+ifneq ($(QEMUSUPPORT),yes)
+QEMUSUPPORT :=
+endif
+
+qemusupport:
+	$Q$(if $(QEMUSUPPORT),/bin/true,/bin/false)
 
 include Makefile.macros
 
@@ -44,13 +54,13 @@ include Makefile.macros
 #             |               |
 #             +---------------+
 #             |
-#      hcp_caboodle:trixie
+#      hcp_environment:trixie
 #
 # Sub-text: heimdal build is broken on trixie, so we need to build on bookworm,
 # but bookworm's swtpm/tpm2-tools is too old, so we need to install and run on
 # trixie. Fortunately, the bookworm-based build runs fine on trixie.
 #
-define cb_hcp_caboodle
+define cb_hcp_environment
 $(eval D := $(strip $1))
 $(eval _CTX := $(strip $2))
 $($D_SYNC): ./ctx/ssh_config ./heimdal/$(HEIMDAL_OUT) ./nginx/$(NGINX_OUT)
@@ -66,9 +76,9 @@ $($D_SYNC): ./heimdal/$(HEIMDAL_OUT)
 	$Qtouch $$@
 endef
 
-ifdef VMSUPPORT
+ifdef QEMUSUPPORT
 
-define cb_hcp_builder_vm
+define cb_hcp_builder_qemu
 $(eval D := $(strip $1))
 $(eval _CTX := $(strip $2))
 $($D_SYNC): ./ctx/create_image.sh ./ctx/syslinux.cfg
@@ -76,7 +86,7 @@ $($D_SYNC): ./ctx/create_image.sh ./ctx/syslinux.cfg
 	$Qtouch $$@
 endef
 
-define cb_hcp_caboodle_vm
+define cb_hcp_qemu_guest
 $(eval D := $(strip $1))
 $(eval _CTX := $(strip $2))
 $($D_SYNC): ./ctx/systemd-shim.sh ./ctx/hcp.service
@@ -84,7 +94,7 @@ $($D_SYNC): ./ctx/systemd-shim.sh ./ctx/hcp.service
 	$Qtouch $$@
 endef
 
-define cb_hcp_caboodle_qemu
+define cb_hcp_qemu_host
 $(eval D := $(strip $1))
 $(eval _CTX := $(strip $2))
 $($D_SYNC): ./ctx/qemu_run.sh
@@ -97,11 +107,11 @@ endif
 $(eval $(call parse_target,hcp_baseline,debian))
 $(eval $(call parse_target,hcp_builder_heimdal,hcp_baseline))
 $(eval $(call parse_target,hcp_builder_nginx,hcp_builder_heimdal,cb_hcp_builder_nginx))
-$(eval $(call parse_target,hcp_caboodle,hcp_baseline,cb_hcp_caboodle))
-ifdef VMSUPPORT
-$(eval $(call parse_target,hcp_builder_vm,hcp_baseline,cb_hcp_builder_vm))
-$(eval $(call parse_target,hcp_caboodle_vm,hcp_caboodle,cb_hcp_caboodle_vm))
-$(eval $(call parse_target,hcp_caboodle_qemu,hcp_caboodle,cb_hcp_caboodle_qemu))
+$(eval $(call parse_target,hcp_environment,hcp_baseline,cb_hcp_environment))
+ifdef QEMUSUPPORT
+$(eval $(call parse_target,hcp_builder_qemu,hcp_baseline,cb_hcp_builder_qemu))
+$(eval $(call parse_target,hcp_qemu_guest,hcp_environment,cb_hcp_qemu_guest))
+$(eval $(call parse_target,hcp_qemu_host,hcp_environment,cb_hcp_qemu_host))
 endif
 
 # The usecase requires host configs (and docker-compose.yml) to be generated
@@ -113,22 +123,22 @@ USECASE_OUTS += $(USECASE_DIR)/docker-compose.yml
 
 # default needs to go after parse_target() but before gen_rules()
 default: testcreds $(USECASE_OUTS)
-default: $(foreach i,caboodle,$(hcp_$i_$(DEBVERSION)))
-ifdef VMSUPPORT
-default: $(foreach i,builder_vm caboodle_vm caboodle_qemu,$(hcp_$i_$(DEBVERSION)))
+default: $(foreach i,environment,$(hcp_$i_$(DEBVERSION)))
+ifdef QEMUSUPPORT
+default: $(foreach i,builder_qemu qemu_guest qemu_host,$(hcp_$i_$(DEBVERSION)))
 endif
 
 $(eval $(call gen_rules))
 
-ifdef VMSUPPORT
-$(CRUD)/hcp_caboodle_vm.tar: $(hcp_caboodle_vm_$(DEBVERSION)) $(TOP)/Makefile
-	$Qdocker export -o $@ `docker run --entrypoint="" -d hcp_caboodle_vm:$(DEBVERSION) /bin/true`
-$(CRUD)/hcp_caboodle_vm.img: $(CRUD)/hcp_caboodle_vm.tar $(hcp_builder_vm_$(DEBVERSION))
+ifdef QEMUSUPPORT
+$(CRUD)/hcp_qemu_guest.tar: $(hcp_qemu_guest_$(DEBVERSION)) $(TOP)/Makefile
+	$Qdocker export -o $@ `docker run --entrypoint="" -d hcp_qemu_guest:$(DEBVERSION) /bin/true`
+$(CRUD)/hcp_qemu_guest.img: $(CRUD)/hcp_qemu_guest.tar $(hcp_builder_qemu_$(DEBVERSION))
 	$Qdocker run -it -v $(CRUD):/crud:rw \
 		--privileged --cap-add SYS_ADMIN \
-		hcp_builder_vm:$(DEBVERSION) \
-		bash -c 'mkdir -p /poo && tar -C /poo --numeric-owner -xf /crud/hcp_caboodle_vm.tar && create_image.sh $(shell id -u) $(shell id -g) $(VM_DISK_SIZE_MB)'
-default: $(CRUD)/hcp_caboodle_vm.img
+		hcp_builder_qemu:$(DEBVERSION) \
+		bash -c 'mkdir -p /poo && tar -C /poo --numeric-owner -xf /crud/hcp_qemu_guest.tar && create_image.sh $(shell id -u) $(shell id -g) $(QEMU_DISK_SIZE_MB)'
+default: $(CRUD)/hcp_qemu_guest.img
 endif
 
 $(USECASE_DIR): | $(CRUD)
