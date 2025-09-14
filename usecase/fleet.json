@@ -186,6 +186,22 @@
             },
             "env": [ "tpm2tools", "krb5", "sshd" ]
         },
+        "bigbrother": {
+            "hostname": "bigbrother.{domain}",
+            "enroll_profile": {
+                "certgen": [ "pkinit-client", "https-client" ],
+                "pkinit-clients": [ "root" ],
+                "https-clients": [ "root" ],
+                "ktgen": {
+                    "sshd": [ "host/{hostname}" ]
+                }
+            },
+            "services": {
+                "attester": null,
+                "sshd": null
+            },
+            "env": [ "tpm2tools", "krb5", "sshd" ]
+        },
         "auth_certificate": {
             "hostname": "certificate.auth.{domain}",
             "tpm": "cotenant",
