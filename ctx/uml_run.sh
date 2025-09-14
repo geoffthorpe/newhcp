@@ -20,7 +20,8 @@ vde_switch --sock=/tmp/myswitch --daemon
 # get it to work.
 slirpvde -sock=/tmp/myswitch -dhcp -daemon \
 	-L 22:10.0.2.15:22 \
-	-L 443:10.0.2.15:443
+	-L 443:10.0.2.15:443 \
+	-L 2049:10.0.2.15:2049
 # vde_plug -d vde:///tmp/myswitch slirp:///tcpfwd=22:10.0.2.15:22/tcpfwd=443:10.0.2.15:443
 echo "Started VDE2 DHCP+DNS+NAT" >&2
 

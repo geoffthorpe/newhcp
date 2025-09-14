@@ -1,15 +1,21 @@
 RUN apt-get install -y --no-install-recommends \
-	systemd-sysv kmod
-RUN apt-get install -y ifupdown2 isc-dhcp-client
+	systemd-sysv kmod ifupdown2 isc-dhcp-client \
+	nfs-kernel-server
 RUN echo "root:root" | chpasswd
 RUN echo "/dev/ubdb swap swap defaults 0 0" >> /etc/fstab
+# Let the HCP JSON choose to start the NFS kernel-server or not.
+RUN systemctl disable nfs-kernel-server
 
 #RUN echo "RESUME=none" > /etc/initramfs-tools/conf.d/resume
 #RUN update-initramfs -u -k all
-#RUN systemctl set-default multi-user.target
+RUN systemctl set-default multi-user.target
 
 RUN mkdir -p /hosthack
 RUN echo "none /hosthack hostfs defaults 0 0" >> /etc/fstab
+
+RUN mkdir -p /exported
+RUN echo "sample data" > /exported/sample
+RUN echo "/exported *(rw,no_subtree_check)" >> /etc/exports
 
 RUN mkdir -p /etc/network
 RUN echo "auto eth0" >> /etc/network/interfaces
