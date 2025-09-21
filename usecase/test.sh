@@ -203,11 +203,11 @@ if [[ $result != 'true' ]]; then
 	exit 1
 fi
 
-if [[ $QEMUSUPPORT == 'yes' ]]; then
-	echo "Starting barton (QEMU within container)"
-	do_run up barton
-
-	# TODO: did barton even come up?? Do something
-fi
+#if [[ $QEMUSUPPORT == 'yes' ]]; then
+#	echo "Starting barton (QEMU within container)"
+#	do_run up barton
+#
+#	# TODO: did barton even come up?? Do something
+#fi
 
 echo "Success"
