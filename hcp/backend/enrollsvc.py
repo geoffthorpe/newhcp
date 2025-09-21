@@ -13,7 +13,7 @@ import requests
 import tempfile
 import glob
 import shutil
-import hcp.svc.enrollsvc as enrollsvc
+import hcp.flask.enrollsvc as enrollsvc
 from hcp.backend.common import *
 
 app = enrollsvc.app

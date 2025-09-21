@@ -13,7 +13,7 @@ import requests
 import tempfile
 import glob
 import shutil
-import hcp.svc.attestsvc as attestsvc
+import hcp.flask.attestsvc as attestsvc
 from hcp.backend.common import *
 import hcp.api.kdc as kapi
 from hcp.common import hcp_config_extract
