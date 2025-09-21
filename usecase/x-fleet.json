@@ -1,0 +1,38 @@
+{
+    "_": "  vim: set expandtab shiftwidth=4 softtabstop=4: ",
+    "vars": {
+        "realm": "HCPHACKING.XYZ",
+        "domain": "hcphacking.xyz"
+    },
+    "defaults": {
+        "enroll_profile": {
+            "hostname": "{hostname}"
+        }
+    },
+    "volumes": [
+        "backdoor"
+    ],
+    "fleet": {
+        "kdc": {
+            "hostname": "kdc.{domain}",
+            "tpm": "none",
+            "vm": "uml",
+            "volumes": [ "backdoor:/backdoor",
+                         "./_crud:/crud:ro" ]
+        },
+        "nfs": {
+            "hostname": "nfs.{domain}",
+            "tpm": "none",
+            "vm": "uml",
+            "volumes": [ "backdoor:/backdoor",
+                         "./_crud:/crud:ro" ]
+        },
+        "client": {
+            "hostname": "client.{domain}",
+            "tpm": "none",
+            "vm": "uml",
+            "volumes": [ "backdoor:/backdoor",
+                         "./_crud:/crud:ro" ]
+        }
+    }
+}
