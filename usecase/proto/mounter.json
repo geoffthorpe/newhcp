@@ -1,0 +1,8 @@
+{
+    "priority": 15,
+    "exec": "/hcp/python/hcp/svc/mounter.py",
+    "block": true,
+    "will_exit": true,
+    "mounts": "{mounter_mounts}",
+    "__TODO_healthcheck": null
+}

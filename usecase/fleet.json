@@ -270,7 +270,12 @@
             },
             "services": {
                 "attester": null,
-                "sshd": null
+                "sshd": null,
+                "mounter": {
+                    "mounts": {
+                        "/home": "nfs.hcphacking.xyz:/"
+                    }
+                }
             },
             "env": [ "tpm2tools", "krb5", "sshd" ]
         }
