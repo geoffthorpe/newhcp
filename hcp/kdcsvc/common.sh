@@ -1,4 +1,4 @@
-source /hcp/common/hcp.sh
+source /hcp/bash/hcp.sh
 
 export HCP_ID=$(hcp_config_extract "vars.id")
 

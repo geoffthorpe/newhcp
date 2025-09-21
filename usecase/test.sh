@@ -152,7 +152,7 @@ do_run exec shell \
 # - we confirm that all of the above generated "shell.$DOMAIN".
 echo "Running an SSO ssh session alicia -> shell"
 result=$(do_run execT alicia /launcher bash <<EOF
-source /hcp/common/hcp.sh
+source /hcp/bash/hcp.sh
 kinit -C FILE:/assets/pkinit-client-alicia.pem alicia \
 	ssh -l alicia shell.$DOMAIN bash <<DONE
 hostname
@@ -168,7 +168,7 @@ fi
 # This time, we ssh back to alicia from within the ssh session to shell
 echo "Running an SSO ssh boomerang alicia -> shell -> alicia"
 result=$(do_run execT alicia /launcher bash <<EOF
-source /hcp/common/hcp.sh
+source /hcp/bash/hcp.sh
 kinit -C FILE:/assets/pkinit-client-alicia.pem alicia \
 	ssh -l alicia shell.$DOMAIN bash <<DONE
 ssh alicia.$DOMAIN bash <<INNER
@@ -192,7 +192,7 @@ fi
 
 echo "Running a kerberos-SPNEGO authentication alicia -> auth_kerberos"
 result=$(do_run execT alicia /launcher bash <<EOF
-source /hcp/common/hcp.sh
+source /hcp/bash/hcp.sh
 kinit -C FILE:/assets/pkinit-client-alicia.pem alicia \
 	curl --cacert /ca_default --negotiate -u : https://kerberos.auth.$DOMAIN/get \
 	| jq .is_secure

@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # This picks up things like TPM2TOOLS_TCTI
-. /hcp/common/hcp.sh
+. /hcp/bash/hcp.sh
 
 # This script performs the attestation routine step-wise.
 
