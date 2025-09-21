@@ -199,6 +199,12 @@ def launch(args):
         if nexus.is_exiting():
             break
 
+    # Hack. For qemu/uml guests, the host runners are groping for a sign that
+    # the workloads within the VMs are launched. Give it to them.
+    if os.path.isdir('/hosthack'):
+        with open('/hosthack/tmp/vm.launched', 'w') as _:
+            pass
+
     if foreground:
         if fg:
             fg.wait()
