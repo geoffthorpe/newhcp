@@ -1,7 +1,7 @@
 {
     "priority": 60,
-    "exec": [ "/hcp/webapi.py", "-C", "{webapi_name}" ],
-    "healthcheck": [ "/hcp/webapi.py", "--healthcheck", "-C", "{webapi_name}" ],
+    "exec": [ "/hcp/python/hcp/svc/webapi.py", "-C", "{webapi_name}" ],
+    "healthcheck": [ "/hcp/python/hcp/svc/webapi.py", "--healthcheck", "-C", "{webapi_name}" ],
     "servername": "{webapi_fqdn}",
     "port": "{webapi_port}",
     "https": {
