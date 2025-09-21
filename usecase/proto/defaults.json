@@ -1,5 +1,4 @@
 {
-    "NODEFAULT_default_targets": [ "start-services" ],
     "attester_period": 120,
     "attester_retry": 5,
     "attester_tool": "/hcp/python/hcp/tool/attest.py",
