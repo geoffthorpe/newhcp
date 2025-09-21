@@ -73,57 +73,6 @@ def hcp_config_extract(path, **kwargs):
 		world = json.load(fp)
 	return pat.extract_path(world, path, **kwargs)
 
-def env_get(k):
-	if not k in os.environ:
-		bail(f"Missing environment variable: {k}")
-	v = os.environ[k]
-	if not isinstance(v, str):
-		bail(f"Environment variable not a string: {k}:{v}")
-	return v
-
-def env_get_or_none(k):
-	if not k in os.environ:
-		return None
-	v = os.environ[k]
-	if not isinstance(v, str):
-		return None
-	if len(v) == 0:
-		return None
-	return v
-
-def env_get_dir_or_none(k):
-	v = env_get_or_none(k)
-	if not v:
-		return None
-	path = Path(v)
-	if not path.is_dir():
-		return None
-	return v
-
-def env_get_dir(k):
-	v = env_get(k)
-	path = Path(v)
-	if not path.is_dir():
-		bail(f"Environment variable not a directory: {k}:{v}")
-	return v
-
-def env_get_file(k):
-	v = env_get(k)
-	path = Path(v)
-	if not path.is_file():
-		bail(f"Environment variable not a file: {k}:{v}")
-	return v
-
-def dict_val_or(d, k, o):
-	if k not in d:
-		return o
-	return d[k]
-
-def dict_pop_or(d, k, o):
-	if k not in d:
-		return o
-	return d.pop(k)
-
 # See the comments for http2exit and exit2http in common/hcp.sh, this is simply
 # a python version of the same.
 ahttp2exit = {
