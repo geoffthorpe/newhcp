@@ -8,7 +8,7 @@ import tempfile
 import requests
 from uuid import uuid4
 
-from hcp.common import log, bail, current_tracefile, \
+from hcp.common import log, bail, \
 		http2exit, exit2http, hcp_config_extract
 
 from gson.union import union
@@ -134,7 +134,6 @@ def run_subprocess(cmd_args, base64wrap = None):
 			mylog(f"running: {all_args}")
 			c = subprocess.run(all_args,
 				stdout = subprocess.PIPE,
-				stderr = current_tracefile,
 				text = True)
 			if c.returncode != 0:
 				mylog(f"FAIL, exitcode={c.returncode}")
@@ -143,14 +142,12 @@ def run_subprocess(cmd_args, base64wrap = None):
 			mylog(f"running: {b64args}")
 			c = subprocess.run(b64args,
 				stdout = subprocess.PIPE,
-				stderr = current_tracefile,
 				text = True)
 	else:
 		all_args = args + cmd_args
 		mylog(f"running: {all_args}")
 		c = subprocess.run(all_args,
 				stdout = subprocess.PIPE,
-				stderr = current_tracefile,
 				text = True)
 	if c.returncode != 0:
 		mylog(f"FAIL, exitcode={c.returncode}")

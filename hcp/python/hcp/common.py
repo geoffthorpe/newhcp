@@ -34,57 +34,16 @@ def touch(p, *, makedirs = True):
 # - cfg_trace is an optional dict that will exist if a '.trace' field exists in
 #   the current config. When it exists, we make decisions on where and how to
 #   log.
-# - current_log_path remembers the last time we opened a tracefile and assigned
-#   it to sys.stderr. The logging code will determine what the tracefile should
-#   be (None, unless cfg_trace is set) and compare it with current_log_path -
-#   if they're different, a new tracefile needs to be opened and assigned.
 def_loglevel = 1
 current_loglevel = 0
-current_log_path = None
-current_tracefile = None
 
 if 'VERBOSE' in os.environ:
 	current_loglevel = int(os.environ['VERBOSE'])
-
-def logrotate():
-	global current_log_path
-	global current_tracefile
-	if 'HCP_NOTRACEFILE' in os.environ:
-		return
-	uid = os.geteuid()
-	whoami = pwd.getpwuid(uid).pw_name
-	now = datetime.now(timezone.utc)
-	pid = os.getpid()
-	procname = '_unknown_'
-	for proc in psutil.process_iter(['pid', 'name']):
-		if proc.info['pid'] == pid:
-			procname = proc.info['name']
-			break
-	dtdir = f"{now.year:04}-{now.month:02}-{now.day:02}-{now.hour:02}"
-	dtf = f"{now.minute:02}-{now.second:02}"
-	fdir = f"/tmp/debug-{whoami}-{dtdir}"
-	fname = f"{fdir}/{dtf}-{procname}.{pid}"
-	if current_log_path != fname:
-		try:
-			os.makedirs(fdir, mode = 0o755)
-		except FileExistsError:
-			pass
-		tracefile = open(f"{fname}", 'a')
-		if current_log_path or current_loglevel > 1:
-			print(f"[tracefile forking to {fname}]", file = sys.stderr)
-		sys.stderr.flush()
-		sys.stderr = tracefile
-		print(f"[tracefile forked from {current_log_path}]",
-			file = sys.stderr)
-		sys.stderr.flush()
-		current_log_path = fname
-		current_tracefile = tracefile
 
 def hlog(level, s):
 	global current_loglevel
 	if level > current_loglevel:
 		return
-	logrotate()
 	print(s, file = sys.stderr)
 	sys.stderr.flush()
 

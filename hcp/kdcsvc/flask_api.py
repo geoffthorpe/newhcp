@@ -13,7 +13,7 @@ import requests
 from gson.union import union
 from hcp.openssl import get_email_address
 
-from hcp.common import log, current_tracefile, http2exit, exit2http
+from hcp.common import log, http2exit, exit2http
 
 app = flask.Flask(__name__)
 app.config["DEBUG"] = False
@@ -192,7 +192,6 @@ def my_cmd_handler(url, cmd, request, isPost = True):
     mylog(f"args={op_args}")
     c = subprocess.run(op_args,
                        stdout = subprocess.PIPE,
-                       stderr = current_tracefile,
                        text = True)
     return check_status_code(c, mylog)
 

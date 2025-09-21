@@ -13,7 +13,6 @@ fi
 
 hcp_default_log_level=1
 hcp_current_log_level=0
-hcp_current_tracefile=""
 
 if [[ -n $VERBOSE ]]; then
 	hcp_current_log_level=$VERBOSE
@@ -22,24 +21,6 @@ fi
 hlog() {
 	if [[ $1 -gt $hcp_current_log_level ]]; then
 		return
-	fi
-	if [[ -z $HCP_NOTRACEFILE ]]; then
-		whoami=$(whoami)
-		pid=$BASHPID
-		procname=$(ps -p $pid -o comm=)
-		dirdate=$(date --utc +%Y-%m-%d-%H)
-		fdate=$(date --utc +%M-%S)
-		fdir="/tmp/debug-$whoami-$dirdate"
-		fname="$fdir/$fdate-$procname.$pid"
-		if [[ $fname != $hcp_current_tracefile ]]; then
-			mkdir -p $fdir
-			if [[ -n $hcp_current_tracefile || $hcp_current_log_level -gt 1 ]]; then
-				echo "[tracefile forking to $fname]" >&2
-			fi
-			exec 2>> $fname
-			echo "[tracefile forked from $hcp_current_tracefile]" >&2
-			hcp_current_tracefile=fname
-		fi
 	fi
 	echo -E "$2" >&2
 	sync

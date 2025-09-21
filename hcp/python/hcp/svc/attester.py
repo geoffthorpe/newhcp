@@ -5,7 +5,7 @@ import os
 import subprocess
 import time
 
-from hcp.common import log, bail, current_tracefile, hcp_config_extract
+from hcp.common import log, bail, hcp_config_extract
 
 _period = hcp_config_extract('.attester.period', must_exist = True)
 _tool = hcp_config_extract('.attester.tool', must_exist = True)
@@ -28,8 +28,7 @@ while True:
 	res = 0
 	try:
 		log("Running command")
-		c = subprocess.run(cmd_args, stderr = current_tracefile,
-				text = True)
+		c = subprocess.run(cmd_args, text = True)
 		res = c.returncode
 	except Exception as e:
 		log(f"Warning, exception: {e}")
