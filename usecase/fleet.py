@@ -230,12 +230,17 @@ if __name__ == '__main__':
         raise Exception("'orchestrator' is not a valid fleet host id")
     if 'vars' not in _input or 'domain' not in _input['vars']:
         raise Exception("No 'domain'")
-    _input['attestsvc']['tpm'] = 'none'
-    _input['orchestrator']['tpm'] = 'none'
+    showhosts = hosts
+    if 'attestsvc' in _input:
+        _input['attestsvc']['tpm'] = 'none'
+        showhosts += [ 'attestsvc' ]
+    if 'orchestrator' in _input:
+        _input['orchestrator']['tpm'] = 'none'
+        showhosts += [ 'orchestrator' ]
     domain = _input['vars']['domain']
 
     if args.show:
-        print(' '.join(hosts + [ 'orchestrator', 'attestsvc' ]))
+        print(' '.join(showhosts))
 
     elif args.host:
         if not os.path.isdir(args.hosts):
@@ -320,25 +325,28 @@ services:
         privileged: true
         environment:
           - DISPLAY=${DISPLAY}
-
+""")
+            if 'orchestrator' in _input:
+                fp.write("""
     orchestrator:
         extends: common_nontpm
         hostname: orchestrator.""")
-            fp.write(domain)
-            fp.write("""
+                fp.write(domain)
+                fp.write("""
         volumes:
           - ./_crud/testcreds/cred_enrollclient:/cred_enrollclient:ro
 """)
-            for host in hosts:
-                tpmmode = _input['fleet'][host]['tpm']
-                if tpmmode != 'none' and tpmmode != 'unmanaged':
-                    fp.write(f"          - tpm_{host}:/tpm_{host}\n")
-            fp.write("""        environment:
+                for host in hosts:
+                    tpmmode = _input['fleet'][host]['tpm']
+                    if tpmmode != 'none' and tpmmode != 'unmanaged':
+                        fp.write(f"          - tpm_{host}:/tpm_{host}\n")
+                fp.write("""        environment:
           - HCP_CONFIG_MUTATE=/_usecase/orchestrator.json
 
 """)
-            docker_write_service(fp, 'attestsvc', _input['attestsvc'],
-                                 with_sidecar = False, with_cotenant = False)
+            if 'attestsvc' in _input:
+                docker_write_service(fp, 'attestsvc', _input['attestsvc'],
+                                     with_sidecar = False, with_cotenant = False)
             for host in hosts:
                 tpmmode = _input['fleet'][host]['tpm']
                 docker_write_service(fp, host, _input['fleet'][host],
