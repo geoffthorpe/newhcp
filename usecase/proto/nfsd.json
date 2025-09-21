@@ -1,0 +1,6 @@
+{
+    "priority": 70,
+    "exec": "/hcp/nfsd.py",
+    "block": "/run/nfsd.started",
+    "TODO_healthcheck": [ "/hcp/nfsd.py", "--healthcheck" ]
+}

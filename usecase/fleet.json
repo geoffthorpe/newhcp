@@ -184,6 +184,27 @@
             },
             "env": [ "tpm2tools", "krb5", "sshd" ]
         },
+        "nfs": {
+            "hostname": "nfs.{domain}",
+            "tpm": "cotenant",
+            "vm": "uml",
+            "volumes": [ "./_crud:/crud:ro" ],
+            "enroll_profile": {
+                "ktgen": {
+                    "nfsd": [ "host/{hostname}" ]
+                }
+            },
+            "services": {
+                "attester": null,
+                "nfsd": {
+                    "exports": [
+                        "/home *(rw,no_subtree_check,fsid=0,insecure)"
+                    ]
+                },
+                "sshd": null
+            },
+            "env": [ "tpm2tools", "krb5", "nfsd" ]
+        },
         "bigbrother": {
             "hostname": "bigbrother.{domain}",
             "enroll_profile": {
