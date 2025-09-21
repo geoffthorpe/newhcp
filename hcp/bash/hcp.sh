@@ -129,35 +129,6 @@ function hcp_config_extract {
 	hlog 3 "hcp_config_extract: $HCP_CONFIG_FILE,$mypath"
 	echo "$result"
 }
-function hcp_config_extract_or {
-	if [[ -z $HCP_CONFIG_FILE ]]; then
-		bail "!HCP_CONFIG_FILE"
-	fi
-	# We need a string that will never occur and yet contains no odd
-	# characters that will screw up 'jq'. Thankfully this is just a
-	# temporary thing until bash->python is complete.
-	s="astringthatneveroccursever"
-	mypath=$(normalize_path "$1")
-	result=$(cat "$HCP_CONFIG_FILE" | jq -r "$mypath // \"$s\"")
-	if [[ $result == $s ]]; then
-		result=$2
-	fi
-	log "hcp_config_extract_or: $HCP_CONFIG_FILE,$mypath,$2"
-	echo "$result"
-}
-
-function hcp_config_user_init {
-	USERNAME=$1
-	if [[ ! -d /home/$USERNAME ]]; then
-		bail "No directory at /home/$USERNAME"
-	fi
-	if [[ ! -f /home/$USERNAME/hcp_config ]]; then
-		cat > /home/$USERNAME/hcp_config <<EOF
-export HCP_CONFIG_FILE="$HCP_CONFIG_FILE"
-EOF
-		chown $USERNAME /home/$USERNAME/hcp_config
-	fi
-}
 
 function add_env_path {
 	if [[ -n $1 ]]; then
@@ -188,38 +159,6 @@ function add_install_path {
 		fi
 	fi
 
-}
-
-# Utility for adding a PEM file to the set of trust roots for the system. This
-# can be called multiple times to update (if changed) the same trust roots, eg.
-# when used inside an attestation-completion callback. As such, $2 and $3
-# specify a CA-store subdirectory and filename (respectively) to use for the
-# PEM file being added. If the same $2 and $3 arguments are provided later on,
-# it is assumed to be an update to the same trust roots.
-# $1 = file containing the trust roots
-# $2 = CA-store subdirectory (can be multiple layers deep)
-# $3 = CA-store filename
-function add_trust_root {
-	if [[ ! -f $1 ]]; then
-		echo "Error, no '$1' found" >&2
-		return 1
-	fi
-	echo "Adding '$1' as a trust root"
-	if [[ -f "/usr/share/ca-certificates/$2/$3" ]]; then
-		if cmp "$1" "/usr/share/ca-certificates/$2/$3"; then
-			echo "  - already exists and hasn't changed, skipping"
-			return 0
-		fi
-		echo "  - exists but has changd, overriding"
-		cp "$1" "/usr/share/ca-certificates/$2/$3"
-		update-ca-certificates
-	else
-		echo "  - no prior trust root, installing"
-		mkdir -p "/usr/share/ca-certificates/$2"
-		cp "$1" "/usr/share/ca-certificates/$2/$3"
-		echo "$2/$3" >> /etc/ca-certificates.conf
-		update-ca-certificates
-	fi
 }
 
 # The above stuff (apart from "set -e") is all function-definition, here we

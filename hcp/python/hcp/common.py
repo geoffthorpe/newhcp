@@ -124,14 +124,6 @@ def dict_pop_or(d, k, o):
 		return o
 	return d.pop(k)
 
-# Given a datetime, produce a string of the form "YYYYMMDDhhmmss" that can
-# be used in a filename/path. This gives 1-second granularity and gives
-# useful outcomes when such strings get sorted alphabetically.
-def datetime2hint(dt):
-	s = f"{dt.year:04}{dt.month:02}{dt.day:02}"
-	s += f"{dt.hour:02}{dt.minute:02}{dt.second:02}"
-	return s
-
 # See the comments for http2exit and exit2http in common/hcp.sh, this is simply
 # a python version of the same.
 ahttp2exit = {
