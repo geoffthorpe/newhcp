@@ -91,7 +91,7 @@
             },
             "services": {
                 "webapi": {
-                    "app": "/hcp/kdcsvc/mgmt_api.py",
+                    "app": "/hcp/kdcsvc/flask_api.py",
                     "https_certificate": "/assets/https-server-{hostname}.pem",
                     "https_authentication": "clientcert"
                 },
@@ -127,7 +127,7 @@
             },
             "services": {
                 "webapi": {
-                    "app": "/hcp/kdcsvc/mgmt_api.py",
+                    "app": "/hcp/kdcsvc/flask_api.py",
                     "https_certificate": "/assets/https-server-{hostname}.pem",
                     "https_authentication": "clientcert",
                     "https_client_CA": "/ca_kdcsvc"
