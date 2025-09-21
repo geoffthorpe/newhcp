@@ -4,8 +4,8 @@ RUN cd / && tar zxf nginx-install.tar.gz && rm nginx-install.tar.gz
 
 # Do our best to ensure that any/all shells come up with the environment (and
 # functions) set for best UX.
-RUN echo "source /hcp/common/hcp.sh" > /etc/profile.d/hcp_common.sh
-RUN echo "source /hcp/common/hcp.sh" >> /root/.bashrc
+RUN echo "source /hcp/bash/hcp.sh" > /etc/profile.d/hcp_bash.sh
+RUN echo "source /hcp/bash/hcp.sh" >> /root/.bashrc
 
 # If the system/default ssh client and/or server get used, we assume HCP is
 # being used to setup identities and SSO, so give our base image better
@@ -19,7 +19,7 @@ RUN systemctl disable sshd
 #RUN systemctl disable nginx
 
 RUN echo "" > /etc/skel/newbashrc
-RUN echo "source /hcp/common/hcp.sh" >> /etc/skel/newbashrc
+RUN echo "source /hcp/bash/hcp.sh" >> /etc/skel/newbashrc
 RUN cat /etc/skel/.bashrc >> /etc/skel/newbashrc
 RUN mv /etc/skel/newbashrc /etc/skel/.bashrc
 
