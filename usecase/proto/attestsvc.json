@@ -1,6 +1,6 @@
 {
     "vars": {
-        "webapi_app": "/hcp/backend/attestsvc.py"
+        "webapi_app": "/hcp/python/hcp/backend/attestsvc.py"
     },
 
     "xtra_global": {
@@ -19,7 +19,7 @@
     },
 
     "backend": {
-        "_": "The hooks in hcp/backend/attestsvc will consume these.",
+        "_": "The hooks in hcp.backend.attestsvc will consume these.",
         "cacert": "/ca_default",
         "clientcert": "/cred_kdcclient"
     }

@@ -1,6 +1,6 @@
 {
     "vars": {
-        "webapi_app": "/hcp/backend/enrollsvc.py"
+        "webapi_app": "/hcp/python/hcp/backend/enrollsvc.py"
     },
 
     "waitdb": {
