@@ -3,8 +3,6 @@ RUN apt-get install -y --no-install-recommends \
 	nfs-kernel-server
 RUN echo "root:root" | chpasswd
 RUN echo "/dev/ubdb swap swap defaults 0 0" >> /etc/fstab
-# Let the HCP JSON choose to start the NFS kernel-server or not.
-RUN systemctl disable nfs-kernel-server
 
 #RUN echo "RESUME=none" > /etc/initramfs-tools/conf.d/resume
 #RUN update-initramfs -u -k all
