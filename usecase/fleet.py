@@ -242,7 +242,7 @@ if __name__ == '__main__':
         raise Exception("'orchestrator' is not a valid fleet host id")
     if 'vars' not in _input or 'domain' not in _input['vars']:
         raise Exception("No 'domain'")
-    showhosts = hosts
+    showhosts = hosts.copy()
     if 'attestsvc' in _input:
         _input['attestsvc']['tpm'] = 'none'
         showhosts += [ 'attestsvc' ]
