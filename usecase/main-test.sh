@@ -119,7 +119,7 @@ echo "Enrolling the remaining TPMs"
 do_run run orchestrator -e
 
 # Note, we have arbitrarily chosen 'alicia' and the two 'auth_*'
-# machines to use contenant TPMs (not sidecars)
+# machines to use contenant TPMs (no sidecars)
 echo "Starting remaining hosts"
 do_run up shell shell_tpm alicia auth_certificate auth_kerberos
 
