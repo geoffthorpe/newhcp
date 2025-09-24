@@ -10,8 +10,8 @@ if [[ -d /hosthack ]]; then
 	ln -s /hosthack/hcp
 	ln -s /hosthack/usecase
 	ln -s /hosthack/_usecase
-	tpmname=$(cd hosthack && ls | grep tpm_)
-	if [[ -d "/hosthack/$tpmname" ]]; then
+	tpmname=$(cd hosthack && ls | grep tpm_ 2>/dev/null || true)
+	if [[ -n "$tpmname" && -d "/hosthack/$tpmname" ]]; then
 		ln -s /hosthack/$tpmname
 	fi
 	if [[ -f /hosthack/ca_default ]]; then
