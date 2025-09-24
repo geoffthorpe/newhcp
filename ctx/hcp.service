@@ -1,9 +1,0 @@
-[Unit]
-Description=HCP qemu service
-After=multi-user.target
-
-[Service]
-ExecStart=/systemd-shim.sh
-
-[Install]
-WantedBy=multi-user.target

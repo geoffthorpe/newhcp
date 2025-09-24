@@ -18,7 +18,8 @@ RUN echo "auto ens3" >> /etc/network/interfaces
 RUN echo "allow-hotplug ens3" >> /etc/network/interfaces
 RUN echo "iface ens3 inet dhcp" >> /etc/network/interfaces
 
-COPY systemd-shim.sh /
-RUN chmod 755 /systemd-shim.sh
-COPY hcp.service /etc/systemd/system/
-RUN systemctl enable hcp.service
+COPY systemd-shim-startup.sh systemd-shim-launcher.sh /
+RUN chmod 755 /systemd-shim-startup.sh /systemd-shim-launcher.sh
+COPY hcp-startup.service hcp-launcher.service /etc/systemd/system/
+RUN systemctl enable hcp-startup.service
+RUN systemctl enable hcp-launcher.service

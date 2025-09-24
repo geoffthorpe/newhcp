@@ -24,8 +24,3 @@ if [[ -d /hosthack ]]; then
 		ln -s /hosthack/cred_healthhttpsclient
 	fi
 fi
-
-/hcp/python/hcp/tool/launcher.py
-
-# Once the launcher exits, that's our cue to tear down
-shutdown -h now

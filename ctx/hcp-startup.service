@@ -1,0 +1,10 @@
+[Unit]
+Description=HCP startup service
+Before=networking.service
+
+[Service]
+Type=oneshot
+ExecStart=/systemd-shim-startup.sh
+
+[Install]
+WantedBy=networking.service
