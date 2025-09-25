@@ -8,6 +8,11 @@ dd if=/dev/zero of=/swapfile bs=1M count=1024
 chmod 600 /swapfile
 mkswap /swapfile
 
+# HACK: to reduce the chance of VMs having conflicting source IP addresses,
+# randomize their choice of subnet
+randomid=$(($RANDOM % 200 + 2))
+echo "Using random subnet 10.0.$randomid.2/24"
+
 mkdir -p /_env
 
 echo "export PYTHONPATH=$PYTHONPATH" > /_env/env
@@ -18,11 +23,12 @@ echo "Set up VM 'env' file" >&2
 vde_switch --sock=/tmp/myswitch --daemon
 # TODO: we should use vde_plug instead of slirpvde, apparently. But I couldn't
 # get it to work.
-slirpvde -sock=/tmp/myswitch -dhcp -daemon \
-	-L 22:10.0.2.15:22 \
-	-L 443:10.0.2.15:443 \
-	-L 2049:10.0.2.15:2049 \
-	-L 111:10.0.2.15:111
+slirpvde -sock=/tmp/myswitch --dhcp --daemon \
+	--host 10.0.$randomid.2/24 \
+	-L 22:10.0.$randomid.15:22 \
+	-L 443:10.0.$randomid.15:443 \
+	-L 2049:10.0.$randomid.15:2049 \
+	-L 111:10.0.$randomid.15:111
 # vde_plug -d vde:///tmp/myswitch slirp:///tcpfwd=22:10.0.2.15:22/tcpfwd=443:10.0.2.15:443
 echo "Started VDE2 DHCP+DNS+NAT" >&2
 
