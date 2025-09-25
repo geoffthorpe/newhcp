@@ -19,7 +19,7 @@ if _mounts:
         for tgt in _mounts:
             src = _mounts[tgt]
             print(f"  {tgt}  <--  {src}")
-            fp.write(f"{src} {tgt} nfs defaults 0 0\n")
+            fp.write(f"{src} {tgt} nfs sec=krb5p,tcp,rw 0 0\n")
     print('Running \'systemctl daemon-reload\'')
     subprocess.run(['systemctl', 'daemon-reload'])
     print('Running \'mount -a\'')
