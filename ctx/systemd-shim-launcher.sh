@@ -4,9 +4,19 @@ set -e
 
 source /_env/env
 
-export HCP_SDNOTIFY=1
+echo "HCP: backgrounding launcher" >&2
+/hcp/python/hcp/tool/launcher.py $@ &
 
-/hcp/python/hcp/tool/launcher.py $@
+echo "HCP: waiting for readiness" >&2
+while [[ ! -f /hosthack/tmp/vm.launched ]]; do
+	sleep 1
+done
 
-# Once the launcher exits, that's our cue to tear down
+echo "HCP: ready, notifying systemd" >&2
+systemd-notify --ready
+
+echo "HCP: waiting for launcher to exit" >&2
+wait
+
+echo "HCP: launcher exited, taking down the VM" >&2
 shutdown -h now

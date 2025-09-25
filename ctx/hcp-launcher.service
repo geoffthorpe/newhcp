@@ -1,12 +1,11 @@
 [Unit]
 Description=HCP launcher service
-After=hcp-startup.service
-Before=rpc-gssd.service
+After=networking.service
+Before=auth-rpcgss-module.service
 
 [Service]
 Type=notify
 ExecStart=/systemd-shim-launcher.sh
-NotifyAccess=all
 
 [Install]
 WantedBy=multi-user.target
