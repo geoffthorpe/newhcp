@@ -33,15 +33,3 @@ with open('/etc/exports', 'w') as fp:
 
 print("Running 'exportfs -ra'")
 subprocess.run(['exportfs', '-ra'])
-
-print("Starting NFS service")
-subprocess.run([ 'systemctl', 'start', 'nfs-kernel-server' ], text = True)
-
-# We've started the daemon.
-with open('/run/nfsd.started', 'w') as _:
-	pass
-
-print("Done.")
-while True:
-	# TODO: should we do anything else? Periodic checks?
-	time.sleep(60)

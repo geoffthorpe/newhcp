@@ -1,6 +1,7 @@
 {
     "priority": 70,
     "exec": "/hcp/python/hcp/svc/nfsd.py",
-    "block": "/run/nfsd.started",
+    "block": true,
+    "will_exit": true,
     "TODO_healthcheck": [ "/hcp/python/hcp/svc/nfsd.py", "--healthcheck" ]
 }
