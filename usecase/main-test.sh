@@ -118,10 +118,10 @@ do_run exec attestsvc \
 echo "Enrolling the remaining TPMs"
 do_run run orchestrator -e
 
-echo "Starting NFS service (in a VM, could take a while)"
-do_run up nfs
-do_run exec nfs \
-	/hcp/python/hcp/tool/waitTouchfile.py /tmp/vm.launched
+#echo "Starting NFS service (in a VM, could take a while)"
+#do_run up nfs
+#do_run exec nfs \
+#	/hcp/python/hcp/tool/waitTouchfile.py /tmp/vm.launched
 
 # Note, we have arbitrarily chosen 'alicia' and the two 'auth_*'
 # machines to use contenant TPMs (no sidecars)
