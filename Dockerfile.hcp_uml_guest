@@ -15,6 +15,11 @@ RUN mkdir -p /etc/network
 RUN echo "auto eth0" >> /etc/network/interfaces
 RUN echo "iface eth0 inet dhcp" >> /etc/network/interfaces
 
+RUN perl -pi.bak -e "s/^ConditionVirtualization=.*/#Edited-out/" \
+	/usr/lib/systemd/system/auth-rpcgss-module.service
+RUN perl -pi.bak -e "s/^ExecStart=.*/ExecStart=true/" \
+	/usr/lib/systemd/system/auth-rpcgss-module.service
+
 COPY systemd-shim-startup.sh systemd-shim-launcher.sh /
 RUN chmod 755 /systemd-shim-startup.sh /systemd-shim-launcher.sh
 COPY hcp-startup.service hcp-launcher.service /etc/systemd/system/
