@@ -53,6 +53,14 @@ elif phase == 'post':
             print('sending SIGHUP to all \'kdc\' processes?!?!')
             subprocess.run(['killall', '-s', 'HUP', 'kdc'],
                            capture_output = True)
+    elif asset.startswith('keytab-'):
+        if not os.path.exists('/etc/krb5.keytab'):
+            print(f"linking /etc/krb5.keytab -> {asset}")
+            subprocess.run(['ln', '-s', f"{os.getcwd()}/{asset}", '/etc/krb5.keytab'])
+    elif asset == 'krb5.conf':
+        if not os.path.exists('/etc/krb5.conf'):
+            print(f"linking /etc/krb5.conf -> {asset}")
+            subprocess.run(['ln', '-s', f"{os.getcwd()}/{asset}", '/etc/krb5.conf'])
 
 else:
     raise Exception(f"Bad phase: {phase}")
