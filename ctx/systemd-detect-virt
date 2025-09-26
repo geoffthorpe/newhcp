@@ -1,0 +1,19 @@
+#!/bin/bash
+
+echo "FOOBAR: $@" >> /tmp/detectvirt
+
+quiet=
+while [ $# -gt 0 ]; do
+	case $1 in
+	-q | --quiet)
+		quiet=true
+		;;
+	esac
+	shift
+done
+
+if [[ -z $quiet ]]; then
+	echo "none"
+fi
+
+exit 1

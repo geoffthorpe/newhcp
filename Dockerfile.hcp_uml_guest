@@ -15,10 +15,15 @@ RUN mkdir -p /etc/network
 RUN echo "auto eth0" >> /etc/network/interfaces
 RUN echo "iface eth0 inet dhcp" >> /etc/network/interfaces
 
+# Countermeasures against systemd's detection of UML and docker,
+# as it is prone to make bad assumptions based on that. (Like,
+# you can't serve NFS from within a container...)
 RUN perl -pi.bak -e "s/^ConditionVirtualization=.*/#Edited-out/" \
 	/usr/lib/systemd/system/auth-rpcgss-module.service
 RUN perl -pi.bak -e "s/^ExecStart=.*/ExecStart=true/" \
 	/usr/lib/systemd/system/auth-rpcgss-module.service
+COPY systemd-detect-virt /usr/bin/
+RUN chmod 755 /usr/bin/systemd-detect-virt
 
 COPY systemd-shim-startup.sh systemd-shim-launcher.sh /
 RUN chmod 755 /systemd-shim-startup.sh /systemd-shim-launcher.sh
