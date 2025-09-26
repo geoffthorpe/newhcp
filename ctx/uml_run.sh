@@ -31,12 +31,13 @@ echo "Set up VM 'env' file" >&2
 vde_switch --sock=/tmp/myswitch --daemon
 # TODO: we should use vde_plug instead of slirpvde, apparently. But I couldn't
 # get it to work.
+# NB: port 23456 is what we use for NFSv4 server callbacks
 slirpvde -sock=/tmp/myswitch --dhcp --daemon \
 	--host 10.0.$randomid.2/24 \
 	-L 22:10.0.$randomid.15:22 \
 	-L 443:10.0.$randomid.15:443 \
 	-L 2049:10.0.$randomid.15:2049 \
-	-L 111:10.0.$randomid.15:111
+	-L 23456:10.0.$randomid.15:23456
 # vde_plug -d vde:///tmp/myswitch slirp:///tcpfwd=22:10.0.2.15:22/tcpfwd=443:10.0.2.15:443
 echo "Started VDE2 DHCP+DNS+NAT" >&2
 
