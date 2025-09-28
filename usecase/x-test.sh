@@ -26,7 +26,7 @@ do_run() {
 	elif [[ $_command == "run" ]]; then
 		FLAGS="$FLAGS --rm"
 	elif [[ $_command == "down" ]]; then
-		FLAGS="$FLAGS -v"
+		FLAGS="$FLAGS -v --remove-orphans"
 	elif [[ $_command == "exec" ]]; then
 		true
 	elif [[ $_command == "execT" ]]; then
@@ -39,8 +39,8 @@ do_run() {
 		exit 1
 	fi
 
-	[[ -n $Q ]] || echo "--> docker-compose $DCFLAGS $_command $FLAGS $@"
-	docker-compose $DCFLAGS $_command $FLAGS $@ > $OUT 2> $ERR && \
+	[[ -n $Q ]] || echo "--> docker compose $DCFLAGS $_command $FLAGS $@"
+	docker compose $DCFLAGS $_command $FLAGS $@ > $OUT 2> $ERR && \
 		([[ -n $Q ]] || echo "--> SUCCESS") || \
 		exit 1
 	Q=$BACKQ

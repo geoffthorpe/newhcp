@@ -23,7 +23,7 @@ The reference usecase uses two namespace principals, as can be seen in the
 following output;
 
 ```
-$ docker-compose exec attestsvc /hcp/python/hcp/api/kdc.py \
+$ docker compose exec attestsvc /hcp/python/hcp/api/kdc.py \
     --api https://kdc_secondary.hcphacking.xyz \
     --cacert /ca_default \
     --clientcert /cred_kdcclient \
@@ -69,7 +69,7 @@ The following steps are performed automatically within `attestsvc`, to get the
 keytab for `shell`. In the example below, you can see how the key versions in
 the keytabs being returned to `shell` rotate with time.
 ```
-$ docker-compose exec attestsvc bash
+$ docker compose exec attestsvc bash
 root@attestsvc:/# \
         /hcp/python/hcp/api/kdc.py \
                 --api https://kdc_secondary.hcphacking.xyz \
@@ -113,7 +113,7 @@ The namespace and synthetic principals features can enabled in the KDC's
 configuration file, under the HDB section, as seen here;
 
 ```
-$ docker-compose exec kdc_primary cat /kdc_primary/etc/kdc.conf
+$ docker compose exec kdc_primary cat /kdc_primary/etc/kdc.conf
 
    [...]
 
@@ -131,14 +131,14 @@ $ docker-compose exec kdc_primary cat /kdc_primary/etc/kdc.conf
 The following illustrates how a TGT for a synthetic principal can be obtained by using an X509v3 certificate with the desired principal encoded within it.
 
 ```
-$ docker-compose exec alicia ls -l /assets
+$ docker compose exec alicia ls -l /assets
    [...]
 -rw------- 1 alicia root 2989 Aug 19 17:46 pkinit-client-alicia.pem
    [...]
-$ docker-compose exec alicia /install-heimdal/bin/hxtool print --content \
+$ docker compose exec alicia /install-heimdal/bin/hxtool print --content \
     /assets/pkinit-client-alicia.pem | grep Kerberos
 	otherName: 1.3.6.1.5.2.2 KerberosPrincipalName alicia@HCPHACKING.XYZ
-$ docker-compose exec alicia /install-heimdal/bin/kinit -C \
+$ docker compose exec alicia /install-heimdal/bin/kinit -C \
     FILE:/assets/pkinit-client-alicia.pem alicia \
     /install-heimdal/bin/klist
 Credentials cache: FILE:/tmp/krb5cc_n6pEWh
@@ -198,12 +198,12 @@ configured, it is automatically set up to run the `ipropd-slave` server to
 provide a replication sink and pull database updates from the primary.
 
 ```
-$ docker-compose exec kdc_primary jq .kdcsvc.secondaries \
+$ docker compose exec kdc_primary jq .kdcsvc.secondaries \
         /tmp/workloads/kdc_primary.json
 [
   "kdc_secondary.hcphacking.xyz"
 ]
-$ docker-compose exec kdc_secondary jq .vars.kdcsvc_primary \
+$ docker compose exec kdc_secondary jq .vars.kdcsvc_primary \
         /tmp/workloads/kdc_secondary.json
 "kdc_primary.hcphacking.xyz"
 ```

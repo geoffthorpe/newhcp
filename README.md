@@ -12,7 +12,7 @@ The structure of this README is as follows;
 ### Host system dependencies
 
 ```
-sudo apt-get install -y docker-compose openssl heimdal-clients
+sudo apt-get install -y docker-compose-v2 openssl heimdal-clients
 ```
 
 ### Clone and build
@@ -26,7 +26,7 @@ make
 ### Run the example workflow (test)
 
 ```
-# The docker-compose stuff depends on TOP being set
+# The docker compose stuff depends on TOP being set
 export TOP=$(pwd)
 
 # Run the test, which will clean up after itself, with quiet output
@@ -41,13 +41,13 @@ V=1 NOTRAP=1 ./test.sh
 
 ```
 # Show the health status of the containers
-docker-compose ps
+docker compose ps
 
 # Show (+follow) the enrollment and attestation service containers
-docker-compose logs -f enrollsvc attestsvc
+docker compose logs -f enrollsvc attestsvc
 
 # Get a root shell on the secondary KDC
-docker-compose exec kdc_secondary bash
+docker compose exec kdc_secondary bash
 ```
 
 ### Step 1 of 2: get a Kerberos-authenticated shell
@@ -55,7 +55,7 @@ docker-compose exec kdc_secondary bash
 To get a TGT explicitly (as root, using alicia's certificate);
 
 ```
-docker-compose exec alicia /launcher bash
+docker compose exec alicia /launcher bash
 root@alicia:/# kinit -C FILE:/assets/pkinit-client-alicia.pem \
                      alicia bash
 root@alicia:/# klist
@@ -69,7 +69,7 @@ Aug 19 17:26:57 2025  Aug 19 17:31:57 2025  krbtgt/HCPHACKING.XYZ@HCPHACKING.XYZ
 To get a TGT implicitly (as alicia, 'kinit' runs automatically);
 
 ```
-docker-compose exec alicia /launcher bash
+docker compose exec alicia /launcher bash
 root@alicia:/# su -w HCP_CONFIG_MUTATE - alicia
 alicia@alicia:~$ klist
 Credentials cache: FILE:/tmp/krb5cc_yorGFK
@@ -98,7 +98,7 @@ alicia@shell:~$
 ### Teardown all running containers
 
 ```
-docker-compose down -v
+docker compose down -v --remove-orphans
 ```
 
 ---
