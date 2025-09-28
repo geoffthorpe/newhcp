@@ -8,11 +8,18 @@ dd if=/dev/zero of=/swapfile bs=1M count=1024
 chmod 600 /swapfile
 mkswap /swapfile
 
+# HACK: NFSv4 over NAT is complicated by the concept of server callbacks. The
+# client VM needs to know its container's IP address when mounting.
+hostip=$(ip addr show scope global | grep inet | \
+	sed -e "s/^.*inet //" | sed -e "s,/.*,,")
+echo "Host IP: $hostip"
+
 mkdir -p /_env
 
 echo "export PYTHONPATH=$PYTHONPATH" > /_env/env
 echo "export HCP_CONFIG_MUTATE=$VM_HCP_CONFIG_MUTATE" >> /_env/env
 echo "export HOSTNAME=$(hostname)" >> /_env/env
+echo "export HOSTIP=$hostip" >> /_env/env
 echo "Set up VM 'env' file" >&2
 
 vde_switch --sock=/tmp/myswitch --daemon
