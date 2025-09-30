@@ -16,21 +16,21 @@
         "kdc": {
             "hostname": "kdc.{domain}",
             "tpm": "none",
-            "vm": "uml",
+            "vm": "qemu",
             "volumes": [ "backdoor:/backdoor",
                          "./_crud:/crud:ro" ]
         },
         "nfs": {
             "hostname": "nfs.{domain}",
             "tpm": "none",
-            "vm": "uml",
+            "vm": "qemu",
             "volumes": [ "backdoor:/backdoor",
                          "./_crud:/crud:ro" ]
         },
         "client": {
             "hostname": "client.{domain}",
             "tpm": "none",
-            "vm": "uml",
+            "vm": "qemu",
             "volumes": [ "backdoor:/backdoor",
                          "./_crud:/crud:ro" ]
         }

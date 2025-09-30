@@ -187,7 +187,7 @@
         "nfs": {
             "hostname": "nfs.{domain}",
             "tpm": "cotenant",
-            "vm": "uml",
+            "vm": "qemu",
             "volumes": [ "./_crud:/crud:ro" ],
             "enroll_profile": {
                 "ktgen": {
@@ -259,7 +259,7 @@
         "catarina": {
             "hostname": "catarina.{domain}",
             "tpm": "cotenant",
-            "vm": "uml",
+            "vm": "qemu",
             "volumes": [ "./_crud:/crud:ro" ],
             "enroll_profile": {
                 "certgen": [ "pkinit-client", "https-client" ],
