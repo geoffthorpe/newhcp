@@ -24,14 +24,14 @@ do_run() {
 	if [[ $_command == "up" ]]; then
 		FLAGS="$FLAGS -d"
 	elif [[ $_command == "run" ]]; then
-		FLAGS="$FLAGS --rm"
+		FLAGS="$FLAGS -iT --rm"
 	elif [[ $_command == "down" ]]; then
 		FLAGS="$FLAGS -v --remove-orphans"
 	elif [[ $_command == "exec" ]]; then
 		true
 	elif [[ $_command == "execT" ]]; then
 		_command="exec"
-		FLAGS="$FLAGS -T"
+		FLAGS="$FLAGS -iT"
 		Q=yes
 		OUT=/dev/stdout
 	else

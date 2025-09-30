@@ -34,7 +34,7 @@ do_run() {
 		true
 	elif [[ $_command == "execT" ]]; then
 		_command="exec"
-		FLAGS="$FLAGS -T"
+		FLAGS="$FLAGS -iT"
 		Q=yes
 		OUT=/dev/stdout
 	else
