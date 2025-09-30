@@ -9,6 +9,7 @@ import time
 from hcp.common import hcp_config_extract
 
 _mounts = hcp_config_extract('.mounter.mounts', or_default = True)
+hostip = os.environ['HOSTIP'] if 'HOSTIP' in os.environ else None
 
 print(f"Starting mounter")
 print(f" - mounts={_mounts}")
@@ -19,7 +20,10 @@ if _mounts:
         for tgt in _mounts:
             src = _mounts[tgt]
             print(f"  {tgt}  <--  {src}")
-            fp.write(f"{src} {tgt} nfs defaults 0 0\n")
+            if hostip:
+                fp.write(f"{src} {tgt} nfs clientaddr={hostip} 0 0\n")
+            else:
+                fp.write(f"{src} {tgt} nfs defaults 0 0\n")
     print('Running \'systemctl daemon-reload\'')
     subprocess.run(['systemctl', 'daemon-reload'])
     print('Running \'mount -a\'')
