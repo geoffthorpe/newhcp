@@ -24,4 +24,4 @@ COPY systemd-shim-startup.sh systemd-shim-launcher.sh /
 RUN chmod 755 /systemd-shim-startup.sh /systemd-shim-launcher.sh
 COPY hcp-startup.service hcp-launcher.service /etc/systemd/system/
 RUN systemctl enable hcp-startup.service
-RUN systemctl enable hcp-launcher.service
+#RUN systemctl enable hcp-launcher.service
