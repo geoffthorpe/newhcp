@@ -23,6 +23,8 @@ RUN perl -pi.bak -e "s/^ConditionVirtualization=.*/#Edited-out/" \
 	/usr/lib/systemd/system/auth-rpcgss-module.service
 RUN perl -pi.bak -e "s/^ExecStart=.*/ExecStart=true/" \
 	/usr/lib/systemd/system/auth-rpcgss-module.service
+COPY systemd-detect-virt /usr/bin/
+RUN chmod 755 /usr/bin/systemd-detect-virt
 
 COPY systemd-shim-startup.sh systemd-shim-launcher.sh /
 RUN chmod 755 /systemd-shim-startup.sh /systemd-shim-launcher.sh

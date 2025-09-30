@@ -98,9 +98,11 @@ define cb_hcp_qemu_guest
 $(eval D := $(strip $1))
 $(eval _CTX := $(strip $2))
 $($D_SYNC): ./ctx/systemd-shim-startup.sh ./ctx/hcp-startup.service \
-	./ctx/systemd-shim-launcher.sh ./ctx/hcp-launcher.service
+	./ctx/systemd-shim-launcher.sh ./ctx/hcp-launcher.service \
+	./ctx/systemd-detect-virt
 	$Qrsync -a ./ctx/systemd-shim-startup.sh ./ctx/hcp-startup.service \
 		./ctx/systemd-shim-launcher.sh ./ctx/hcp-launcher.service \
+		./ctx/systemd-detect-virt \
 		$(_CTX)/
 	$Qtouch $$@
 endef
@@ -132,9 +134,11 @@ define cb_hcp_uml_guest
 $(eval D := $(strip $1))
 $(eval _CTX := $(strip $2))
 $($D_SYNC): ./ctx/systemd-shim-startup.sh ./ctx/hcp-startup.service \
-	./ctx/systemd-shim-launcher.sh ./ctx/hcp-launcher.service
+	./ctx/systemd-shim-launcher.sh ./ctx/hcp-launcher.service \
+	./ctx/systemd-detect-virt
 	$Qrsync -a ./ctx/systemd-shim-startup.sh ./ctx/hcp-startup.service \
 		./ctx/systemd-shim-launcher.sh ./ctx/hcp-launcher.service \
+		./ctx/systemd-detect-virt \
 		$(_CTX)/
 	$Qtouch $$@
 endef
