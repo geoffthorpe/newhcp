@@ -3,8 +3,6 @@ RUN apt-get install -y --no-install-recommends \
 	nfs-kernel-server
 RUN echo "root:root" | chpasswd
 RUN echo "/dev/sdb swap swap defaults 0 0" >> /etc/fstab
-# Let the HCP JSON choose to start the NFS kernel-server or not.
-RUN systemctl disable nfs-kernel-server
 
 RUN echo "RESUME=none" > /etc/initramfs-tools/conf.d/resume
 RUN update-initramfs -u -k all
@@ -18,8 +16,16 @@ RUN echo "auto ens3" >> /etc/network/interfaces
 RUN echo "allow-hotplug ens3" >> /etc/network/interfaces
 RUN echo "iface ens3 inet dhcp" >> /etc/network/interfaces
 
+# Countermeasures against systemd's detection of UML and docker,
+# as it is prone to make bad assumptions based on that. (Like,
+# you can't serve NFS from within a container...)
+RUN perl -pi.bak -e "s/^ConditionVirtualization=.*/#Edited-out/" \
+	/usr/lib/systemd/system/auth-rpcgss-module.service
+RUN perl -pi.bak -e "s/^ExecStart=.*/ExecStart=true/" \
+	/usr/lib/systemd/system/auth-rpcgss-module.service
+
 COPY systemd-shim-startup.sh systemd-shim-launcher.sh /
 RUN chmod 755 /systemd-shim-startup.sh /systemd-shim-launcher.sh
 COPY hcp-startup.service hcp-launcher.service /etc/systemd/system/
-RUN systemctl enable hcp-startup.service
-RUN systemctl enable hcp-launcher.service
+#RUN systemctl enable hcp-startup.service
+#RUN systemctl enable hcp-launcher.service
