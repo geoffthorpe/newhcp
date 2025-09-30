@@ -27,7 +27,7 @@ do_run() {
 	if [[ $_command == "up" ]]; then
 		FLAGS="$FLAGS -d"
 	elif [[ $_command == "run" ]]; then
-		FLAGS="$FLAGS --rm"
+		FLAGS="$FLAGS -iT --rm"
 	elif [[ $_command == "down" ]]; then
 		FLAGS="$FLAGS -v"
 	elif [[ $_command == "exec" ]]; then
@@ -42,8 +42,8 @@ do_run() {
 		exit 1
 	fi
 
-	[[ -n $Q ]] || echo "--> docker-compose $DCFLAGS $_command $FLAGS $@"
-	docker-compose $DCFLAGS $_command $FLAGS $@ > $OUT 2> $ERR && \
+	[[ -n $Q ]] || echo "--> docker compose $DCFLAGS $_command $FLAGS $@"
+	docker compose $DCFLAGS $_command $FLAGS $@ > $OUT 2> $ERR && \
 		([[ -n $Q ]] || echo "--> SUCCESS") || \
 		exit 1
 	Q=$BACKQ
@@ -189,7 +189,7 @@ if [[ $result != alicia.$DOMAIN ]]; then
 fi
 
 echo "Running a client-certificate authentication alicia -> auth_certificate"
-result=$(docker-compose exec alicia curl --cacert /ca_default --cert /assets/https-client-alicia.pem https://certificate.auth.$DOMAIN/get | jq .is_secure)
+result=$(docker compose exec alicia curl --cacert /ca_default --cert /assets/https-client-alicia.pem https://certificate.auth.$DOMAIN/get | jq .is_secure)
 if [[ $result != 'true' ]]; then
 	echo "Error, unexpected output: $result" >&2
 	exit 1
