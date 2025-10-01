@@ -33,6 +33,7 @@ vde_switch --sock=/tmp/myswitch --daemon
 slirpvde -sock=/tmp/myswitch --dhcp --daemon \
 	--host 10.0.$randomid.2/24 \
 	-L 22:10.0.$randomid.15:22 \
+	-L 88:10.0.$randomid.15:88 \
 	-L 443:10.0.$randomid.15:443 \
 	-L 2049:10.0.$randomid.15:2049 \
 	-L 32764:10.0.$randomid.15:32764

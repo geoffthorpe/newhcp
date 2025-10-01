@@ -1,6 +1,6 @@
-COPY heimdal-install.tar.gz nginx-install.tar.gz /
-RUN cd / && tar zxf heimdal-install.tar.gz && rm heimdal-install.tar.gz
+COPY nginx-install.tar.gz /
 RUN cd / && tar zxf nginx-install.tar.gz && rm nginx-install.tar.gz
+RUN apt install -y krb5-kdc krb5-admin-server
 
 # Do our best to ensure that any/all shells come up with the environment (and
 # functions) set for best UX.

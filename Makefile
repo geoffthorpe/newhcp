@@ -73,16 +73,15 @@ include Makefile.macros
 define cb_hcp_environment
 $(eval D := $(strip $1))
 $(eval _CTX := $(strip $2))
-$($D_SYNC): ./ctx/ssh_config ./heimdal/$(HEIMDAL_OUT) ./nginx/$(NGINX_OUT)
-	$Qrsync -a ./ctx/ssh_config ./heimdal/$(HEIMDAL_OUT) ./nginx/$(NGINX_OUT) $(_CTX)/
+$($D_SYNC): ./ctx/ssh_config ./nginx/$(NGINX_OUT)
+	$Qrsync -a ./ctx/ssh_config ./nginx/$(NGINX_OUT) $(_CTX)/
 	$Qtouch $$@
 endef
 
 define cb_hcp_builder_nginx
 $(eval D := $(strip $1))
 $(eval _CTX := $(strip $2))
-$($D_SYNC): ./heimdal/$(HEIMDAL_OUT)
-	$Qrsync -a ./heimdal/$(HEIMDAL_OUT) $(_CTX)/
+$($D_SYNC):
 	$Qtouch $$@
 endef
 
