@@ -30,7 +30,12 @@ if phase == 'pre':
         name = asset.removeprefix('pkinit-client-')
         name = name.removeprefix('https-client-')
         name = name.removesuffix('.pem')
-        if name and os.path.isdir(f"/home/{name}"):
+        if name:
+            try:
+                _ = pwd.getpwnam(name)
+            except:
+                name = None
+        if name:
             print(f"{asset}: chown to '{name}'")
             os.chown(path, getuid(name), -1)
         else:
