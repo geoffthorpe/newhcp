@@ -22,6 +22,9 @@ RUN systemctl disable sshd
 # Restrain the Kerberos services from starting up
 RUN systemctl disable krb5-kdc
 RUN systemctl disable krb5-admin-server
+# And remove the default config, so that our attester replaces it
+RUN rm /etc/krb5.conf
+RUN rm /etc/krb5kdc/kdc.conf
 
 RUN echo "" > /etc/skel/newbashrc
 RUN echo "source /hcp/bash/hcp.sh" >> /etc/skel/newbashrc

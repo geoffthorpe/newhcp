@@ -1,5 +1,7 @@
 #!/bin/bash
 
+echo "Initializing (rootfs-local) kdcsvc state"
+
 source /hcp/kdcsvc/common.sh
 
 if [[ ! -f $HCP_KDCSVC_GLOBAL_INIT ]]; then
@@ -11,8 +13,6 @@ if [[ -f "$HCP_KDCSVC_LOCAL_INIT" ]]; then
 	echo "Error, setup_local.sh being run but already initialized" >&2
 	exit 1
 fi
-
-echo "Initializing (rootfs-local) kdcsvc state"
 
 # Create any symlinks in the rootfs that are expected
 # Oh, and by the way there is a gotcha - any files in /etc/sudoers.d/ that have
