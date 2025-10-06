@@ -5,8 +5,6 @@
 # non-zero status code. It's good discipline for scripts though.
 [[ -z $PS1 ]] && set -e
 
-WHOAMI=$(whoami)
-
 if [[ -f /_env/env ]]; then
 	source /_env/env
 fi
@@ -163,25 +161,16 @@ function add_install_path {
 
 # The above stuff (apart from "set -e") is all function-definition, here we
 # actually _do_ something when you source this file.
-# TODO: this should be removed, and instead we should consume 'env' properties
-# from the configuration.
 
 for i in $(find / -maxdepth 1 -mindepth 1 -type d -name "install-*"); do
 	add_install_path "$i"
 done
+
 if [[ -z $HCP_CONFIG_FILE ]]; then
 	echo "Auto-running launcher to get HCP environment" >&2
-	exec /launcher bash
+	exec /launcher /bin/bash "$@"
 fi
-if [[ -z $KRB5CCNAME ]]; then
-	ME=$(whoami)
-	if [[ -f /assets/pkinit-client-$ME.pem ]]; then
-		echo "Auto-running kinit to get TGT for '$ME'" >&2
-		exec kinit -C FILE:/assets/pkinit-client-$ME.pem $ME bash
-	else
-		echo "No kinit/TGT available for '$ME'" >&2
-	fi
-fi
+
 envjson=$(hcp_config_extract ".env")
 if [[ $envjson != 'null' ]]; then
 	envjson_keys=$(echo "$envjson" | jq 'keys[]')
