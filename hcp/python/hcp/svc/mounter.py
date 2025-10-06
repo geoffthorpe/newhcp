@@ -20,12 +20,19 @@ if _mounts:
         for tgt in _mounts:
             src = _mounts[tgt]
             print(f"  {tgt}  <--  {src}")
+            opts = 'sec=krb5p'
             if hostip:
-                fp.write(f"{src} {tgt} nfs clientaddr={hostip} 0 0\n")
-            else:
-                fp.write(f"{src} {tgt} nfs defaults 0 0\n")
+                opts = opts + f",clientaddr={hostip}"
+            fp.write(f"{src} {tgt} nfs {opts} 0 0\n")
+
     print('Running \'systemctl daemon-reload\'')
     subprocess.run(['systemctl', 'daemon-reload'])
+
+    torestart = ['rpc-svcgssd', 'rpc-gssd', 'rpcbind']
+    print(f"Restarting {' '.join(torestart)}")
+    for s in torestart:
+        subprocess.run(['systemctl', 'restart', s])
+
     print('Running \'mount -a\'')
     subprocess.run(['mount', '-a'])
 else:

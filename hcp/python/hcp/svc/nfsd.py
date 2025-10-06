@@ -33,3 +33,8 @@ with open('/etc/exports', 'w') as fp:
 
 print("Running 'exportfs -ra'")
 subprocess.run(['exportfs', '-ra'])
+
+torestart = ['rpc-svcgssd', 'rpc-gssd', 'rpcbind']
+print(f"Restarting {' '.join(torestart)}")
+for s in torestart:
+	subprocess.run(['systemctl', 'restart', s])

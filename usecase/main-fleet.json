@@ -163,7 +163,7 @@
                 "attester": null,
                 "nfsd": {
                     "exports": [
-                        "/home *(rw,no_subtree_check,fsid=0,insecure)"
+                        "/home *(rw,sync,no_subtree_check,sec=krb5p,fsid=0,insecure)"
                     ]
                 },
                 "sshd": null
