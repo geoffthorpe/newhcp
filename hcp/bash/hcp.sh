@@ -170,6 +170,7 @@ if [[ -z $HCP_CONFIG_FILE ]]; then
 	echo "Auto-running launcher to get HCP environment" >&2
 	exec /launcher /bin/bash "$@"
 fi
+cd
 
 envjson=$(hcp_config_extract ".env")
 if [[ $envjson != 'null' ]]; then
