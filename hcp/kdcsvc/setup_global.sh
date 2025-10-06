@@ -49,7 +49,7 @@ cat $KRB5_CONFIG >> $HCP_KDCSVC_STATE/etc/kdc.conf
 # Produce sudoers
 echo "Creating $HCP_KDCSVC_STATE/etc/sudoers.env"
 cat > $HCP_KDCSVC_STATE/etc/sudoers.env << EOF
-export HCP_CONFIG_FILE=$HCP_CONFIG_FILE
+export HCP_CONFIG_MUTATE=$HCP_CONFIG_MUTATE
 export KRB5_CONFIG=$KRB5_CONFIG
 export PYTHONPATH=/hcp/python
 EOF
@@ -61,7 +61,7 @@ export HCP_NICEID=$(echo "$HCP_ID" | sed -e "s/[\._-]/x/g" | sed -e "s/[a-z]/\U&
 echo "Creating $HCP_KDCSVC_STATE/etc/sudoers"
 cat > $HCP_KDCSVC_STATE/etc/sudoers << EOF
 # sudo rules for kdcsvc-mgmt > /etc/sudoers.d/
-Cmnd_Alias $HCP_NICEID = /hcp/kdcsvc/do_kadmin.py
+Cmnd_Alias $HCP_NICEID = /hcp/kdcsvc/do_kadmin.sh
 Defaults!$HCP_NICEID !lecture
 Defaults!$HCP_NICEID !authenticate
 Defaults!$HCP_NICEID env_file=$HCP_KDCSVC_STATE/etc/sudoers.env
