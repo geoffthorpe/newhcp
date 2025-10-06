@@ -25,8 +25,7 @@
                 "pkinit_anchors": "/ca_default",
                 "domain": "{domain}",
                 "dotdomain": ".{domain}",
-                "kdchost": "kdc.{domain}",
-                "kdcport": "3088"
+                "kdchost": "kdc.{domain}"
             }
         }
     },
@@ -99,7 +98,7 @@
                     "https_client_CA": "/ca_kdcsvc"
                 },
                 "attester": null,
-                "kdcsvc_TGS": { "port": "3088" }
+                "kdcsvc_TGS": null
             },
             "env": [ "tpm2tools", "krb5" ]
         },

@@ -136,7 +136,7 @@ def my_get_assets(ekpubhash, outdir):
     rdns = false
 [realms]
     {realm} = {{
-        kdc = {kdchost}:{kdcport}
+        kdc = {kdchost}
         default_domain = {domain}
         pkinit_anchors = FILE:{pkinit_anchors}
         #pkinit_eku_checking = kpServerAuth
@@ -148,8 +148,7 @@ def my_get_assets(ekpubhash, outdir):
 '''.format(realm = realm, pkinit_anchors = krb5conf['pkinit_anchors'],
                         domain = krb5conf['domain'],
                         dotdomain = krb5conf['dotdomain'],
-                        kdchost = krb5conf['kdchost'],
-                        kdcport = krb5conf['kdcport']))
+                        kdchost = krb5conf['kdchost']))
             add_public(enrollpath, f"{tempdir}/krb5.conf",
                        f"{outdir}/krb5.conf")
             result.append([f"krb5.conf", True])

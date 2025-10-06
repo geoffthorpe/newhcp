@@ -23,7 +23,6 @@
     "kdcsvc_max_ticket_life": "1h",
     "kdcsvc_max_renewable_life": "5h",
     "kdcsvc_admin_email": "attestsvc@{domain}",
-    "NODEFAULT_kdcsvc_TGS_port": -1,
     "orchestrator_fleet": "/usecase/fleet.json",
     "policysvc_port": 9080,
     "NODEFAULT_policysvc_config": "none.policy.json",
