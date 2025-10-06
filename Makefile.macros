@@ -21,7 +21,7 @@ $(eval IMG := $(strip $1))
 $(eval F := $(strip $2))
 $(eval CB := $(strip $3))
 $(eval $(IMG)_DFILE := Dockerfile.$(IMG))
-$(foreach d,$(DEBSUPPORTED),$(eval $(call _parse_target,$(IMG),$F,$d,$(CB))))
+$(foreach d,$(DEBVERSION),$(eval $(call _parse_target,$(IMG),$F,$d,$(CB))))
 endef
 
 define _gen_target_clean_rule

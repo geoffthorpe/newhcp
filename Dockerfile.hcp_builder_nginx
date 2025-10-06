@@ -1,2 +1,8 @@
-COPY heimdal-install.tar.gz /
-RUN cd / && tar zxf heimdal-install.tar.gz && rm heimdal-install.tar.gz
+RUN apt-get install -y gcc g++ make cmake meson automake autoconf \
+	autoconf-archive libtool pkg-config expect gawk socat help2man bison \
+	flex libc-dev libssl-dev libseccomp-dev libtasn1-6-dev libjson-c-dev \
+	libcurl4-openssl-dev libqrencode-dev uuid-dev gnu-efi binutils-dev bc \
+	libjson-glib-dev libfile-slurp-perl libncurses5-dev comerr-dev libdb-dev
+RUN apt-get install -y libkrb5-dev
+RUN ln -s /usr/lib/x86_64-linux-gnu/libgssapi_krb5.so /usr/lib/libgssapi.so
+RUN ldconfig

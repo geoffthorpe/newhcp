@@ -1,5 +1,4 @@
-COPY heimdal-install.tar.gz nginx-install.tar.gz /
-RUN cd / && tar zxf heimdal-install.tar.gz && rm heimdal-install.tar.gz
+COPY nginx-install.tar.gz /
 RUN cd / && tar zxf nginx-install.tar.gz && rm nginx-install.tar.gz
 RUN echo "/install-heimdal/lib" >> /etc/ld.so.conf.d/heimdal.conf
 RUN ldconfig
