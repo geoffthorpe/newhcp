@@ -129,23 +129,24 @@ def my_get_assets(ekpubhash, outdir):
     default = STDERR
 [libdefaults]
     default_realm = {realm}
-        kdc_timesync = 1
-        ccache_type = 4
-        forwardable = true
-        proxiable = true
-        rdns = false
+    kdc_timesync = 1
+    ccache_type = 4
+    forwardable = true
+    proxiable = true
+    rdns = false
 [realms]
     {realm} = {{
         kdc = {kdchost}:{kdcport}
         default_domain = {domain}
         pkinit_anchors = FILE:{pkinit_anchors}
-        pkinit_eku_checking = kpServerAuth
-        pkinit_kdc_hostname = {kdchost}
+        #pkinit_eku_checking = kpServerAuth
+        #pkinit_kdc_hostname = {kdchost}
     }}
 [domain_realm]
     {dotdomain} = {realm}
     {domain} = {realm}
 '''.format(realm = realm, pkinit_anchors = krb5conf['pkinit_anchors'],
+                        domain = krb5conf['domain'],
                         dotdomain = krb5conf['dotdomain'],
                         kdchost = krb5conf['kdchost'],
                         kdcport = krb5conf['kdcport']))

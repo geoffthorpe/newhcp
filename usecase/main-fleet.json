@@ -23,6 +23,7 @@
             },
             "krb5conf": {
                 "pkinit_anchors": "/ca_default",
+                "domain": "{domain}",
                 "dotdomain": ".{domain}",
                 "kdchost": "kdc.{domain}",
                 "kdcport": "3088"
