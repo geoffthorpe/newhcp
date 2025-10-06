@@ -19,20 +19,19 @@
             "key-type": "rsa",
             "key-bits": 2048,
             "ktgen": {
-                "api": "https://kdc_secondary.{domain}"
+                "api": "https://kdc.{domain}"
             },
             "krb5conf": {
                 "pkinit_anchors": "/ca_default",
                 "dotdomain": ".{domain}",
-                "kdchost": "kdc_secondary.{domain}",
+                "kdchost": "kdc.{domain}",
                 "kdcport": "3088"
             }
         }
     },
     "volumes": [
         "backend",
-        "kdc_primary",
-        "kdc_secondary"
+        "kdc"
     ],
     "orchestrator": {
         "args_for": "orchestrator",
@@ -77,51 +76,17 @@
             },
             "env": [ "tpm2tools" ]
         },
-        "kdc_primary": {
-            "hostname": "kdc_primary.{domain}",
+        "kdc": {
+            "hostname": "kdc.{domain}",
             "enroll_profile": {
                 "certgen": [ "pkinit-kdc" ]
             },
-            "volumes": [ "kdc_primary:/kdc_primary" ],
-            "rootproto": {
-                "kdcsvc": {
-                    "secondaries": [ "kdc_secondary.{domain}" ],
-                    "pkinit_identity": "/assets/pkinit-kdc-{realm}.pem"
-                }
-            },
-            "services": {
-                "webapi": {
-                    "app": "/hcp/kdcsvc/flask_api.py",
-                    "https_certificate": "/assets/https-server-{hostname}.pem",
-                    "https_authentication": "clientcert"
-                },
-                "attester": null,
-                "kdcsvc_TGS": { "port": "3089" },
-                "kdcsvc_iprop_primary": null
-            },
-            "env": [ "tpm2tools", "krb5" ]
-        },
-        "kdc_secondary": {
-            "hostname": "kdc_secondary.{domain}",
-            "enroll_profile": {
-                "certgen": [ "pkinit-kdc",
-                             "pkinit-iprop" ],
-                "krb5conf": {
-                    "_": ["The point here is that kdc_secondary is the only host",
-                          "that doesn't have kdc_secondary as its KDC, so we",
-                          "override the setting in this one case."],
-                    "kdchost": "kdc_primary.{domain}:3089"
-                }
-            },
             "volumes": [
-                "kdc_secondary:/kdc_secondary",
+                "kdc:/kdc",
                 "./_crud/testcreds/ca_kdcsvc:/ca_kdcsvc:ro"
             ],
             "rootproto": {
                 "kdcsvc": {
-                    "dir": "/kdc_secondary",
-                    "mode": "secondary",
-                    "primary": "kdc_primary.{domain}",
                     "pkinit_identity": "/assets/pkinit-kdc-{realm}.pem"
                 }
             },
@@ -133,8 +98,7 @@
                     "https_client_CA": "/ca_kdcsvc"
                 },
                 "attester": null,
-                "kdcsvc_TGS": { "port": "3088" },
-                "kdcsvc_iprop_secondary": null
+                "kdcsvc_TGS": { "port": "3088" }
             },
             "env": [ "tpm2tools", "krb5" ]
         },

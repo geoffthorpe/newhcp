@@ -99,21 +99,21 @@ do_run run orchestrator \
 		--retries 10 --pause 1 \
 		https://enrollsvc.$DOMAIN/healthcheck
 
-echo "Enrolling KDC TPMs"
-do_run run orchestrator -e kdc_primary kdc_secondary
+echo "Enrolling KDC TPM"
+do_run run orchestrator -e kdc
 
-# KDCs need to be running before other hosts can attest (other hosts get
+# KDC needs to be running before other hosts can attest (other hosts get
 # keytabs during attestation...)
-echo "Starting KDCs"
-do_run up kdc_primary kdc_primary_tpm kdc_secondary kdc_secondary_tpm
+echo "Starting KDC"
+do_run up kdc kdc_tpm
 
-echo "Waiting for kdc_secondary to be available"
+echo "Waiting for kdc to be available"
 do_run exec attestsvc \
 	/hcp/python/hcp/tool/waitWeb.py \
 		--cacert /ca_default \
 		--clientcert /cred_kdcclient \
 		--retries 10 --pause 1 \
-		https://kdc_secondary.$DOMAIN/healthcheck
+		https://kdc.$DOMAIN/healthcheck
 
 echo "Enrolling the remaining TPMs"
 do_run run orchestrator -e
