@@ -29,7 +29,7 @@ do_run() {
 	elif [[ $_command == "run" ]]; then
 		FLAGS="$FLAGS -iT --rm"
 	elif [[ $_command == "down" ]]; then
-		FLAGS="$FLAGS -v"
+		FLAGS="$FLAGS -v --remove-orphans"
 	elif [[ $_command == "exec" ]]; then
 		true
 	elif [[ $_command == "execT" ]]; then
@@ -99,12 +99,12 @@ do_run run orchestrator \
 		--retries 10 --pause 1 \
 		https://enrollsvc.$DOMAIN/healthcheck
 
-echo "Enrolling KDC TPM"
+echo "Enrolling kdc TPM"
 do_run run orchestrator -e kdc
 
 # KDC needs to be running before other hosts can attest (other hosts get
 # keytabs during attestation...)
-echo "Starting KDC"
+echo "Starting kdc"
 do_run up kdc kdc_tpm
 
 echo "Waiting for kdc to be available"
@@ -127,7 +127,6 @@ do_run run orchestrator -e
 # machines to use contenant TPMs (no sidecars)
 echo "Starting remaining hosts"
 do_run up shell shell_tpm alicia auth_certificate auth_kerberos
-
 
 # By waiting for sshd launch, we implicitly wait for attestation.
 echo "Waiting for alicia to be attested"
