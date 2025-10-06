@@ -132,7 +132,7 @@ def my_get_assets(ekpubhash, outdir):
     kdc_timesync = 1
     ccache_type = 4
     forwardable = true
-    proxiable = true
+    #proxiable = true
     rdns = false
 [realms]
     {realm} = {{
