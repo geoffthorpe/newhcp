@@ -81,6 +81,7 @@ def my_get_assets(ekpubhash, outdir):
                 for hostname in hostnames:
                     do_cert(f"https-server-{hostname}.pem",
                             [ '--type=https-server', f"--hostname={hostname}",
+                              f"--subject=UID={hostname}",
                               '--ca-certificate=FILE:/ca_default_private' ])
             elif certtype == 'https-client':
                 clients = profile['https-clients'] if \
@@ -99,6 +100,7 @@ def my_get_assets(ekpubhash, outdir):
                         raise Exception("No realm for pkinit-client")
                     do_cert(f"pkinit-client-{client}.pem",
                             [ '--type=pkinit-client',
+                              f"--subject=UID={client}",
                               '--ca-certificate=FILE:/ca_default_private',
                               f"--pk-init-principal={client}@{realm}" ])
             elif certtype == 'pkinit-kdc':
@@ -106,6 +108,7 @@ def my_get_assets(ekpubhash, outdir):
                     raise Exception("No realm for pkinit-kdc")
                 do_cert(f"pkinit-kdc-{realm}.pem",
                         [ '--type=pkinit-kdc',
+                          '--subject=UID=default',
                           '--ca-certificate=FILE:/ca_default_private',
                           f"--pk-init-principal=krbtgt/{realm}@{realm}" ])
             elif certtype == 'pkinit-iprop':
@@ -126,27 +129,22 @@ def my_get_assets(ekpubhash, outdir):
     default = STDERR
 [libdefaults]
     default_realm = {realm}
-    dns_lookup_kdc = no
-    dns_lookup_realm = no
-    ignore_acceptor_hostname = yes
-    dns_canonicalize_hostname = no
-    rdns = no
-    forwardable = true
-    kuserok = SYSTEM-K5LOGIN:/etc/k5login.d
-    kuserok = USER-K5LOGIN
-    kuserok = SIMPLE
-[appdefaults]
-    pkinit_anchors = FILE:{pkinit_anchors}
-[domain_realm]
-    {dotdomain} = {realm}
+        kdc_timesync = 1
+        ccache_type = 4
+        forwardable = true
+        proxiable = true
+        rdns = false
 [realms]
     {realm} = {{
         kdc = {kdchost}:{kdcport}
-        pkinit_require_eku = true
-        pkinit_require_krbtgt_otherName = true
-        pkinit_win2k = no
-        pkinit_win2k_require_binding = yes
+        default_domain = {domain}
+        pkinit_anchors = FILE:{pkinit_anchors}
+        pkinit_eku_checking = kpServerAuth
+        pkinit_kdc_hostname = {kdchost}
     }}
+[domain_realm]
+    {dotdomain} = {realm}
+    {domain} = {realm}
 '''.format(realm = realm, pkinit_anchors = krb5conf['pkinit_anchors'],
                         dotdomain = krb5conf['dotdomain'],
                         kdchost = krb5conf['kdchost'],
