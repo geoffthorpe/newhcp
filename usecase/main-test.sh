@@ -118,11 +118,6 @@ do_run exec attestsvc \
 echo "Enrolling the remaining TPMs"
 do_run run orchestrator -e
 
-#echo "Starting NFS service (in a VM, could take a while)"
-#do_run up nfs
-#do_run exec nfs \
-#	/hcp/python/hcp/tool/waitTouchfile.py /tmp/vm.launched
-
 # Note, we have arbitrarily chosen 'alicia' and the two 'auth_*'
 # machines to use contenant TPMs (no sidecars)
 echo "Starting remaining hosts"
@@ -204,11 +199,39 @@ if [[ $result != 'true' ]]; then
 	exit 1
 fi
 
-#if [[ $QEMUSUPPORT == 'yes' ]]; then
-#	echo "Starting barton (QEMU within container)"
-#	do_run up barton
-#
-#	# TODO: did barton even come up?? Do something
-#fi
+if [[ $QEMUSUPPORT == 'yes' ]]; then
+	echo "Starting nfs (QEMU)"
+	do_run up nfs
+	echo "Waiting for nfs to be available"
+	do_run exec nfs \
+		/hcp/python/hcp/tool/waitTouchfile.py /tmp/vm.workload.running
+	echo "Starting barton (QEMU)"
+	do_run up barton
+	echo "Starting catarina (QEMU)"
+	do_run up catarina
+	echo "Waiting for barton to be available"
+	do_run exec barton \
+		/hcp/python/hcp/tool/waitTouchfile.py /tmp/vm.workload.running
+	echo "Waiting for catarina to be available"
+	do_run exec catarina \
+		/hcp/python/hcp/tool/waitTouchfile.py /tmp/vm.workload.running
+#	echo "NFS check: write home directory via barton"
+#	do_run execT alicia su -w HCP_CONFIG_MUTATE - alicia <<EOF
+#ssh barton.hcphacking.xyz <<FOO
+#echo foobar > ~/dingdong
+#FOO
+#EOF
+#	echo "NFS check: read home directory via catarina"
+#	result=$(do_run execT alicia su -w HCP_CONFIG_MUTATE - alicia <<EOF
+#ssh catarina.hcphacking.xyz <<FOO
+#cat ~/dingdong
+#FOO
+#EOF
+#)
+#	if [[ $result != 'foobar' ]]; then
+#		echo "Error, unexpected output: $result" >&2
+#		exit 1
+#	fi
+fi
 
 echo "Success"

@@ -202,7 +202,7 @@ def launch(args):
     # Hack. For qemu/uml guests, the host runners are groping for a sign that
     # the workloads within the VMs are launched. Give it to them.
     if os.path.isdir('/hosthack') and os.getuid() == 0:
-        with open('/hosthack/tmp/vm.launched', 'w') as _:
+        with open('/hosthack/tmp/vm.workload.running', 'w') as _:
             pass
 
     if foreground:
