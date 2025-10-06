@@ -186,7 +186,7 @@ if [[ $result != alicia.$DOMAIN ]]; then
 fi
 
 echo "Running a client-certificate authentication alicia -> auth_certificate"
-result=$(docker compose exec alicia curl --cacert /ca_default --cert /assets/https-client-alicia.pem https://certificate.auth.$DOMAIN/get | jq .is_secure)
+result=$(docker compose exec alicia curl --silent --cacert /ca_default --cert /assets/https-client-alicia.pem https://certificate.auth.$DOMAIN/get | jq .is_secure)
 if [[ $result != 'true' ]]; then
 	echo "Error, unexpected output: $result" >&2
 	exit 1
@@ -195,7 +195,7 @@ fi
 echo "Running a kerberos-SPNEGO authentication alicia -> auth_kerberos"
 result=$(do_run execT alicia /launcher bash <<EOF
 kinit -C FILE:/assets/pkinit-client-alicia.pem alicia \
-	curl --cacert /ca_default --negotiate -u : https://kerberos.auth.$DOMAIN/get \
+	curl --silent --cacert /ca_default --negotiate -u : https://kerberos.auth.$DOMAIN/get \
 	| jq .is_secure
 EOF
 )

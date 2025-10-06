@@ -210,14 +210,19 @@
             "volumes": [ "./_crud:/crud:ro" ],
             "enroll_profile": {
                 "certgen": [ "pkinit-client", "https-client" ],
-                "pkinit-clients": [ "alicia" ],
+                "pkinit-clients": [ "barton", "catarina" ],
                 "ktgen": {
-                    "sshd": [ "host/{hostname}" ]
+                    "sshd": [ "host/{hostname}", "nfs/{hostname}" ]
                 }
             },
             "services": {
                 "attester": null,
-                "sshd": null
+                "sshd": null,
+                "mounter": {
+                    "mounts": {
+                        "/home": "nfs.hcphacking.xyz:/"
+                    }
+                }
             },
             "env": [ "tpm2tools", "krb5", "sshd" ]
         },
@@ -228,7 +233,7 @@
             "volumes": [ "./_crud:/crud:ro" ],
             "enroll_profile": {
                 "certgen": [ "pkinit-client", "https-client" ],
-                "pkinit-clients": [ "catarina" ],
+                "pkinit-clients": [ "catarina", "barton" ],
                 "ktgen": {
                     "sshd": [ "host/{hostname}", "nfs/{hostname}" ]
                 }
