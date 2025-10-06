@@ -19,6 +19,10 @@ RUN systemctl disable sshd
 # TODO: actually we're building nginx from source for now...
 #RUN systemctl disable nginx
 
+# Restrain the Kerberos services from starting up
+RUN systemctl disable krb5-kdc
+RUN systemctl disable krb5-admin-server
+
 RUN echo "" > /etc/skel/newbashrc
 RUN echo "source /hcp/bash/hcp.sh" >> /etc/skel/newbashrc
 RUN cat /etc/skel/.bashrc >> /etc/skel/newbashrc

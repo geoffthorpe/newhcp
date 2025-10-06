@@ -15,4 +15,4 @@ RUN apt-get install -y vim net-tools \
 	python3-openssl python3-flask python3-requests-kerberos uwsgi-plugin-python3 \
 	uuid-runtime openssh-server gnutls-bin libglib2.0-0 socat \
 	libtpms0 swtpm-libs swtpm swtpm-tools tpm2-tools \
-	heimdal-clients
+	heimdal-clients krb5-user krb5-kdc krb5-admin-server krb5-pkinit
