@@ -1,7 +1,7 @@
 [Unit]
 Description=HCP launcher service
-After=networking.service
-Before=auth-rpcgss-module.service
+After=nfs-server.service
+Before=multi-user.target
 
 [Service]
 Type=notify
