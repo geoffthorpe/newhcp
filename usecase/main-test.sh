@@ -215,23 +215,21 @@ if [[ $QEMUSUPPORT == 'yes' ]]; then
 	echo "Waiting for catarina to be available"
 	do_run exec catarina \
 		/hcp/python/hcp/tool/waitTouchfile.py /tmp/vm.workload.running
-#	echo "NFS check: write home directory via barton"
-#	do_run execT alicia su -w HCP_CONFIG_MUTATE - alicia <<EOF
-#ssh barton.hcphacking.xyz <<FOO
-#echo foobar > ~/dingdong
-#FOO
-#EOF
-#	echo "NFS check: read home directory via catarina"
-#	result=$(do_run execT alicia su -w HCP_CONFIG_MUTATE - alicia <<EOF
-#ssh catarina.hcphacking.xyz <<FOO
-#cat ~/dingdong
-#FOO
-#EOF
-#)
-#	if [[ $result != 'foobar' ]]; then
-#		echo "Error, unexpected output: $result" >&2
-#		exit 1
-#	fi
+	echo "NFS check: write home directory via barton"
+	FOO=$RANDOM
+	do_run execT alicia su -w HCP_CONFIG_MUTATE - alicia <<EOF
+ssh barton.hcphacking.xyz bash -c "true;echo $FOO > ~/dingdong"
+EOF
+	echo "NFS check: read home directory via catarina"
+	result=$(do_run execT alicia su -w HCP_CONFIG_MUTATE - alicia <<EOF
+ssh catarina.hcphacking.xyz bash -c "true;cat ~/dingdong"
+EOF
+)
+	if [[ $result != $FOO ]]; then
+		echo "Error, I expected: $FOO" >&2
+		echo "       I received: $result" >&2
+		exit 1
+	fi
 fi
 
 echo "Success"
