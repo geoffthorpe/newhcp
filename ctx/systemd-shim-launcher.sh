@@ -5,10 +5,10 @@ set -e
 source /_env/env
 
 echo "HCP: backgrounding launcher" >&2
-/hcp/python/hcp/tool/launcher.py $@ &
+/hcp/python/hcp/tool/launcher.py "$@" &
 
 echo "HCP: waiting for readiness" >&2
-while [[ ! -f /hosthack/tmp/vm.launched ]]; do
+while [[ ! -f /hosthack/tmp/vm.workload.running ]]; do
 	sleep 1
 done
 
