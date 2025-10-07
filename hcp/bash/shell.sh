@@ -10,4 +10,4 @@ if [[ -z $KRB5CCNAME ]]; then
 	fi
 fi
 
-exec bash
+exec bash "$@"
