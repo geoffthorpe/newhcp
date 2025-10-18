@@ -22,19 +22,18 @@ $(TESTCREDS_CA_$(name)): $(TESTCREDS_CA_$(name)_PRIVATE)
 	$$Qopenssl x509 -in $$< -outform PEM -out $$@
 endef
 
-define add_cred_hxtool
+define add_cred_cert
 $(eval CA := $(strip $1))
 $(eval name := $(strip $2))
-$(eval flags := $(strip $3))
+$(eval subj := $(strip $3))
+$(eval args := $(strip $4))
+$(eval CApath := $(TESTCREDS_CA_$(CA)_PRIVATE))
 $(eval TESTCREDS_$(name) := $(TESTCREDS_OUT)/cred_$(name))
 $(eval TESTCREDS_DONE += $(TESTCREDS_$(name)))
 $(TESTCREDS_$(name)): | $(TESTCREDS_OUT)
 $(TESTCREDS_$(name)): $(TESTCREDS_CA_$(CA)_PRIVATE)
-	$$Qhxtool issue-certificate \
-		--ca-certificate="FILE:$(TESTCREDS_CA_$(CA)_PRIVATE)" \
-		--certificate="FILE:$$@" \
-		--generate-key=rsa --key-bits=2048 \
-		$(flags)
+	$$Qhcp/bash/mkcert.sh "$$@" "$(subj)" "$(CApath)" "$(CApath)" \
+		$(args)
 endef
 
 define add_cred_randkey
@@ -60,30 +59,24 @@ $(TESTCREDS_$(name)_PUBLIC): $(TESTCREDS_$(name)_PRIVATE)
 endef
 
 $(eval $(call add_CA,default))
-$(eval $(call add_cred_hxtool,default,attestsvc, \
-		--type=https-server \
-		--hostname="attestsvc.$(DOMAIN)" \
-		--subject="UID=attestsvc"))
+$(eval $(call add_cred_cert,default,attestsvc,\
+		/UID=attestsvc,\
+		DNS attestsvc.$(DOMAIN)))
 
 $(eval $(call add_CA,httpsclient))
-$(eval $(call add_cred_hxtool,httpsclient,healthhttpsclient, \
-		--type=https-client \
-		--subject="UID=healthhttpsclient" \
-		--email="healthhttpsclient@$(DOMAIN)"))
+$(eval $(call add_cred_cert,httpsclient,healthhttpsclient,\
+		/UID=healthhttpsclient,\
+		email healthhttpsclient@$(DOMAIN)))
 
 $(eval $(call add_CA,enrollsvc))
-$(eval $(call add_cred_hxtool,enrollsvc,enrollclient, \
-		--type=https-client \
-		--hostname="orchestrator.$(DOMAIN)" \
-		--subject="UID=orchestrator" \
-		--email="orchestrator@$(DOMAIN)"))
+$(eval $(call add_cred_cert,enrollsvc,enrollclient,\
+		/UID=orchestrator,\
+		DNS orchestrator.$(DOMAIN) email orchestrator@$(DOMAIN)))
 
 $(eval $(call add_CA,kdcsvc))
-$(eval $(call add_cred_hxtool,kdcsvc,kdcclient, \
-		--type=https-client \
-		--hostname="attestsvc.$(DOMAIN)" \
-		--subject="UID=attestsvc" \
-		--email="attestsvc@$(DOMAIN)"))
+$(eval $(call add_cred_cert,kdcsvc,kdcclient,\
+		/UID=attestsvc,\
+		DNS attestsvc.$(DOMAIN) email attestsvc@$(DOMAIN)))
 
 $(eval $(call add_cred_randkey,attestnoncer,key))
 $(eval $(call add_cred_keypair,asset))
