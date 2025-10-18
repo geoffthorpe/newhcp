@@ -44,14 +44,13 @@ def docker_write_sidecar(fp, name, data, with_tpm = True):
     fp.write(f"          - HCP_CONFIG_MUTATE=/_usecase/{name}_tpm.json\n\n")
 
 def produce_host_config(host, _input, outputdir):
-    if host != 'attestsvc' and host != 'orchestrator' and \
-                            host not in hosts:
+    if host != 'orchestrator' and host not in hosts:
         raise Exception(f"'{host}' is not a known fleet host id")
     print(f"Producing '{host}' config file")
     in_fleet = host in _input['fleet']
     if in_fleet:
         data = _input['fleet'][host]
-    else: # host == attestsvc or host == orchestrator
+    else: # host == orchestrator
         data = _input[host]
     hostname = data['hostname'] if 'hostname' in data else 'nada'
     tpm_mode = data['tpm']
@@ -236,16 +235,11 @@ if __name__ == '__main__':
     for x in hosts:
         h = _input['fleet'][x]
         h['tpm'] = h['tpm'] if 'tpm' in h else 'sidecar'
-    if 'attestsvc' in hosts:
-        raise Exception("'attestsvc' is not a valid fleet host id")
     if 'orchestrator' in hosts:
         raise Exception("'orchestrator' is not a valid fleet host id")
     if 'vars' not in _input or 'domain' not in _input['vars']:
         raise Exception("No 'domain'")
     showhosts = hosts.copy()
-    if 'attestsvc' in _input:
-        _input['attestsvc']['tpm'] = 'none'
-        showhosts += [ 'attestsvc' ]
     if 'orchestrator' in _input:
         _input['orchestrator']['tpm'] = 'none'
         showhosts += [ 'orchestrator' ]
@@ -354,9 +348,6 @@ services:
           - HCP_CONFIG_MUTATE=/_usecase/orchestrator.json
 
 """)
-            if 'attestsvc' in _input:
-                docker_write_service(fp, 'attestsvc', _input['attestsvc'],
-                                     with_sidecar = False, with_cotenant = False)
             for host in hosts:
                 tpmmode = _input['fleet'][host]['tpm']
                 docker_write_service(fp, host, _input['fleet'][host],
