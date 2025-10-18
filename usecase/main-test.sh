@@ -53,23 +53,29 @@ do_exit() {
 
 [[ -n $NOTRAP ]] || trap do_exit EXIT
 
-echo "Destroying any existing state"
+BOLD='\e[1m'
+RESET='\e[0m'
+header() {
+	echo -e "${BOLD}$1${RESET}"
+}
+
+header "Destroying any existing state"
 do_run down
 
-echo "Creating TPMs"
+header "Creating TPMs"
 do_run run orchestrator -a -c
 
-echo "Starting core attestsvc service"
+header "Starting core attestsvc service"
 do_run up attestsvc
 
-echo "Starting enrollsvc TPM"
+header "Starting enrollsvc TPM"
 do_run up enrollsvc_tpm
 
-echo "Waiting for enrollsvc TPM to advertise ek.pub"
+header "Waiting for enrollsvc TPM to advertise ek.pub"
 do_run run enrollsvc \
 	/hcp/python/hcp/tool/waitTouchfile.py "/tpmsocket_enrollsvc/tpm.files/ek.pub"
 
-echo "Self-enrolling enrollsvc TPM"
+header "Self-enrolling enrollsvc TPM"
 do_run run enrollsvc bash <<EOF
 hash=\$(openssl sha256 -r "/tpmsocket_enrollsvc/tpm.files/ek.pub")
 path="/backend/db/\${hash:0:2}/\${hash:0:4}/\${hash:0:64}"
@@ -85,10 +91,10 @@ if [[ ! -d "\$path" ]]; then
 fi
 EOF
 
-echo "Starting enrollsvc service"
+header "Starting enrollsvc service"
 do_run up enrollsvc
 
-echo "Waiting for enrollsvc availability"
+header "Waiting for enrollsvc availability"
 do_run run orchestrator \
 	/hcp/python/hcp/tool/waitWeb.py \
 		--cacert /ca_default \
@@ -96,15 +102,15 @@ do_run run orchestrator \
 		--retries 10 --pause 1 \
 		https://enrollsvc.$DOMAIN/healthcheck
 
-echo "Enrolling kdc TPMs"
+header "Enrolling kdc TPMs"
 do_run run orchestrator -e kdc_primary kdc_secondary
 
 # KDCs need to be running before other hosts can attest (other hosts get
 # keytabs during attestation...)
-echo "Starting kdcs"
+header "Starting kdcs"
 do_run up kdc_primary kdc_primary_tpm kdc_secondary kdc_secondary_tpm
 
-echo "Waiting for kdc_secondary to be available"
+header "Waiting for kdc_secondary to be available"
 do_run exec attestsvc \
 	/hcp/python/hcp/tool/waitWeb.py \
 		--cacert /ca_default \
@@ -112,19 +118,19 @@ do_run exec attestsvc \
 		--retries 10 --pause 1 \
 		https://kdc_secondary.$DOMAIN/healthcheck
 
-echo "Enrolling the remaining TPMs"
+header "Enrolling the remaining TPMs"
 do_run run orchestrator -e
 
 # Note, we have arbitrarily chosen 'alicia' and the two 'auth_*'
 # machines to use contenant TPMs (no sidecars)
-echo "Starting remaining hosts"
+header "Starting remaining hosts"
 do_run up shell shell_tpm alicia auth_certificate auth_kerberos
 
 # By waiting for sshd launch, we implicitly wait for attestation.
-echo "Waiting for alicia to be attested"
+header "Waiting for alicia to be attested"
 do_run exec alicia \
 	/hcp/python/hcp/tool/waitTouchfile.py /assets/pkinit-client-alicia.pem
-echo "Waiting for shell to be attested and sshd running"
+header "Waiting for shell to be attested and sshd running"
 do_run exec shell \
 	/hcp/python/hcp/tool/waitTouchfile.py /run/sshd/started
 
@@ -146,7 +152,7 @@ do_run exec shell \
 #         - Run 'hostname', the output will return through the ssh shell.
 # - pass the output through 'xargs' (a trick to strip whitespace)
 # - we confirm that all of the above generated "shell.$DOMAIN".
-echo "Running an SSO ssh session alicia -> shell"
+header "Running an SSO ssh session alicia -> shell"
 result=$(do_run execT alicia /launcher bash <<EOF
 kinit -C FILE:/assets/pkinit-client-alicia.pem alicia \
 	ssh -l alicia shell.$DOMAIN bash <<DONE
@@ -161,7 +167,7 @@ if [[ $result != shell.$DOMAIN ]]; then
 fi
 
 # This time, we ssh back to alicia from within the ssh session to shell
-echo "Running an SSO ssh boomerang alicia -> shell -> alicia"
+header "Running an SSO ssh boomerang alicia -> shell -> alicia"
 result=$(do_run execT alicia /launcher bash <<EOF
 kinit -C FILE:/assets/pkinit-client-alicia.pem alicia \
 	ssh -l alicia shell.$DOMAIN bash <<DONE
@@ -177,14 +183,14 @@ if [[ $result != alicia.$DOMAIN ]]; then
 	exit 1
 fi
 
-echo "Running a client-certificate authentication alicia -> auth_certificate"
+header "Running a client-certificate authentication alicia -> auth_certificate"
 result=$(docker compose exec alicia curl --silent --cacert /ca_default --cert /assets/https-client-alicia.pem https://certificate.auth.$DOMAIN/get | jq .is_secure)
 if [[ $result != 'true' ]]; then
 	echo "Error, unexpected output: $result" >&2
 	exit 1
 fi
 
-echo "Running a kerberos-SPNEGO authentication alicia -> auth_kerberos"
+header "Running a kerberos-SPNEGO authentication alicia -> auth_kerberos"
 result=$(do_run execT alicia /launcher bash <<EOF
 kinit -C FILE:/assets/pkinit-client-alicia.pem alicia \
 	curl --silent --cacert /ca_default --negotiate -u : https://kerberos.auth.$DOMAIN/get \
@@ -196,27 +202,27 @@ if [[ $result != 'true' ]]; then
 	exit 1
 fi
 
-echo "Starting nfs (QEMU/KVM virtual machine)"
+header "Starting nfs (QEMU/KVM virtual machine)"
 do_run up nfs
-echo "Waiting for nfs to be available"
+header "Waiting for nfs to be available"
 do_run exec nfs \
 	/hcp/python/hcp/tool/waitTouchfile.py /tmp/vm.workload.running
-echo "Starting barton (QEMU/KVM virtual machine)"
+header "Starting barton (QEMU/KVM virtual machine)"
 do_run up barton
-echo "Starting catarina (user-mode-linux virtual machine)"
+header "Starting catarina (user-mode-linux virtual machine)"
 do_run up catarina
-echo "Waiting for barton to be available"
+header "Waiting for barton to be available"
 do_run exec barton \
 	/hcp/python/hcp/tool/waitTouchfile.py /tmp/vm.workload.running
-echo "Writing to NFS home directory from barton, via ssh from alicia"
+header "Writing to NFS home directory from barton, via ssh from alicia"
 FOO=$RANDOM
 do_run execT alicia su -w HCP_CONFIG_MUTATE - alicia <<EOF
 ssh barton.hcphacking.xyz 'bash -c "echo $FOO > ~/dingdong"'
 EOF
-echo "Waiting for catarina to be available"
+header "Waiting for catarina to be available"
 do_run exec catarina \
 	/hcp/python/hcp/tool/waitTouchfile.py /tmp/vm.workload.running
-echo "Reading from NFS home directory from catarina, via ssh from alicia"
+header "Reading from NFS home directory from catarina, via ssh from alicia"
 result=$(do_run execT alicia su -w HCP_CONFIG_MUTATE - alicia <<EOF
 ssh catarina.hcphacking.xyz 'bash -c "cat ~/dingdong"'
 EOF
@@ -227,4 +233,4 @@ if [[ $result != $FOO ]]; then
 	exit 1
 fi
 
-echo "Success"
+header "Success"
