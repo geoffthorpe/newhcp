@@ -204,7 +204,7 @@ $(CRUD)/hcp_uml_guest.img: $(CRUD)/hcp_uml_guest.tar $(hcp_builder_uml_$(DEBVERS
 default: $(CRUD)/hcp_uml_guest.img
 $(CRUD)/linux-$(UML_KERN_VER).tar.xz:
 	$Qcd $(CRUD) && wget https://cdn.kernel.org/pub/linux/kernel/v6.x/linux-$(UML_KERN_VER).tar.xz
-$(CRUD)/linux-$(UML_KERN_VER): $(CRUD)/linux-$(UML_KERN_VER).tar.xz
+$(CRUD)/linux-$(UML_KERN_VER): | $(CRUD)/linux-$(UML_KERN_VER).tar.xz
 	$Qcd $(CRUD) && unxz -k linux-$(UML_KERN_VER).tar.xz && tar xf linux-$(UML_KERN_VER).tar
 $(CRUD)/linux: $(hcp_builder_uml_kernel_$(DEBVERSION)) | $(CRUD)/linux-$(UML_KERN_VER)
 	$Qdocker run -it --rm -v $(CRUD):/crud:rw \
