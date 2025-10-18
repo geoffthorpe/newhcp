@@ -19,6 +19,7 @@ sudo apt-get install -y docker-compose-v2 openssl heimdal-clients
 
 ```
 git clone https://github.com/geoffthorpe/newhcp
+cd newhcp
 git submodule update --init
 make
 ```
