@@ -49,7 +49,7 @@ class FleetHost:
         if name not in fleet:
             raise Exception(f"Unknown fleet host '{name}'")
         self.name = name
-        self.hostname = fleet[name]['hostname']
+        self.hostname = fleet[name]['hostname'] if 'hostname' in fleet[name] else 'nada'
         self.assume_enrolled = assume_enrolled
         self.profile = expand(union(fleetdefaults, fleet[name]),
                               env = { 'hostname': self.hostname })
