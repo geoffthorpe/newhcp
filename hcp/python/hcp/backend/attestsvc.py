@@ -62,10 +62,9 @@ def my_get_assets(ekpubhash, outdir):
         ktgen = profile['ktgen'] if 'ktgen' in profile else None
         if ktgen:
             ktgenapi = ktgen.pop('api')
-        hxcmd = ['hxtool', 'issue-certificate']
-        hxcmd.append('--lifetime=' + str(profile['lifetime'] if 'lifetime' in profile else '1d'))
-        hxcmd.append('--generate-key=' + (profile['key-type'] if 'key-type' in profile else 'rsa'))
-        hxcmd.append('--key-bits=' + str(profile['key-bits'] if 'key-bits' in profile else '2048'))
+        hxcmd = [ 'hxtool', 'issue-certificate',
+                  '--generate-key=rsa', '--key-bits=2048',
+                  f"--lifetime={str(profile['days'])}d" ]
         def do_cert(filename, arguments):
             cmd = hxcmd.copy() + arguments + \
                 [ f"--certificate=FILE:{tempdir}/{filename}" ]

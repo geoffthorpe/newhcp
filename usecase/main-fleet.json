@@ -15,9 +15,7 @@
             "certgen": [ "https-server" ],
             "pkinit-clients": [],
             "realm": "{realm}",
-            "lifetime": "2h",
-            "key-type": "rsa",
-            "key-bits": 2048,
+            "days": 1,
             "ktgen": {
                 "api": "https://kdc_secondary.{domain}"
             },
