@@ -218,11 +218,11 @@ if [[ $QEMUSUPPORT == 'yes' ]]; then
 	echo "NFS check: write home directory via barton"
 	FOO=$RANDOM
 	do_run execT alicia su -w HCP_CONFIG_MUTATE - alicia <<EOF
-ssh barton.hcphacking.xyz bash -c "true;echo $FOO > ~/dingdong"
+ssh barton.hcphacking.xyz 'bash -c "echo $FOO > ~/dingdong"'
 EOF
 	echo "NFS check: read home directory via catarina"
 	result=$(do_run execT alicia su -w HCP_CONFIG_MUTATE - alicia <<EOF
-ssh catarina.hcphacking.xyz bash -c "true;cat ~/dingdong"
+ssh catarina.hcphacking.xyz 'bash -c "cat ~/dingdong"'
 EOF
 )
 	if [[ $result != $FOO ]]; then
