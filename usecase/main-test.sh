@@ -10,9 +10,6 @@ DCFLAGS="-p $PROJECT"
 
 DOMAIN=$(jq -r .vars.domain usecase/fleet.json)
 
-QEMUSUPPORT=$(make qemusupport > /dev/null 2>&1 && echo yes || echo no)
-echo "QEMU support = $QEMUSUPPORT"
-
 echo "Running basic sanity test"
 
 [[ -n $V ]] && OUT=/dev/stdout || OUT=/dev/null
@@ -199,37 +196,35 @@ if [[ $result != 'true' ]]; then
 	exit 1
 fi
 
-if [[ $QEMUSUPPORT == 'yes' ]]; then
-	echo "Starting nfs (QEMU)"
-	do_run up nfs
-	echo "Waiting for nfs to be available"
-	do_run exec nfs \
-		/hcp/python/hcp/tool/waitTouchfile.py /tmp/vm.workload.running
-	echo "Starting barton (QEMU)"
-	do_run up barton
-	echo "Starting catarina (QEMU)"
-	do_run up catarina
-	echo "Waiting for barton to be available"
-	do_run exec barton \
-		/hcp/python/hcp/tool/waitTouchfile.py /tmp/vm.workload.running
-	echo "Waiting for catarina to be available"
-	do_run exec catarina \
-		/hcp/python/hcp/tool/waitTouchfile.py /tmp/vm.workload.running
-	echo "NFS check: write home directory via barton"
-	FOO=$RANDOM
-	do_run execT alicia su -w HCP_CONFIG_MUTATE - alicia <<EOF
+echo "Starting nfs (QEMU/KVM virtual machine)"
+do_run up nfs
+echo "Waiting for nfs to be available"
+do_run exec nfs \
+	/hcp/python/hcp/tool/waitTouchfile.py /tmp/vm.workload.running
+echo "Starting barton (QEMU/KVM virtual machine)"
+do_run up barton
+echo "Starting catarina (user-mode-linux virtual machine)"
+do_run up catarina
+echo "Waiting for barton to be available"
+do_run exec barton \
+	/hcp/python/hcp/tool/waitTouchfile.py /tmp/vm.workload.running
+echo "Writing to NFS home directory from barton, via ssh from alicia"
+FOO=$RANDOM
+do_run execT alicia su -w HCP_CONFIG_MUTATE - alicia <<EOF
 ssh barton.hcphacking.xyz 'bash -c "echo $FOO > ~/dingdong"'
 EOF
-	echo "NFS check: read home directory via catarina"
-	result=$(do_run execT alicia su -w HCP_CONFIG_MUTATE - alicia <<EOF
+echo "Waiting for catarina to be available"
+do_run exec catarina \
+	/hcp/python/hcp/tool/waitTouchfile.py /tmp/vm.workload.running
+echo "Reading from NFS home directory from catarina, via ssh from alicia"
+result=$(do_run execT alicia su -w HCP_CONFIG_MUTATE - alicia <<EOF
 ssh catarina.hcphacking.xyz 'bash -c "cat ~/dingdong"'
 EOF
 )
-	if [[ $result != $FOO ]]; then
-		echo "Error, I expected: $FOO" >&2
-		echo "       I received: $result" >&2
-		exit 1
-	fi
+if [[ $result != $FOO ]]; then
+	echo "Error, I expected: $FOO" >&2
+	echo "       I received: $result" >&2
+	exit 1
 fi
 
 echo "Success"
