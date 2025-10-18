@@ -204,6 +204,9 @@ def launch(args):
     if os.path.isdir('/hosthack') and os.getuid() == 0:
         with open('/hosthack/tmp/vm.workload.running', 'w') as _:
             pass
+    # Something similar even if we're not a VM
+    with open('/tmp/workload.running', 'w') as _:
+        pass
 
     if foreground:
         if fg:
