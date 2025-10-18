@@ -129,10 +129,10 @@ do_run up shell shell_tpm alicia auth_certificate auth_kerberos
 # By waiting for sshd launch, we implicitly wait for attestation.
 header "Waiting for alicia to be attested"
 do_run exec alicia \
-	/hcp/python/hcp/tool/waitTouchfile.py /assets/pkinit-client-alicia.pem
+	/hcp/python/hcp/tool/waitTouchfile.py /tmp/workload.running
 header "Waiting for shell to be attested and sshd running"
 do_run exec shell \
-	/hcp/python/hcp/tool/waitTouchfile.py /run/sshd/started
+	/hcp/python/hcp/tool/waitTouchfile.py /tmp/workload.running
 
 # The next little blob of script requires some explanation.
 # - we start a bash instance on 'alicia' and feed commands to it.
