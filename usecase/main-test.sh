@@ -123,8 +123,11 @@ do_run run orchestrator -e
 
 # Note, we have arbitrarily chosen 'alicia' and the two 'auth_*'
 # machines to use contenant TPMs (no sidecars)
-header "Starting remaining hosts"
+header "Starting remaining container workloads"
 do_run up shell shell_tpm alicia auth_certificate auth_kerberos
+
+header "Starting nfs (QEMU/KVM virtual machine)"
+do_run up nfs
 
 # By waiting for sshd launch, we implicitly wait for attestation.
 header "Waiting for alicia to be attested"
@@ -202,8 +205,6 @@ if [[ $result != 'true' ]]; then
 	exit 1
 fi
 
-header "Starting nfs (QEMU/KVM virtual machine)"
-do_run up nfs
 header "Waiting for nfs to be available"
 do_run exec nfs \
 	/hcp/python/hcp/tool/waitTouchfile.py /tmp/vm.workload.running
