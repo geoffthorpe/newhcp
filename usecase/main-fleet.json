@@ -68,8 +68,7 @@
             "hostname": "enrollsvc.{domain}",
             "volumes": [
                 "backend:/backend",
-                "./_crud/testcreds/ca_enrollsvc:/ca_enrollsvc:ro",
-                "./_crud/testcreds/cred_enrollsvc:/cred_enrollsvc:ro"
+                "./_crud/testcreds/ca_enrollsvc:/ca_enrollsvc:ro"
             ],
             "rootproto": { "enrollsvc": null },
             "services": {
