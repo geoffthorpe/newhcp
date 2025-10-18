@@ -34,15 +34,20 @@
         "kdc_primary",
         "kdc_secondary"
     ],
-    "orchestrator": {
-        "args_for": "orchestrator",
-        "result_from": "orchestrator",
-        "foreground": "orchestrator",
-        "services": { "orchestrator": null }
-    },
     "fleet": {
+        "orchestrator": {
+            "tpm": "none",
+            "volumes": [
+                "./_crud/testcreds/cred_enrollclient:/cred_enrollclient:ro"
+            ],
+            "args_for": "orchestrator",
+            "result_from": "orchestrator",
+            "foreground": "orchestrator",
+            "services": { "orchestrator": null }
+        },
         "attestsvc": {
             "hostname": "attestsvc.{domain}",
+            "tpm": "none",
             "volumes": [
                 "backend:/backend",
                 "./_crud/testcreds/ca_default_private:/ca_default_private:ro",

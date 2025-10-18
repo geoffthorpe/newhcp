@@ -44,15 +44,11 @@ def docker_write_sidecar(fp, name, data, with_tpm = True):
     fp.write(f"          - HCP_CONFIG_MUTATE=/_usecase/{name}_tpm.json\n\n")
 
 def produce_host_config(host, _input, outputdir):
-    if host != 'orchestrator' and host not in hosts:
+    if host not in hosts:
         raise Exception(f"'{host}' is not a known fleet host id")
     print(f"Producing '{host}' config file")
-    in_fleet = host in _input['fleet']
-    if in_fleet:
-        data = _input['fleet'][host]
-    else: # host == orchestrator
-        data = _input[host]
-    hostname = data['hostname'] if 'hostname' in data else 'nada'
+    data = _input['fleet'][host]
+    hostname = data['hostname']
     tpm_mode = data['tpm']
     if tpm_mode not in [ 'none', 'sidecar', 'cotenant', 'unmanaged' ]:
         raise Exception(f"Unrecognised tpm_mode: {tpm_mode}")
@@ -234,15 +230,15 @@ if __name__ == '__main__':
     hosts = [ x for x in _input['fleet'] ]
     for x in hosts:
         h = _input['fleet'][x]
+        h['hostname'] = h['hostname'] if 'hostname' in h else 'nada'
         h['tpm'] = h['tpm'] if 'tpm' in h else 'sidecar'
-    if 'orchestrator' in hosts:
-        raise Exception("'orchestrator' is not a valid fleet host id")
+    if 'orchestrator' in _input['fleet']:
+        h = _input['fleet']['orchestrator']
+        h['volumes'] += [ f"tpm_{y}:/tpm_{y}:rw" for y in hosts if 
+                        _input['fleet'][y]['tpm'] not in [ 'none', 'unmanaged' ] ]
     if 'vars' not in _input or 'domain' not in _input['vars']:
         raise Exception("No 'domain'")
     showhosts = hosts.copy()
-    if 'orchestrator' in _input:
-        _input['orchestrator']['tpm'] = 'none'
-        showhosts += [ 'orchestrator' ]
     domain = _input['vars']['domain']
 
     if args.show:
@@ -329,24 +325,6 @@ services:
         privileged: true
         environment:
           - DISPLAY=${DISPLAY}
-""")
-            if 'orchestrator' in _input:
-                fp.write("""
-    orchestrator:
-        extends: common_nontpm
-        hostname: orchestrator.""")
-                fp.write(domain)
-                fp.write("""
-        volumes:
-          - ./_crud/testcreds/cred_enrollclient:/cred_enrollclient:ro
-""")
-                for host in hosts:
-                    tpmmode = _input['fleet'][host]['tpm']
-                    if tpmmode != 'none' and tpmmode != 'unmanaged':
-                        fp.write(f"          - tpm_{host}:/tpm_{host}\n")
-                fp.write("""        environment:
-          - HCP_CONFIG_MUTATE=/_usecase/orchestrator.json
-
 """)
             for host in hosts:
                 tpmmode = _input['fleet'][host]['tpm']
