@@ -11,9 +11,11 @@ The structure of this README is as follows;
 
 ### Host system dependencies
 
-```
-sudo apt-get install -y docker-compose-v2 openssl heimdal-clients
-```
+We rely on a functioning `docker` installation on the host, including
+`docker-buildx` and `docker-compose` (v2 or greater). Other host tools that
+might need to be installed are `jq`, `rsync`, and `wget`. Other than that, the
+system is largely built within container images, to avoid placing further
+installation requirements on the host.
 
 ### Clone and build
 
