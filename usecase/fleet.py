@@ -265,9 +265,6 @@ volumes:
             for item in _input['volumes']:
                 fp.write(f"    {item}:\n")
             fp.write("""
-networks:
-    hcpnetwork:
-
 services:
     common:
         image: hcp_environment:trixie
@@ -291,8 +288,6 @@ services:
 
     common_nontpm:
         extends: common
-        networks:
-          - hcpnetwork
         volumes:
           - ./_crud/testcreds/ca_default:/ca_default:ro
           - ./_crud/testcreds/verifier_asset:/verifier_asset:ro
