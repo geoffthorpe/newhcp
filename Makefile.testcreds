@@ -14,9 +14,7 @@ $(eval TESTCREDS_CA_$(name) := $(TESTCREDS_OUT)/ca_$(name))
 $(eval TESTCREDS_CA_$(name)_PRIVATE := $(TESTCREDS_OUT)/ca_$(name)_private)
 $(eval TESTCREDS_DONE += $(TESTCREDS_CA_$(name)))
 $(TESTCREDS_CA_$(name)_PRIVATE): | $(TESTCREDS_OUT)
-	$Qhxtool issue-certificate --self-signed --issue-ca \
-		--generate-key=rsa --subject="CN=$(name)" \
-		--lifetime=10years --certificate="FILE:$$@"
+	$$Qhcp/bash/mkCA.sh "$$@" "$(name)"
 $(TESTCREDS_CA_$(name)): | $(TESTCREDS_OUT)
 $(TESTCREDS_CA_$(name)): $(TESTCREDS_CA_$(name)_PRIVATE)
 	$$Qopenssl x509 -in $$< -outform PEM -out $$@
