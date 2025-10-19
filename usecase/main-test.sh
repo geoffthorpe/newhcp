@@ -126,10 +126,10 @@ do_run run orchestrator -e
 header "Starting remaining container workloads"
 do_run up shell shell_tpm alicia auth_certificate auth_kerberos
 
-header "Starting nfs (user-mode-linux virtual machine)"
+header "Starting nfs (qemu/kvm virtual machine)"
 do_run up nfs
 
-# By waiting for sshd launch, we implicitly wait for attestation.
+# By waiting for workload launch, we implicitly wait for attestation.
 header "Waiting for alicia to be attested"
 do_run exec alicia \
 	/hcp/python/hcp/tool/waitTouchfile.py /tmp/workload.running
@@ -139,7 +139,6 @@ do_run exec shell \
 
 # The next little blob of script requires some explanation.
 # - we start a bash instance on 'alicia' and feed commands to it.
-#   - load environment (so 'kinit' is in the PATH, etc)
 #   - run 'kinit' using our PKINIT client cert to get a TGT. This is the
 #     "single sign-on" (SSO) event. (Or "zero sign-on" if you prefer, because
 #     the client cert is obtained non-interactively.)
@@ -208,7 +207,7 @@ fi
 header "Waiting for nfs to be available"
 do_run exec nfs \
 	/hcp/python/hcp/tool/waitTouchfile.py /tmp/vm.workload.running
-header "Starting barton (user-mode-linux virtual machine)"
+header "Starting barton (qemu/kvm virtual machine)"
 do_run up barton
 header "Starting catarina (user-mode-linux virtual machine)"
 do_run up catarina
