@@ -126,7 +126,7 @@ do_run run orchestrator -e
 header "Starting remaining container workloads"
 do_run up shell shell_tpm alicia auth_certificate auth_kerberos
 
-header "Starting nfs (QEMU/KVM virtual machine)"
+header "Starting nfs (user-mode-linux virtual machine)"
 do_run up nfs
 
 # By waiting for sshd launch, we implicitly wait for attestation.
@@ -208,7 +208,7 @@ fi
 header "Waiting for nfs to be available"
 do_run exec nfs \
 	/hcp/python/hcp/tool/waitTouchfile.py /tmp/vm.workload.running
-header "Starting barton (QEMU/KVM virtual machine)"
+header "Starting barton (user-mode-linux virtual machine)"
 do_run up barton
 header "Starting catarina (user-mode-linux virtual machine)"
 do_run up catarina

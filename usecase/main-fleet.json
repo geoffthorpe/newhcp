@@ -189,7 +189,7 @@
         "nfs": {
             "hostname": "nfs.{domain}",
             "tpm": "cotenant",
-            "vm": "qemu",
+            "vm": "uml",
             "volumes": [ "./_crud:/crud:ro" ],
             "enroll_profile": {
                 "ktgen": {
@@ -243,7 +243,7 @@
         "barton": {
             "hostname": "barton.{domain}",
             "tpm": "cotenant",
-            "vm": "qemu",
+            "vm": "uml",
             "volumes": [ "./_crud:/crud:ro" ],
             "enroll_profile": {
                 "certgen": [ "pkinit-client", "https-client" ],
