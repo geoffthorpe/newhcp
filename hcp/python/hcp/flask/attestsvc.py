@@ -101,8 +101,7 @@ def my_initiate():
     return resp
 
 # Complete consumes;
-# - ticket
-# Complete returns;
+# - encrypted ticket
 @app.route('/v1/complete', methods=['POST'])
 def my_complete():
     if 'initial' not in request.files:
@@ -112,8 +111,8 @@ def my_complete():
     initial = request.files['initial']
     quote = request.files['quote']
     # TBD: there's not a lot of error handling ...
-    # First, parse the 'initial'
     with tempfile.TemporaryDirectory() as tempdir:
+        # First, parse the 'initial'
         initial.save(f"{tempdir}/initial")
         with open(f"{tempdir}/initial", 'r') as fp:
             initialjson = fp.read()
