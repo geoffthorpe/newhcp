@@ -205,7 +205,10 @@ def launch(args):
         with open('/hosthack/tmp/vm.workload.running', 'w') as _:
             pass
     # Something similar even if we're not a VM
-    with open('/tmp/workload.running', 'w') as _:
+    try:
+        with open('/tmp/workload.running', 'w') as _:
+            pass
+    except:
         pass
 
     if foreground:
