@@ -293,33 +293,23 @@ services:
           - ./_crud/testcreds/verifier_asset:/verifier_asset:ro
           - ./_crud/testcreds/cred_healthhttpsclient:/cred_healthhttpsclient:ro
 
-    common_qemu:
+    common_vm:
         extends: common_nontpm
-        image: hcp_qemu_host:trixie
         volumes:
           - /tmp/.X11-unix:/tmp/.X11-unix:rw
-          - ./_crud/testcreds/ca_default:/ca_default:ro
-          - ./_crud/testcreds/verifier_asset:/verifier_asset:ro
-          - ./_crud/testcreds/cred_healthhttpsclient:/cred_healthhttpsclient:ro
           - /dev:/dev
           - /sys:/sys
         privileged: true
         environment:
           - DISPLAY=${DISPLAY}
 
+    common_qemu:
+        extends: common_vm
+        image: hcp_qemu_host:trixie
+
     common_uml:
-        extends: common_nontpm
+        extends: common_vm
         image: hcp_uml_host:trixie
-        volumes:
-          - /tmp/.X11-unix:/tmp/.X11-unix:rw
-          - ./_crud/testcreds/ca_default:/ca_default:ro
-          - ./_crud/testcreds/verifier_asset:/verifier_asset:ro
-          - ./_crud/testcreds/cred_healthhttpsclient:/cred_healthhttpsclient:ro
-          - /dev:/dev
-          - /sys:/sys
-        privileged: true
-        environment:
-          - DISPLAY=${DISPLAY}
 """)
             for host in hosts:
                 tpmmode = _input['fleet'][host]['tpm']
