@@ -25,8 +25,9 @@ import hcp.common
 # or when waiting for a signalled task to exit.
 DELAY_FAST = 0.2
 
-# The number of seconds to pause when waiting to see if a service has dropped.
-DELAY_SLOW = 10
+# The number of seconds to pause when waiting to see if a service has dropped
+# (and/or waiting to see if a healthcheck is pending).
+DELAY_SLOW = 4
 
 class Service:
     def __init__(self, stanza):
@@ -60,10 +61,44 @@ class Service:
                 time.sleep(DELAY_FAST)
     def exited(self):
         return self.popen.poll() != None
+    def healthcheck(self, parent_env):
+        res = {}
+        res['alive'] = not self.exited()
+        res['healthy'] = False
+        if 'healthcheck' in self.stanza:
+            env = parent_env.copy()
+            if 'env' in self.stanza:
+                myenv = self.stanza['env']
+                for k in myenv:
+                    env[k] = myenv[k]
+            env['HCP_CONFIG_FILE'] = os.environ['HCP_CONFIG_FILE']
+            cmd = self.stanza['healthcheck']
+            if isinstance(cmd, str):
+                cmd = [ cmd ]
+            cwd = self.stanza['cwd'] if 'cwd' in self.stanza else None
+            tmppopen = subprocess.Popen(cmd, env = env, cwd = cwd,
+                                        stdout = subprocess.PIPE,
+                                        stderr = subprocess.PIPE)
+            try:
+                # TODO: 1 second?! Really?! Why?
+                retcode = tmppopen.wait(timeout = 1)
+                if retcode == 0:
+                    res['status'] = 'successful healthcheck'
+                    res['healthy'] = True
+                else:
+                    res['status'] = f"healthcheck retcode: {retcode}"
+            except subprocess.TimeoutExpired:
+                tmppopen.terminate()
+                res['status'] = 'healthcheck timed out'
+            #if not res['healthy']:
+            res['cmd'] = cmd
+            res['stdout'] = tmppopen.stdout.read().decode('utf-8')
+            res['stderr'] = tmppopen.stderr.read().decode('utf-8')
+        return res
     def will_exit(self):
         return self._will_exit
-    def wait(self):
-        self.popen.wait()
+    def wait(self, timeout = None):
+        self.popen.wait(timeout = timeout)
     def teardown(self):
         if self.popen.poll() == None:
             self.popen.terminate()
@@ -211,12 +246,45 @@ def launch(args):
     except:
         pass
 
-    if foreground:
-        if fg:
-            fg.wait()
-    else:
-        while not nexus.is_exiting():
-            time.sleep(DELAY_SLOW)
+    complete = False
+    while not complete:
+        if foreground:
+            if fg:
+                try:
+                    fg.wait(timeout = DELAY_SLOW)
+                    complete = True
+                except TimeoutExpired:
+                    pass
+            else:
+                complete = True
+        else:
+            complete = nexus.is_exiting()
+            if not complete:
+                time.sleep(DELAY_SLOW)
+            complete = nexus.is_exiting()
+        if not complete:
+            # Use this opportunity to run healthchecks?
+            healthcheck = True
+            resultpath = None
+            if os.path.exists('/hosthack/tmp/do_healthcheck'):
+                os.remove('/hosthack/tmp/do_healthcheck')
+                resultpath = '/hosthack/tmp/healthcheck'
+            elif os.path.exists('/tmp/do_healthcheck'):
+                os.remove('/tmp/do_healthcheck')
+                resultpath = '/tmp/healthcheck'
+            else:
+                healthcheck = False
+            if healthcheck:
+                hcjson = {}
+                for service in services:
+                    # A service that has already exited and is expected to exit
+                    # should not be part of future healthchecks.
+                    if service.exited() and service.will_exit():
+                        continue
+                    hcjson[service.name()] = service.healthcheck(nexus.env)
+                with open(f"{resultpath}.tmp", 'w') as fp:
+                    json.dump(hcjson, fp)
+                os.rename(f"{resultpath}.tmp", resultpath)
 
     nexus.teardown()
     return nexus.returncode()
