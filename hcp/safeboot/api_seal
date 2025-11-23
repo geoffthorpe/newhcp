@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/bash
 
 PROG=${0##*/}
 BINDIR=$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")

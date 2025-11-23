@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/bash
 # Full disclosure, this script is modified from the ultra-useful
 # example I found at; https://github.com/iximiuz/docker-to-linux
 
