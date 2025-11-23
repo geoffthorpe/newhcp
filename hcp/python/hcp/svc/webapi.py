@@ -70,6 +70,7 @@ if myhttps:
     myservercert = https_param('certificate', str)
     myauthentication = https_param('authentication', str)
     myCA = https_param('client_CA', str)
+    myhealthCA = https_param('healthCA', str, required = False)
     mykerberos = False
     if myauthentication == 'clientcert':
         myhealthclient = https_param('healthclient', str)
@@ -90,8 +91,10 @@ mycurlargs = '-f -g --connect-timeout 2'
 mykinit = []
 if myhttps:
     myURL = f"https://{myURL}"
+    if myhealthCA:
+        mycurlargs = f"{mycurlargs} --cacert {myhealthCA}"
     if myauthentication == 'clientcert':
-        mycurlargs = f"{mycurlargs} --cacert {myCA} --cert {myhealthclient}"
+        mycurlargs = f"{mycurlargs} --cert {myhealthclient}"
     elif myauthentication == 'kerberos':
         mycurlargs = f"{mycurlargs} --negotiate -u :"
         mykinit += [
