@@ -176,6 +176,10 @@ def my_complete():
                             '--public', f"{tempdir}/ak.pub"],
                            capture_output = True)
         if c.returncode != 0:
+            # DEBUG: uncomment the following to cause the first passage through
+            # this code to create a tarball for examination
+            #if not os.path.isfile('/tmp/out.checkquote.tar.gz'):
+            #    subprocess.run(['tar', 'zcf', '/tmp/out.checkquote.tar.gz', tempdir])
             sys.stderr.write(f"WARNING: failed attestation from {initial['ekpubhash']}\n")
             return make_response("Error: unable to verify quote", 400)
 
