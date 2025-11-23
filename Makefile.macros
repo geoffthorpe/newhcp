@@ -28,6 +28,8 @@ define _gen_target_clean_rule
 $(eval T := $(strip $1))
 clean_$T:
 	$Q$(DRMV) $($T_DNAME)
+	$Qrm -f $($T_DFILE) $($T)
+	$Qrm -rf $($T_CTX)
 clean: clean_$T
 endef
 define _gen_target_rule_sync
