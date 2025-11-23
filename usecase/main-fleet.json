@@ -86,7 +86,11 @@
             "enroll_profile": {
                 "certgen": [ "pkinit-kdc" ]
             },
-            "volumes": [ "kdc_primary:/kdc_primary" ],
+            "volumes": [
+                "kdc_primary:/kdc_primary",
+                "./_crud/testcreds/ca_kdcsvc:/ca_kdcsvc:ro",
+                "./_crud/testcreds/cred_kdcclient:/cred_kdcclient:ro"
+            ],
             "rootproto": {
                 "kdcsvc": {
                     "secondaries": [ "kdc_secondary.{domain}" ],
@@ -97,7 +101,9 @@
                 "webapi": {
                     "app": "/hcp/kdcsvc/flask_api.py",
                     "https_certificate": "/assets/https-server-{hostname}.pem",
-                    "https_authentication": "clientcert"
+                    "https_authentication": "clientcert",
+                    "https_client_CA": "/ca_kdcsvc",
+                    "https_healthclient": "/cred_kdcclient"
                 },
                 "attester": null,
                 "kdcsvc_TGS": null,
@@ -119,7 +125,8 @@
             },
             "volumes": [
                 "kdc_secondary:/kdc_secondary",
-                "./_crud/testcreds/ca_kdcsvc:/ca_kdcsvc:ro"
+                "./_crud/testcreds/ca_kdcsvc:/ca_kdcsvc:ro",
+                "./_crud/testcreds/cred_kdcclient:/cred_kdcclient:ro"
             ],
             "rootproto": {
                 "kdcsvc": {
@@ -134,7 +141,8 @@
                     "app": "/hcp/kdcsvc/flask_api.py",
                     "https_certificate": "/assets/https-server-{hostname}.pem",
                     "https_authentication": "clientcert",
-                    "https_client_CA": "/ca_kdcsvc"
+                    "https_client_CA": "/ca_kdcsvc",
+                    "https_healthclient": "/cred_kdcclient"
                 },
                 "attester": null,
                 "kdcsvc_TGS": null,
@@ -145,7 +153,10 @@
         "auth_certificate": {
             "hostname": "certificate.auth.{domain}",
             "tpm": "cotenant",
-            "volumes": [ "./_crud/testcreds/ca_httpsclient:/ca_httpsclient:ro" ],
+            "volumes": [
+                "./_crud/testcreds/ca_httpsclient:/ca_httpsclient:ro",
+                "./_crud/testcreds/cred_healthhttpsclient:/cred_healthhttpsclient:ro"
+            ],
             "services": {
                 "webapi": {
                     "app": "/hcp/python/hcp/flask/dummy.py",
@@ -161,6 +172,8 @@
             "hostname": "kerberos.auth.{domain}",
             "tpm": "cotenant",
             "enroll_profile": {
+                "certgen": [ "pkinit-client" ],
+                "pkinit-clients": [ "healthcheck" ],
                 "ktgen": {
                     "http": [ "HTTP/{hostname}" ]
                 }

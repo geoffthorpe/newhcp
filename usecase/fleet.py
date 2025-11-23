@@ -291,7 +291,6 @@ services:
         volumes:
           - ./_crud/testcreds/ca_default:/ca_default:ro
           - ./_crud/testcreds/verifier_asset:/verifier_asset:ro
-          - ./_crud/testcreds/cred_healthhttpsclient:/cred_healthhttpsclient:ro
 
     common_vm:
         extends: common_nontpm
