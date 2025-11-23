@@ -205,17 +205,14 @@ def enroll_janitor(api, requests_verify = True, requests_cert = False,
 
 if __name__ == '__main__':
 
-    ww_desc = 'API client for Enrollment Service management interface'
+    ww_desc = 'Tool for polling on the availability of a URL'
     ww_epilog = """
-    If the URL for the Enrollment Service's management API is not supplied on the
-    command line (via '--api'), it will fallback to using the 'ENROLLSVC_API_URL'
-    environment variable. If the API is using HTTPS and the server certificate is
-    not signed by a CA that is already trusted by the system, '--cacert' should
-    be used to specify a CA certificate (or bundle) that should be considered
-    trusted. (Otherwise, specify '--noverify' to inhibit certificate validation.)
-    To use a client certificate to authenticate to the server, specify
-    '--clientcert'. If that file doesn't include the private key, specify it with
-    '--clientkey'.
+    If the API is using HTTPS and the server certificate is not signed by a CA
+    that is already trusted by the system, '--cacert' should be used to specify
+    a CA certificate (or bundle) that should be considered trusted. (Otherwise,
+    specify '--noverify' to inhibit certificate validation.) To use a client
+    certificate to authenticate to the server, specify '--clientcert'. If that
+    file doesn't include the private key, specify it with '--clientkey'.
 
     To see subcommand-specific help, pass '-h' to the subcommand.
     """
