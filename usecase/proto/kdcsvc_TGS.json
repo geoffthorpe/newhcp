@@ -7,5 +7,6 @@
         "--config-file={kdcsvc_dir}/etc/kdc.conf",
         "--ports=88"
     ],
-    "__TODO_healthcheck": null
+    "__TODO_fix_healthcheck": null,
+    "healthcheck": "/usr/bin/true"
 }

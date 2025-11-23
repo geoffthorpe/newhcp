@@ -8,5 +8,6 @@
         "--hostname={id}.{domain}",
         "--verbose"
     ],
-    "__TODO_healthcheck": null
+    "__TODO_fix_healthcheck": null,
+    "healthcheck": "/usr/bin/true"
 }
