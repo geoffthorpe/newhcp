@@ -33,8 +33,9 @@ RUN echo "alicia:foo" | chpasswd
 RUN echo "barton:foo" | chpasswd
 RUN echo "catarina:foo" | chpasswd
 
-# Save some typing by putting a symlink in the root dir
+# Save some typing by putting symlinks in the root dir
 RUN ln -s /hcp/python/hcp/tool/launcher.py /launcher
+RUN ln -s /hcp/python/hcp/tool/vm_cmd.py /vm
 
 # Set the launcher as our entrypoint
 ENTRYPOINT ["/hcp/python/hcp/tool/launcher.py"]

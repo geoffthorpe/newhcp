@@ -285,6 +285,35 @@ def launch(args):
                 with open(f"{resultpath}.tmp", 'w') as fp:
                     json.dump(hcjson, fp)
                 os.rename(f"{resultpath}.tmp", resultpath)
+            try:
+                # Use this opportunity to run an arbitrary command of the owner's
+                # choosing? :-)
+                cmd = None
+                resultpath = None
+                if os.path.exists('/hosthack/tmp/do_cmd'):
+                    with open('/hosthack/tmp/do_cmd', 'r') as fp:
+                        cmd = json.load(fp)
+                    os.remove('/hosthack/tmp/do_cmd')
+                    resultpath = '/hosthack/tmp/cmd'
+                if cmd:
+                    args = cmd['cmd'] if 'cmd' in cmd else [ '/usr/bin/false' ]
+                    instring = cmd['input'] if 'input' in cmd else ""
+                    r = subprocess.run(args, env = nexus.env, cwd = '/', text = True,
+                                       input = instring,
+                                       stdout = subprocess.PIPE,
+                                       stderr = subprocess.PIPE)
+                    cmd = {
+                        "cmd": args,
+                        "returncode": r.returncode,
+                        "input": instring,
+                        "stdout": r.stdout,
+                        "stderr": r.stderr
+                    }
+                    with open('/hosthack/tmp/cmd', 'w') as fp:
+                        json.dump(cmd, fp)
+            except Exception as e:
+                with open('/hosthack/tmp/failure', 'w') as fp:
+                    print(f"{e}", file = fp)
 
     nexus.teardown()
     return nexus.returncode()
