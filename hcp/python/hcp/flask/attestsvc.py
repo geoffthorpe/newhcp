@@ -1,4 +1,6 @@
+#!/usr/bin/python3
 # vim: set expandtab shiftwidth=4 softtabstop=4:
+
 import flask
 from flask import request, abort, send_file, Response, make_response
 import subprocess
@@ -173,6 +175,7 @@ def my_complete():
                             '--message', f"{tempdir}/quote.out",
                             '--signature', f"{tempdir}/quote.sig",
                             '--pcr', f"{tempdir}/quote.pcr",
+                            #'--eventlog', f"{tempdir}/quote.eventlog",
                             '--public', f"{tempdir}/ak.pub"],
                            capture_output = True)
         if c.returncode != 0:
