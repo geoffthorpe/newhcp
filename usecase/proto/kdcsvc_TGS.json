@@ -8,5 +8,11 @@
         "--ports=88"
     ],
     "__TODO_fix_healthcheck": null,
-    "healthcheck": "/usr/bin/true"
+    "healthcheck": [
+        "kinit",
+	"--kdc-hostname={hostname}",
+        "-C", "FILE:/assets/pkinit-client-healthcheck.pem",
+        "healthcheck",
+        "klist"
+    ]
 }

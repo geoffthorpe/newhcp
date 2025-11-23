@@ -84,7 +84,8 @@
         "kdc_primary": {
             "hostname": "kdc_primary.{domain}",
             "enroll_profile": {
-                "certgen": [ "pkinit-kdc" ]
+                "certgen": [ "pkinit-kdc", "pkinit-client" ],
+                "pkinit-clients": [ "healthcheck" ]
             },
             "volumes": [
                 "kdc_primary:/kdc_primary",
@@ -114,8 +115,12 @@
         "kdc_secondary": {
             "hostname": "kdc_secondary.{domain}",
             "enroll_profile": {
-                "certgen": [ "pkinit-kdc",
-                             "pkinit-iprop" ],
+                "certgen": [
+                    "pkinit-kdc",
+                    "pkinit-iprop",
+                    "pkinit-client"
+                ],
+                "pkinit-clients": [ "healthcheck" ],
                 "krb5conf": {
                     "_": ["The point here is that kdc_secondary is the only host",
                           "that doesn't have kdc_secondary as its KDC, so we",
