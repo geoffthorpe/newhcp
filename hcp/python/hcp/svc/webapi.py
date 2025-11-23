@@ -100,8 +100,8 @@ if myhttps:
         mykinit += [
             'kinit',
             '-C',
-            'FILE:/assets/healthclient.pem',
-            f"healthclient.{myservername}" ]
+            'FILE:/assets/pkinit-client-healthcheck.pem',
+            f"healthcheck" ]
 else:
     myURL = f"http://{myURL}"
 if not args.curl_args:
