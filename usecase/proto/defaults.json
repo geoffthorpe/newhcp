@@ -41,6 +41,7 @@
     "webapi_https_authentication": "none",
     "webapi_https_client_CA": "/ca_default",
     "webapi_https_healthclient": "/cred_healthhttpsclient",
+    "webapi_https_healthCA": "/ca_default",
     "webapi_touchfile": "{webapi_https_certificate}",
     "webapi_uwsgi_env": {},
     "webapi_uwsgi_uid": "www-data",

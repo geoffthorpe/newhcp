@@ -1,14 +1,15 @@
 {
     "priority": 60,
     "exec": [ "/hcp/python/hcp/svc/webapi.py", "-C", "{webapi_name}" ],
-    "healthcheck": [ "/hcp/python/hcp/svc/webapi.py", "--healthcheck", "-C", "{webapi_name}" ],
+    "healthcheck": [ "/hcp/python/hcp/svc/webapi.py", "--healthcheck", "-v", "-v", "-C", "{webapi_name}" ],
     "servername": "{webapi_fqdn}",
     "port": "{webapi_port}",
     "https": {
         "certificate": "{webapi_https_certificate}",
         "authentication": "{webapi_https_authentication}",
         "client_CA": "{webapi_https_client_CA}",
-        "healthclient": "{webapi_https_healthclient}"
+        "healthclient": "{webapi_https_healthclient}",
+	"healthCA": "{webapi_https_healthCA}"
     },
     "app": "{webapi_app}",
     "uwsgi_env": "{webapi_uwsgi_env}",

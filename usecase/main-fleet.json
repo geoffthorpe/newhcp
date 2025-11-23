@@ -66,14 +66,16 @@
             "hostname": "enrollsvc.{domain}",
             "volumes": [
                 "backend:/backend",
-                "./_crud/testcreds/ca_enrollsvc:/ca_enrollsvc:ro"
+                "./_crud/testcreds/ca_enrollsvc:/ca_enrollsvc:ro",
+                "./_crud/testcreds/cred_enrollclient:/cred_enrollclient:ro"
             ],
             "rootproto": { "enrollsvc": null },
             "services": {
                 "webapi": {
                     "https_authentication": "clientcert",
                     "https_certificate": "/assets/https-server-{hostname}.pem",
-                    "https_client_CA": "/ca_enrollsvc"
+                    "https_client_CA": "/ca_enrollsvc",
+                    "https_healthclient": "/cred_enrollclient"
                 },
                 "attester": null
             },

@@ -1,7 +1,7 @@
 {
     "priority": 50,
     "exec": "/hcp/python/hcp/svc/swtpm.py",
-    "healthcheck": [ "/hcp/python/hcp/svc/swtpm.py", "--healthcheck" ],
+    "healthcheck": [ "/hcp/python/hcp/svc/swtpm.py", "-v", "-v", "--healthcheck" ],
     "state": "/tpm_{machine}",
     "sockdir": "/tpmsocket_{machine}",
     "toplevel": {

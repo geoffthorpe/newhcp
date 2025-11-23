@@ -1,8 +1,9 @@
 {
     "priority": 10,
     "exec": "/hcp/python/hcp/svc/attester.py",
+    "__TODO_fix_healthcheck": "erk",
+    "healthcheck": "/usr/bin/true",
     "block": "{attester_assetdir}/touch",
-    "__TODO_healthcheck": null,
     "period": "{attester_period}",
     "retry": "{attester_retry}",
     "tool": "{attester_tool}",
