@@ -131,16 +131,18 @@ def initiate(api, output, requests_verify = True, requests_cert = False,
         fp.write(json.dumps(jr))
     return True
 
-def quote(initial, output):
+def quote(initial, output, dictionarylockout = False):
     with open(initial, 'r') as fp:
         initjson = fp.read()
     init = json.loads(initjson)
     with tempfile.TemporaryDirectory() as tempdir:
         with open(f"{tempdir}/nonce", 'w') as fp:
             fp.write(init['nonce'].strip())
-        if sr(['tpm2', 'dictionarylockout', '-c']) and \
-            tpm2_flushall() and \
-            sr(['tpm2', 'createek',
+        if dictionarylockout:
+            if not sr(['tpm2', 'dictionarylockout', '-c']) or \
+                    not tpm2_flushall():
+                return False
+        if sr(['tpm2', 'createek',
                 '--ek-context', f"{tempdir}/ek.ctx",
                 '--key-algorithm', 'rsa',
                 '--public', f"{tempdir}/ek.pub"]) and \

@@ -14,6 +14,7 @@ verifkey = hcp_config_extract('.attester.verifier', must_exist = True)
 assetdir = hcp_config_extract('.attester.assetdir', must_exist = True)
 cacert = hcp_config_extract('.attester.cacert', must_exist = True)
 callback = hcp_config_extract('.attester.callback', or_default = True)
+dl = hcp_config_extract('.attester.dictionarylockout', or_default = True, default = True)
 
 print("""
             Running attestclient:
@@ -21,7 +22,8 @@ print("""
     (https CA, if required)   cacert: {cacert}
       (asset-signature key) verifkey: {verifkey}
 (base directory for output) assetdir: {assetdir}
-""".format(API = API, verifkey = verifkey,
+    (clear TPM DA) dictionarylockout: {dl}
+""".format(API = API, verifkey = verifkey, dl = dl,
 	   assetdir = assetdir, cacert = cacert))
 
 def check_result(result, s):
@@ -38,7 +40,7 @@ with tempfile.TemporaryDirectory() as tempdir:
                  "Failed to get 'initial' from attestsvc")
 
     print('Producing quote from TPM...')
-    check_result(api.quote(pinitial, pquote),
+    check_result(api.quote(pinitial, pquote, dictionarylockout = dl),
                  "Failed to product 'quote'")
 
     print('Completing attestation with server...')
