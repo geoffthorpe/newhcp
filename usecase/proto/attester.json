@@ -11,5 +11,6 @@
     "verifier": "{attester_verifier}",
     "assetdir": "{attester_assetdir}",
     "cacert": "{attester_cacert}",
-    "callback": "{attester_callback}"
+    "callback": "{attester_callback}",
+    "dictionarylockout": "{attester_dictionarylockout}"
 }

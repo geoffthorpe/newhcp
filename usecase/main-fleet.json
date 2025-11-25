@@ -305,6 +305,29 @@
                 }
             },
             "env": [ "tpm2tools", "krb5", "sshd" ]
+        },
+        "hostside": {
+            "hostname": "hostside.{domain}",
+            "tpm": "unmanaged",
+            "volumes": [
+                "./_crud/testcreds/cred_enrollclient:/cred_enrollclient:ro"
+            ],
+            "devices": [
+                "/dev/tpm0:/dev/tpm0",
+                "/dev/tpmrm0:/dev/tpmrm0"
+            ],
+            "enroll_profile": {
+                "ktgen": {
+                    "sshd": [ "host/{hostname}" ]
+                }
+            },
+            "services": {
+                "attester": {
+                    "dictionarylockout": false
+                },
+                "sshd": null
+            },
+            "env": [ "krb5", "sshd" ]
         }
     }
 }

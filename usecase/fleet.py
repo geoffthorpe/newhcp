@@ -27,6 +27,11 @@ def docker_write_service(fp, name, data, with_sidecar = True, with_cotenant = Fa
         fp.write(f"          - tpmsocket_{name}:/tpmsocket_{name}\n")
     for item in vols:
         fp.write(f"          - {item}\n")
+    devs = data['devices'] if 'devices' in data else []
+    if len(devs) > 0:
+        fp.write('        devices:\n')
+    for item in devs:
+        fp.write(f"          - {item}\n")
     fp.write('        environment:\n')
     mutate = f"{name}_runner" if vm else name
     fp.write(f"          - HCP_CONFIG_MUTATE=/_usecase/{mutate}.json\n\n")

@@ -25,6 +25,8 @@ do_run() {
 		FLAGS="$FLAGS -d"
 	elif [[ $_command == "run" ]]; then
 		FLAGS="$FLAGS -iT --rm"
+		Q=yes
+		OUT=/dev/stdout
 	elif [[ $_command == "down" ]]; then
 		FLAGS="$FLAGS -v --remove-orphans"
 	elif [[ $_command == "exec" ]]; then
@@ -232,5 +234,29 @@ if [[ $result != $FOO ]]; then
 	echo "       I received: $result" >&2
 	exit 1
 fi
+
+header "Enrolling the host's TPM using 'hostside'"
+result=$(do_run run hostside /launcher bash <<EOF
+tpm2 createek -G rsa -u /ek.pub -c /dev/null
+/hcp/python/hcp/api/enroll.py \
+	--api https://enrollsvc.hcphacking.xyz \
+	--cacert /ca_default \
+	--clientcert /cred_enrollclient \
+	add \
+	--profile "{\"hostname\":\"hostside.hcphacking.xyz\",\"days\":1}" \
+	/ek.pub | jq -r .ekpubhash
+EOF
+)
+if [[ ${#result} != 64 ]]; then
+	echo "Error, unexpected result: $result" >&2
+	exit 1
+fi
+header "Host TPM hash: $result"
+
+header "Starting hostside"
+do_run up hostside
+header "Waiting for hostside to be available"
+do_run exec hostside \
+	/hcp/python/hcp/tool/waitTouchfile.py /tmp/workload.running
 
 header "Success"
