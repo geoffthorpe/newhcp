@@ -313,7 +313,6 @@
                 "./_crud/testcreds/cred_enrollclient:/cred_enrollclient:ro"
             ],
             "devices": [
-                "/dev/tpm0:/dev/tpm0",
                 "/dev/tpmrm0:/dev/tpmrm0"
             ],
             "enroll_profile": {
