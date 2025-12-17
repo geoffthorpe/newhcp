@@ -7,8 +7,12 @@ import json
 import subprocess
 import random
 import string
+import sys
 
+os.environ['TOP'] = os.getcwd()
+sys.path.append(os.getcwd())
 from hcp.python.hcp.host.compose import Container, Composer
+
 
 class TestFailure(Exception):
     pass
@@ -45,6 +49,11 @@ if __name__ == '__main__':
                 print(f"\n#######\n## {txt}")
             else:
                 print(txt)
+    def bashscript(txt):
+        if not args.quiet and args.verbose:
+            print('----- start bash script input -----')
+            print(txt)
+            print('------ end bash script input ------')
 
     fleet = json.load(open('usecase/fleet.json'))
     DOMAIN = fleet['vars']['domain']
@@ -105,7 +114,7 @@ fi
     """
     selfenrollbash = selfenrollbash.strip().replace('$DOMAIN', DOMAIN)
     header('Self-enrolling enrollsvc TPM')
-    composer.log(True, f"Passing bash script as input:\n{selfenrollbash}")
+    bashscript(selfenrollbash)
     enrollsvc.runT([ 'bash' ], input = selfenrollbash, text = True)
 
     header('Starting enrollsvc service')
@@ -187,7 +196,7 @@ DONE
     """
     sshbash = sshbash.strip().replace('$DOMAIN', DOMAIN)
     header('Running an SSO ssh session alicia -> shell')
-    composer.log(True, f"Passing bash script as input:\n{sshbash}")
+    bashscript(sshbash)
     c = alicia.execT([ '/launcher', 'bash' ], input = sshbash,
                      stdout = subprocess.PIPE, text = True)
     output = c.stdout.strip()
@@ -206,7 +215,7 @@ DONE
     """
     sshbash = sshbash.strip().replace('$DOMAIN', DOMAIN)
     header('Running an SSO ssh boomerang alicia -> shell -> alicia')
-    composer.log(True, f"Passing bash script as input:\n{sshbash}")
+    bashscript(sshbash)
     c = alicia.execT([ '/launcher', 'bash' ], input = sshbash,
                      stdout = subprocess.PIPE, text = True)
     output = c.stdout.strip()
@@ -236,7 +245,7 @@ kinit -C FILE:/assets/pkinit-client-alicia.pem alicia \
     """
     kerbbash = kerbbash.strip().replace('$DOMAIN', DOMAIN)
     header('Running a kerberos-SPNEGO authentication alicia -> auth_kerberos')
-    composer.log(True, f"Passing bash script as input:\n{kerbbash}")
+    bashscript(kerbbash)
     c = alicia.execT([ '/launcher', 'bash' ], input = kerbbash,
                      stdout = subprocess.PIPE, text = True)
     composer.log(True, f"healthcheck response: {c.stdout.strip()}")
@@ -272,7 +281,7 @@ ssh barton.$DOMAIN 'bash -c "echo $FOO > ~/dingdong"'
         """
         writebash = writebash.strip().replace('$DOMAIN', DOMAIN).replace('$FOO', FOO)
         header('Writing to NFS home directory from barton, via ssh from alicia')
-        composer.log(True, f"Passing bash script as input:\n{writebash}")
+        bashscript(writebash)
         alicia.execT([ 'su', '-w', 'HCP_CONFIG_MUTATE', '-', 'alicia' ],
                      input = writebash, stdout = subprocess.PIPE, text = True)
 
@@ -286,7 +295,7 @@ ssh catarina.$DOMAIN 'bash -c "cat ~/dingdong"'
         """
         readbash = readbash.strip().replace('$DOMAIN', DOMAIN)
         header('Reading from NFS home directory from catarina, via ssh from alicia')
-        composer.log(True, f"Passing bash script as input:\n{readbash}")
+        bashscript(readbash)
         c = alicia.execT([ 'su', '-w', 'HCP_CONFIG_MUTATE', '-', 'alicia' ],
                          input = readbash, stdout = subprocess.PIPE, text = True)
         output = c.stdout.strip()
@@ -308,7 +317,7 @@ tpm2 createek -G rsa -u /ek.pub -c /dev/null
         """
         tpmbash = tpmbash.strip().replace('$DOMAIN', DOMAIN)
         header('Enrolling the host\'s TPM using \'hostside\'')
-        composer.log(True, f"Passing bash script as input:\n{tpmbash}")
+        bashscript(tpmbash)
         c = hostside.runT([ '/launcher', 'bash' ], input = tpmbash,
                           stdout = subprocess.PIPE, text = True)
         composer.log(True, f"enroll result: {c.stdout.strip()}")
