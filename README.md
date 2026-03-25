@@ -4,6 +4,12 @@ The structure of this README is as follows;
 
 * **[Quick reference](#quick-reference)** for building and running
 * **[What](#what-it-is-and-what-it-does)** it is and what it does
+  * **[Host Cryptographic Provisioning](#host-cryptographic-provisioning)**
+  * **[Software TPM service](#software-tpm-service)**
+  * **[Stateless KDC service](#stateless-kdc-service)**
+  * **[Stateless SSH service](#stateless-ssh-service)**
+  * **[WebAPI service](#webapi-service)**
+  * **[Reusable tooling](#reusable-tooling)**
 
 ---
 
@@ -108,7 +114,7 @@ docker compose down -v --remove-orphans
 
 ## What it is and what it does
 
-### HCP (Host Cryptographic Provisioning)
+### Host Cryptographic Provisioning
 
 Reference implementation of a TPM-enrollment-based attestation framework for
 provisioning hosts with secret and non-secret assets. Here is a diagram
@@ -122,7 +128,7 @@ Consumes TPM state created by the `orchestrator` tool. Can be instantiated as a
 side-car container (using a shared-mount for host communication - no
 networking) or as a cotenant service within the host container.
 
-### **[Stateless KDC (Kerberos Domain Controller) service](doc/stateless-kdc.md)**
+### **[Stateless KDC service](doc/stateless-kdc.md)**
 
 Demonstrates how PKI-based identity can underpin a Kerberos network, because
 none of the service or client (role/user) identities in the reference usecase
@@ -135,7 +141,7 @@ from X509v3 certificates containing their authorized identity. Think of it as
 * synthetic principals (client credentials)
 * `kdcsvc` (kadmin API, replication, ...)
 
-### Stateless SSH (sshd) service
+### Stateless SSH service
 
 A cotenant service that allows a host's user accounts to become ssh-accessible
 using Kerberos (GSS-API) authentication. Together with the Stateless KDC
@@ -149,7 +155,7 @@ and, if enabled, providing a HTTPS reverse-proxy (based on nginx) using TLS
 certificates obtained from TPM enrollment. This service runs co-tenant inside
 all the other services that provide web APIs (we dogfood webapi extensively).
 
-### **[Tooling](doc/tooling.md)**
+### **[Reusable tooling](doc/tooling.md)**
 
 * Workload launcher, for defining and running workloads, consisting of services
   and dependencies. This consumes a basic JSON description of what has to be
