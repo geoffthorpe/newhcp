@@ -167,7 +167,7 @@ server (`nfs`) and clients (`barton` and `catarina`) as full blown VMs. Note,
 the container takes care of bridging between the virtualized network in the VM
 and the container's network.
 
-### **[Reusable tooling](doc/tooling.md)**
+### Reusable tooling
 
 * Workload launcher, for defining and running workloads, consisting of services
   and dependencies. This consumes a basic JSON description of what has to be
