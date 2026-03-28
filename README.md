@@ -6,9 +6,10 @@ The structure of this README is as follows;
 * **[What](#what-it-is-and-what-it-does)** it is and what it does
   * **[Host Cryptographic Provisioning](#host-cryptographic-provisioning)**
   * **[Software TPM service](#software-tpm-service)**
+  * **[WebAPI service](#webapi-service)**
   * **[Stateless KDC service](#stateless-kdc-service)**
   * **[Stateless SSH service](#stateless-ssh-service)**
-  * **[WebAPI service](#webapi-service)**
+  * **[Virtual machine injection](#virtual-machine-injection)**
   * **[Reusable tooling](#reusable-tooling)**
 
 ---
@@ -128,6 +129,13 @@ Consumes TPM state created by the `orchestrator` tool. Can be instantiated as a
 side-car container (using a shared-mount for host communication - no
 networking) or as a cotenant service within the host container.
 
+### WebAPI service
+
+A web-API-hosting service (based on uwsgi) for representing Flask applications
+and, if enabled, providing a HTTPS reverse-proxy (based on nginx) using TLS
+certificates obtained from TPM enrollment. This service runs co-tenant inside
+all the other services that provide web APIs (we dogfood webapi extensively).
+
 ### **[Stateless KDC service](doc/stateless-kdc.md)**
 
 Demonstrates how PKI-based identity can underpin a Kerberos network, because
@@ -148,12 +156,16 @@ using Kerberos (GSS-API) authentication. Together with the Stateless KDC
 service, this shows an end-to-end SSO solution running on top of an
 HCP-bootstrapped network.
 
-### WebAPI service
+### Virtual machine injection
 
-A web-API-hosting service (based on uwsgi) for representing Flask applications
-and, if enabled, providing a HTTPS reverse-proxy (based on nginx) using TLS
-certificates obtained from TPM enrollment. This service runs co-tenant inside
-all the other services that provide web APIs (we dogfood webapi extensively).
+For workloads that require an entire operating system instance (i.e. a
+dedicated kernel), the framework supports running a virtual machine (qemu or
+user-mode-linux) within the container and launching the workload within that
+container. This is notably used for demonstrating NFSv4 functionality, as the
+filesystem is most easily enabled via in-kernel support, so we launch the
+server (`nfs`) and clients (`barton` and `catarina`) as full blown VMs. Note,
+the container takes care of bridging between the virtualized network in the VM
+and the container's network.
 
 ### **[Reusable tooling](doc/tooling.md)**
 
