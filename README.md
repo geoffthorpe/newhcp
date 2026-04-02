@@ -159,13 +159,13 @@ HCP-bootstrapped network.
 ### Virtual machine injection
 
 For workloads that require an entire operating system instance (i.e. a
-dedicated kernel), the framework supports running a virtual machine (qemu or
+dedicated kernel), the framework supports running a virtual machine (qemu/kvm or
 user-mode-linux) within the container and launching the workload within that
-container. This is notably used for demonstrating NFSv4 functionality, as the
+VM. This is notably used for demonstrating NFSv4 functionality, as the
 filesystem is most easily enabled via in-kernel support, so we launch the
-server (`nfs`) and clients (`barton` and `catarina`) as full blown VMs. Note,
-the container takes care of bridging between the virtualized network in the VM
-and the container's network.
+server (`nfs`) and clients (`barton` and `catarina`) as full blown VMs.
+The container takes care of bridging between the container network and the
+virtualized network in the VM.
 
 ### Reusable tooling
 
