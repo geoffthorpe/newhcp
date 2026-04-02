@@ -162,10 +162,14 @@ For workloads that require an entire operating system instance (i.e. a
 dedicated kernel), the framework supports running a virtual machine (qemu/kvm or
 user-mode-linux) within the container and launching the workload within that
 VM. This is notably used for demonstrating NFSv4 functionality, as the
-filesystem is most easily enabled via in-kernel support, so we launch the
-server (`nfs`) and clients (`barton` and `catarina`) as full blown VMs.
-The container takes care of bridging between the container network and the
-virtualized network in the VM.
+filesystem is most easily enabled via Linux kernel support, so we launch the
+server (`nfs`) and client (`barton` and `catarina`) host workloads as full blown VMs.
+The shim code in the container (that takes care of launching the VM) also
+takes care of bridging between the container network and the
+virtualized network inside the VM, so the workloads generally run unmodified in
+both modes of operation: *container-native* and *VM-within-container*. (That is
+unless, as with the NFSv4 example, there is a dependency on an underlying
+system service or behavior that is specific to one mode or the other.)
 
 ### Reusable tooling
 
