@@ -178,5 +178,5 @@ system service or behavior that is specific to one mode or the other.)
   setup and started and runs like a container init daemon.
 * JSON manipulations, for path handling (`gson.path`), recursive unions
   (`gson.union`), parameter expansion (`gson.expander`), and programmatic
-  manipulation (`gson.mutater`), etc.
+  manipulation of JSON by itself (`gson.mutater`), etc.
 * Extensible workflow, for building and running.
