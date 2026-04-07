@@ -40,11 +40,11 @@ make
 export TOP=$(pwd)
 
 # Run the test, which will clean up after itself, with quiet output
-Q=1 ./test.sh
+./test.py --quiet
 
 # Run the test, with verbose output, and leave all the containers
 # running, in order to allow manual interaction.
-V=1 NOTRAP=1 ./test.sh
+./test.py --verbose --notrap
 ```
 
 ### Examining host container state
