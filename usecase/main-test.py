@@ -8,6 +8,7 @@ import subprocess
 import random
 import string
 import sys
+import atexit
 
 os.environ['TOP'] = os.getcwd()
 sys.path.append(os.getcwd())
@@ -31,6 +32,7 @@ if __name__ == '__main__':
     help_nohost = 'disable the testing of host TPM'
     help_verbose = 'display more than just headings'
     help_quiet = 'don\'t even display headings'
+    help_notrap = 'don\'t clean up'
     parser = argparse.ArgumentParser(description = test_desc,
                                      epilog = test_epilog)
     parser.add_argument('--project', metavar='<PREFIX>', help = help_project,
@@ -39,6 +41,7 @@ if __name__ == '__main__':
     parser.add_argument('--nohost', action = 'store_true', help = help_nohost)
     parser.add_argument('--verbose', action = 'store_true', help = help_verbose)
     parser.add_argument('--quiet', action = 'store_true', help = help_quiet)
+    parser.add_argument('--notrap', action = 'store_true', help = help_notrap)
 
     args = parser.parse_args()
 
@@ -80,6 +83,11 @@ if __name__ == '__main__':
         catarina = Container(composer, 'catarina')
     if not args.nohost:
         hostside = Container(composer, 'hostside')
+    if not args.notrap:
+        def cleanup():
+            header('(On-exit: tearing down containers)')
+            composer.down()
+        atexit.register(cleanup)
 
     header('Destroying any existing state')
     composer.down()
