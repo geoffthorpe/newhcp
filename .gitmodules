@@ -7,3 +7,6 @@
 [submodule "spnego-http-auth-nginx-module"]
 	path = spnego-http-auth-nginx-module
 	url = https://github.com/stnoonan/spnego-http-auth-nginx-module
+[submodule "mit"]
+	path = mit
+	url = https://github.com/krb5/krb5

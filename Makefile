@@ -17,6 +17,7 @@ DBCMD := docker build --build-arg MYTZ=$(TIMEZONE)
 DRMV := docker image rm
 DRUN := docker run --rm
 HEIMDAL_OUT := heimdal-install.tar.gz
+MIT_OUT := mit-install.tar.gz
 NGINX_OUT := nginx-install.tar.gz
 CRUD := $(TOP)/_crud
 MDIRS := $(CRUD)
@@ -73,8 +74,8 @@ include Makefile.macros
 define cb_hcp_environment
 $(eval D := $(strip $1))
 $(eval _CTX := $(strip $2))
-$($D_SYNC): ./ctx/ssh_config ./heimdal/$(HEIMDAL_OUT) ./nginx/$(NGINX_OUT)
-	$Qrsync -a ./ctx/ssh_config ./heimdal/$(HEIMDAL_OUT) ./nginx/$(NGINX_OUT) $(_CTX)/
+$($D_SYNC): ./ctx/ssh_config ./heimdal/$(HEIMDAL_OUT) ./mit/$(MIT_OUT) ./nginx/$(NGINX_OUT)
+	$Qrsync -a ./ctx/ssh_config ./heimdal/$(HEIMDAL_OUT) ./mit/$(MIT_OUT) ./nginx/$(NGINX_OUT) $(_CTX)/
 	$Qtouch $$@
 endef
 
@@ -149,6 +150,7 @@ endif
 
 $(eval $(call parse_target,hcp_baseline,debian))
 $(eval $(call parse_target,hcp_builder_heimdal,hcp_baseline))
+$(eval $(call parse_target,hcp_builder_mit,hcp_baseline))
 $(eval $(call parse_target,hcp_builder_nginx,hcp_builder_heimdal,cb_hcp_builder_nginx))
 $(eval $(call parse_target,hcp_environment,hcp_baseline,cb_hcp_environment))
 ifdef QEMUSUPPORT
@@ -241,6 +243,10 @@ endif
 heimdal/$(HEIMDAL_OUT): | $(hcp_builder_heimdal_bookworm)
 	$Q$(DRUN) -v $(TOP)/heimdal:/heimdal $(hcp_builder_heimdal_bookworm_DNAME) bash -c \
 		"cd /heimdal && ./autogen.sh && MAKEINFO=true ./configure --disable-texinfo --prefix=/install-heimdal && MAKEINFO=true make && MAKEINFO=true make install && tar zcf heimdal-install.tar.gz /install-heimdal"
+
+mit/$(MIT_OUT): | $(hcp_builder_heimdal_trixie)
+	$Q$(DRUN) -v $(TOP)/mit:/mit $(hcp_builder_heimdal_trixie_DNAME) bash -c \
+		"cd /mit/src && autoreconf --verbose && ./configure --prefix=/install-mit && make && make install && tar zcf /mit/mit-install.tar.gz /install-mit"
 
 nginx/$(NGINX_OUT): | $(hcp_builder_nginx_trixie)
 	$Q$(DRUN) -v $(TOP)/nginx:/nginx -v$(TOP)/spnego-http-auth-nginx-module:/nginx/spnego-http-auth-nginx-module $(hcp_builder_nginx_trixie_DNAME) bash -c \
