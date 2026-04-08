@@ -118,4 +118,5 @@ def add_install_path(d):
 
 installdirs = glob.glob('/install-*')
 for i in installdirs:
-	add_install_path(i)
+	if i != "/install-mit" or "USE_MIT" in os.environ:
+		add_install_path(i)
