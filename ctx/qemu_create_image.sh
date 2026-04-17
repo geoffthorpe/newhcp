@@ -13,10 +13,10 @@ IMG=/crud/hcp_qemu_guest.img
 echo "[Create disk image]"
 [ -z "${VM_DISK_SIZE_MB}" ] && VM_DISK_SIZE_MB=1024
 VM_DISK_SIZE_SECTOR=$(expr $VM_DISK_SIZE_MB \* 1024 \* 1024 / 512)
-dd if=/dev/zero of=${IMG} bs=${VM_DISK_SIZE_SECTOR} count=512
+dd if=/dev/zero of=${IMG}.tmp bs=${VM_DISK_SIZE_SECTOR} count=512
 
 echo "[Make partition]"
-sfdisk ${IMG} <<EOF
+sfdisk ${IMG}.tmp <<EOF
 label: dos
 label-id: 0xdeadbeef
 unit: sectors
@@ -28,7 +28,7 @@ echo "[Format partition with ext4]"
 losetup -D
 LOOPDEVICE=$(losetup -f)
 echo -e "\n[Using ${LOOPDEVICE} loop device]"
-losetup -o $(expr 512 \* 2048) ${LOOPDEVICE} ${IMG}
+losetup -o $(expr 512 \* 2048) ${LOOPDEVICE} ${IMG}.tmp
 mkfs.ext4 ${LOOPDEVICE}
 
 echo "[Copy directory structure to partition]"
@@ -46,6 +46,8 @@ umount /tmpmnt
 losetup -D
 
 echo "[Write syslinux MBR]"
-dd if=/usr/lib/syslinux/mbr/mbr.bin of=${IMG} bs=440 count=1 conv=notrunc
+dd if=/usr/lib/syslinux/mbr/mbr.bin of=${IMG}.tmp bs=440 count=1 conv=notrunc
 
-[ "${UID_HOST}" -a "${GID_HOST}" ] && chown ${UID_HOST}:${GID_HOST} ${IMG}
+[ "${UID_HOST}" -a "${GID_HOST}" ] && chown ${UID_HOST}:${GID_HOST} ${IMG}.tmp
+
+mv ${IMG}.tmp ${IMG}

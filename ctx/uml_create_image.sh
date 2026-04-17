@@ -13,16 +13,16 @@ IMG=/crud/hcp_uml_guest.img
 echo "[Create disk image]"
 [ -z "${VM_DISK_SIZE_MB}" ] && VM_DISK_SIZE_MB=1024
 VM_DISK_SIZE_SECTOR=$(expr $VM_DISK_SIZE_MB \* 1024 \* 1024 / 512)
-dd if=/dev/zero of=${IMG} bs=${VM_DISK_SIZE_SECTOR} count=512
+dd if=/dev/zero of=${IMG}.tmp bs=${VM_DISK_SIZE_SECTOR} count=512
 
 echo "[Format image with ext4]"
-mkfs.ext4 ${IMG}
+mkfs.ext4 ${IMG}.tmp
 
 echo "[Mounting ext4 partition by loopback]"
 losetup -D
 LOOPDEVICE=$(losetup -f)
 echo -e "[Using ${LOOPDEVICE} loop device]"
-losetup ${LOOPDEVICE} ${IMG}
+losetup ${LOOPDEVICE} ${IMG}.tmp
 mkdir -p /tmpmnt
 mount -t auto ${LOOPDEVICE} /tmpmnt/
 
@@ -33,4 +33,6 @@ echo "[Unmount]"
 umount /tmpmnt
 losetup -D
 
-[ "${UID_HOST}" -a "${GID_HOST}" ] && chown ${UID_HOST}:${GID_HOST} ${IMG}
+[ "${UID_HOST}" -a "${GID_HOST}" ] && chown ${UID_HOST}:${GID_HOST} ${IMG}.tmp
+
+mv ${IMG}.tmp ${IMG}
