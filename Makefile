@@ -18,6 +18,7 @@ DRMV := docker image rm
 DRUN := docker run --rm
 HEIMDAL_OUT := heimdal-install.tar.gz
 MIT_OUT := mit-install.tar.gz
+KSTART_OUT := kstart-install.tar.gz
 NGINX_OUT := nginx-install.tar.gz
 CRUD := $(TOP)/_crud
 MDIRS := $(CRUD)
@@ -71,11 +72,19 @@ include Makefile.macros
 # but bookworm's swtpm/tpm2-tools is too old, so we need to install and run on
 # trixie. Fortunately, the bookworm-based build runs fine on trixie.
 #
+define cb_hcp_builder_kstart
+$(eval D := $(strip $1))
+$(eval _CTX := $(strip $2))
+$($D_SYNC): ./mit/$(MIT_OUT)
+	$Qrsync -a ./mit/$(MIT_OUT) $(_CTX)/
+	$Qtouch $$@
+endef
+
 define cb_hcp_environment
 $(eval D := $(strip $1))
 $(eval _CTX := $(strip $2))
-$($D_SYNC): ./ctx/ssh_config ./heimdal/$(HEIMDAL_OUT) ./mit/$(MIT_OUT) ./nginx/$(NGINX_OUT)
-	$Qrsync -a ./ctx/ssh_config ./heimdal/$(HEIMDAL_OUT) ./mit/$(MIT_OUT) ./nginx/$(NGINX_OUT) $(_CTX)/
+$($D_SYNC): ./ctx/ssh_config ./heimdal/$(HEIMDAL_OUT) ./mit/$(MIT_OUT) ./kstart/$(KSTART_OUT) ./nginx/$(NGINX_OUT)
+	$Qrsync -a ./ctx/ssh_config ./heimdal/$(HEIMDAL_OUT) ./mit/$(MIT_OUT) ./kstart/$(KSTART_OUT) ./nginx/$(NGINX_OUT) $(_CTX)/
 	$Qtouch $$@
 endef
 
@@ -150,7 +159,8 @@ endif
 
 $(eval $(call parse_target,hcp_baseline,debian))
 $(eval $(call parse_target,hcp_builder_heimdal,hcp_baseline))
-$(eval $(call parse_target,hcp_builder_mit,hcp_baseline))
+$(eval $(call parse_target,hcp_builder_mit,hcp_builder_heimdal))
+$(eval $(call parse_target,hcp_builder_kstart,hcp_builder_mit,cb_hcp_builder_kstart))
 $(eval $(call parse_target,hcp_builder_nginx,hcp_builder_heimdal,cb_hcp_builder_nginx))
 $(eval $(call parse_target,hcp_environment,hcp_baseline,cb_hcp_environment))
 ifdef QEMUSUPPORT
@@ -244,9 +254,13 @@ heimdal/$(HEIMDAL_OUT): | $(hcp_builder_heimdal_bookworm)
 	$Q$(DRUN) -v $(TOP)/heimdal:/heimdal $(hcp_builder_heimdal_bookworm_DNAME) bash -c \
 		"cd /heimdal && ./autogen.sh && MAKEINFO=true ./configure --disable-texinfo --prefix=/install-heimdal && MAKEINFO=true make && MAKEINFO=true make install && tar zcf heimdal-install.tar.gz /install-heimdal"
 
-mit/$(MIT_OUT): | $(hcp_builder_heimdal_trixie)
-	$Q$(DRUN) -v $(TOP)/mit:/mit $(hcp_builder_heimdal_trixie_DNAME) bash -c \
+mit/$(MIT_OUT): | $(hcp_builder_mit_trixie)
+	$Q$(DRUN) -v $(TOP)/mit:/mit $(hcp_builder_mit_trixie_DNAME) bash -c \
 		"cd /mit/src && autoreconf --verbose && ./configure --prefix=/install-mit && make && make install && tar zcf /mit/mit-install.tar.gz /install-mit"
+
+kstart/$(KSTART_OUT): | $(hcp_builder_kstart_trixie)
+	$Q$(DRUN) -v $(TOP)/kstart:/kstart $(hcp_builder_kstart_trixie_DNAME) bash -c \
+		"cd /kstart && ./bootstrap && ./configure --prefix=/install-kstart PATH_KRB5_CONFIG=/install-mit/bin/krb5-config && make && make install && tar zcf /kstart/kstart-install.tar.gz /install-kstart"
 
 nginx/$(NGINX_OUT): | $(hcp_builder_nginx_trixie)
 	$Q$(DRUN) -v $(TOP)/nginx:/nginx -v$(TOP)/spnego-http-auth-nginx-module:/nginx/spnego-http-auth-nginx-module $(hcp_builder_nginx_trixie_DNAME) bash -c \
