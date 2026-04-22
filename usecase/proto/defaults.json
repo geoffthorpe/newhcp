@@ -8,6 +8,7 @@
     "attester_cacert": "/ca_default",
     "attester_callback": "/hcp/python/hcp/tool/callback.py",
     "attester_until": "/assets/touch",
+    "attester_dictionarylockout": false,
     "git-daemon_port": "9418",
     "git-daemon_uid": "www-data",
     "kdcsvc_dir": "/kdc_primary",
