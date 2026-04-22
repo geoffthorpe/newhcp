@@ -130,7 +130,11 @@ function hcp_config_extract {
 
 function add_env_path {
 	if [[ -n $1 ]]; then
-		echo "$1:$2"
+		if echo "$1" | grep "$2" > /dev/null 2>&1; then
+			echo "$1"
+		else
+			echo "$1:$2"
+		fi
 	else
 		echo "$2"
 	fi

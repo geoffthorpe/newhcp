@@ -105,7 +105,9 @@ def add_install_path(d):
 			if not os.path.isdir(v):
 				continue
 			if len(current) > 0:
-				current = f"{current}:{v}"
+				currentparts = current.split(':')
+				if v not in currentparts:
+					current = f"{current}:{v}"
 			else:
 				current = v
 		os.environ[n] = current
