@@ -28,6 +28,7 @@ if __name__ == '__main__':
     test_desc = 'Run the canonical test-case for newhcp'
     test_epilog = ''
     help_project = 'set the docker prefix used by compose'
+    help_down = 'clean up after a previous run'
     help_nonfs = 'disable the testing of kerberized NFS'
     help_nohost = 'disable the testing of host TPM'
     help_verbose = 'display more than just headings'
@@ -37,6 +38,7 @@ if __name__ == '__main__':
                                      epilog = test_epilog)
     parser.add_argument('--project', metavar='<PREFIX>', help = help_project,
                         default = os.path.basename(os.getcwd()))
+    parser.add_argument('--down', action = 'store_true', help = help_down)
     parser.add_argument('--nonfs', action = 'store_true', help = help_nonfs)
     parser.add_argument('--nohost', action = 'store_true', help = help_nohost)
     parser.add_argument('--verbose', action = 'store_true', help = help_verbose)
@@ -64,6 +66,9 @@ if __name__ == '__main__':
     composer = Composer(project = args.project,
                         verbose = args.verbose,
                         quiet = args.quiet)
+    if args.down:
+        composer.down()
+        sys.exit(0)
     orchestrator = Container(composer, 'orchestrator')
     attestsvc = Container(composer, 'attestsvc')
     enrollsvc_tpm = Container(composer, 'enrollsvc_tpm')
