@@ -16,6 +16,8 @@ def docker_write_service(fp, name, data, with_sidecar = True, with_cotenant = Fa
               'common_nontpm'
     print(f"Writing service '{name}' to docker compose file")
     fp.write(f"    {name}:\n")
+    if 'image' in data:
+        fp.write(f"        image: {data['image']}\n")
     fp.write(f"        extends: {baseimg}\n")
     fp.write(f"        hostname: {data['hostname']}\n")
     vols = data['volumes'] if 'volumes' in data else []
