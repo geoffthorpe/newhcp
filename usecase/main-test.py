@@ -29,21 +29,21 @@ if __name__ == '__main__':
     test_epilog = ''
     help_project = 'set the docker prefix used by compose'
     help_down = 'clean up after a previous run'
-    help_nonfs = 'disable the testing of kerberized NFS'
-    help_nohost = 'disable the testing of host TPM'
+    help_no_nfs = 'disable the testing of kerberized NFS'
+    help_no_host = 'disable the testing of host TPM'
     help_verbose = 'display more than just headings'
     help_quiet = 'don\'t even display headings'
-    help_notrap = 'don\'t clean up'
+    help_no_trap = 'don\'t clean up'
     parser = argparse.ArgumentParser(description = test_desc,
                                      epilog = test_epilog)
     parser.add_argument('--project', metavar='<PREFIX>', help = help_project,
                         default = os.path.basename(os.getcwd()))
     parser.add_argument('--down', action = 'store_true', help = help_down)
-    parser.add_argument('--nonfs', action = 'store_true', help = help_nonfs)
-    parser.add_argument('--nohost', action = 'store_true', help = help_nohost)
+    parser.add_argument('--no-nfs', action = 'store_true', help = help_no_nfs)
+    parser.add_argument('--no-host', action = 'store_true', help = help_no_host)
     parser.add_argument('--verbose', action = 'store_true', help = help_verbose)
     parser.add_argument('--quiet', action = 'store_true', help = help_quiet)
-    parser.add_argument('--notrap', action = 'store_true', help = help_notrap)
+    parser.add_argument('--no-trap', action = 'store_true', help = help_no_trap)
 
     args = parser.parse_args()
 
@@ -82,13 +82,13 @@ if __name__ == '__main__':
     alicia = Container(composer, 'alicia')
     auth_certificate = Container(composer, 'auth_certificate')
     auth_kerberos = Container(composer, 'auth_kerberos')
-    if not args.nonfs:
+    if not args.no_nfs:
         nfs = Container(composer, 'nfs')
         barton = Container(composer, 'barton')
         catarina = Container(composer, 'catarina')
-    if not args.nohost:
+    if not args.no_host:
         hostside = Container(composer, 'hostside')
-    if not args.notrap:
+    if not args.no_trap:
         def cleanup():
             header('(On-exit: tearing down containers)')
             composer.down()
@@ -170,7 +170,7 @@ fi
     auth_certificate.up()
     auth_kerberos.up()
 
-    if not args.nonfs:
+    if not args.no_nfs:
         header('Starting nfs (qemu/kvm virtual machine)')
         nfs.up()
 
@@ -270,7 +270,7 @@ kinit -C FILE:/assets/pkinit-client-alicia.pem alicia \
     if 'is_secure' not in output or output['is_secure'] != True:
         raise TestFailure()
 
-    if not args.nonfs:
+    if not args.no_nfs:
 
         header('Waiting for nfs to be available')
         nfs.exec([
@@ -316,7 +316,7 @@ ssh catarina.$DOMAIN 'bash -c "cat ~/dingdong"'
         if output != FOO:
             raise TestFailure()
 
-    if not args.nohost:
+    if not args.no_host:
 
         tpmbash = """
 tpm2 createek -G rsa -u /ek.pub -c /dev/null
