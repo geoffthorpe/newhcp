@@ -198,6 +198,7 @@
         },
         "shell": {
             "hostname": "shell.{domain}",
+            "image": "hcp_environment_mit:trixie",
             "enroll_profile": {
                 "ktgen": {
                     "sshd": [ "host/{hostname}" ]
@@ -248,6 +249,7 @@
         },
         "alicia": {
             "hostname": "alicia.{domain}",
+            "image": "hcp_environment_mit:trixie",
             "tpm": "cotenant",
             "enroll_profile": {
                 "certgen": [ "pkinit-client", "https-client" ],

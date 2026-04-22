@@ -174,14 +174,14 @@ $(eval $(call parse_target,hcp_environment_heimdal,hcp_baseline,cb_hcp_environme
 $(eval $(call parse_target,hcp_environment_mit,hcp_baseline,cb_hcp_environment_mit))
 ifdef QEMUSUPPORT
 $(eval $(call parse_target,hcp_builder_qemu,hcp_baseline,cb_hcp_builder_qemu))
-$(eval $(call parse_target,hcp_qemu_guest,hcp_environment_heimdal,cb_hcp_qemu_guest))
-$(eval $(call parse_target,hcp_qemu_host,hcp_environment_heimdal,cb_hcp_qemu_host))
+$(eval $(call parse_target,hcp_qemu_guest,hcp_environment_mit,cb_hcp_qemu_guest))
+$(eval $(call parse_target,hcp_qemu_host,hcp_environment_mit,cb_hcp_qemu_host))
 endif
 ifdef UMLSUPPORT
 $(eval $(call parse_target,hcp_builder_uml,hcp_baseline,cb_hcp_builder_uml))
 $(eval $(call parse_target,hcp_builder_uml_kernel,hcp_builder_heimdal,cb_hcp_builder_uml_kernel))
-$(eval $(call parse_target,hcp_uml_guest,hcp_environment_heimdal,cb_hcp_uml_guest))
-$(eval $(call parse_target,hcp_uml_host,hcp_environment_heimdal,cb_hcp_uml_host))
+$(eval $(call parse_target,hcp_uml_guest,hcp_environment_mit,cb_hcp_uml_guest))
+$(eval $(call parse_target,hcp_uml_host,hcp_environment_mit,cb_hcp_uml_host))
 endif
 
 # The usecase requires host configs (and docker-compose.yml) to be generated
