@@ -167,9 +167,6 @@ function add_install_path {
 # actually _do_ something when you source this file.
 
 for i in $(find / -maxdepth 1 -mindepth 1 -type d -name "install-*"); do
-	if [[ $(basename "$i") == "install-mit" && "x$USE_MIT" == "x" ]]; then
-		continue
-	fi
 	add_install_path "$i"
 done
 
