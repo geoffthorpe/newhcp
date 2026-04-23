@@ -9,6 +9,7 @@ import random
 import string
 import sys
 import atexit
+import yaml
 
 os.environ['TOP'] = os.getcwd()
 sys.path.append(os.getcwd())
@@ -62,6 +63,14 @@ if __name__ == '__main__':
 
     fleet = json.load(open('usecase/fleet.json'))
     DOMAIN = fleet['vars']['domain']
+
+    yml = yaml.safe_load(open('docker-compose.yml', 'r'))
+    def hostimage(name):
+        if 'image' in yml['services'][name]:
+            return yml['services'][name]['image']
+        if 'extends' in yml['services'][name]:
+            return hostimage(yml['services'][name]['extends'])
+        return None
 
     composer = Composer(project = args.project,
                         verbose = args.verbose,
@@ -201,12 +210,29 @@ fi
     #         - Run 'hostname', the output will return through the ssh shell.
     # - pass the output through 'xargs' (a trick to strip whitespace)
     # - we confirm that all of the above generated "shell.$DOMAIN".
+    # - if 'alicia' is MIT-based, then;
+    #   - we need to add the 'alicia' principal to the KDC
+    #   - we run k5start -q -X X509_user_identity=FILE:<path> alicia -- ssh ...
+    #   else
+    #   - we don't add the 'alicia' principal (use synthetic)
+    #   - we run kinit -C FILE:<path> alicia -- ssh ...
+    is_mit = hostimage('alicia').find('_mit') != -1
+    kinit = 'k5start -q -X X509_user_identity=' if is_mit else 'kinit -C '
+    ksep = '--' if is_mit else ''
+    if is_mit:
+        header('Adding \'alicia\' principal to KDC')
+        attestsvc.exec([
+            '/hcp/python/hcp/api/kdc.py',
+            '--api', 'https://kdc_primary.hcphacking.xyz',
+            '--cacert', '/ca_default',
+            '--clientcert', '/cred_kdcclient',
+            'add', 'alicia' ])
     sshbash = """
-kinit -C FILE:/assets/pkinit-client-alicia.pem alicia \
+{kinit}FILE:/assets/pkinit-client-alicia.pem alicia {ksep} \
 	    ssh -l alicia shell.$DOMAIN bash <<DONE
 hostname
 DONE
-    """
+    """.format(kinit = kinit, ksep = ksep)
     sshbash = sshbash.strip().replace('$DOMAIN', DOMAIN)
     header('Running an SSO ssh session alicia -> shell')
     bashscript(sshbash)
@@ -219,13 +245,13 @@ DONE
 
     # This time, we ssh back to alicia from within the ssh session to shell
     sshbash = """
-kinit -C FILE:/assets/pkinit-client-alicia.pem alicia \
+{kinit}FILE:/assets/pkinit-client-alicia.pem alicia {ksep} \
 	ssh -l alicia shell.$DOMAIN bash <<DONE
 ssh alicia.$DOMAIN bash <<INNER
 hostname
 INNER
 DONE
-    """
+    """.format(kinit = kinit, ksep = ksep)
     sshbash = sshbash.strip().replace('$DOMAIN', DOMAIN)
     header('Running an SSO ssh boomerang alicia -> shell -> alicia')
     bashscript(sshbash)
@@ -253,9 +279,9 @@ DONE
         raise TestFailure()
 
     kerbbash = """
-kinit -C FILE:/assets/pkinit-client-alicia.pem alicia \
+{kinit}FILE:/assets/pkinit-client-alicia.pem alicia {ksep} \
     curl --silent --cacert /ca_default --negotiate -u : https://kerberos.auth.$DOMAIN/get \
-    """
+    """.format(kinit = kinit, ksep = ksep)
     kerbbash = kerbbash.strip().replace('$DOMAIN', DOMAIN)
     header('Running a kerberos-SPNEGO authentication alicia -> auth_kerberos')
     bashscript(kerbbash)
