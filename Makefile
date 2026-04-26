@@ -80,11 +80,19 @@ $($D_SYNC): ./mit/$(MIT_OUT)
 	$Qtouch $$@
 endef
 
-define cb_hcp_environment
+define cb_hcp_environment_heimdal
 $(eval D := $(strip $1))
 $(eval _CTX := $(strip $2))
-$($D_SYNC): ./ctx/ssh_config ./heimdal/$(HEIMDAL_OUT) ./mit/$(MIT_OUT) ./kstart/$(KSTART_OUT) ./nginx/$(NGINX_OUT)
-	$Qrsync -a ./ctx/ssh_config ./heimdal/$(HEIMDAL_OUT) ./mit/$(MIT_OUT) ./kstart/$(KSTART_OUT) ./nginx/$(NGINX_OUT) $(_CTX)/
+$($D_SYNC): ./ctx/ssh_config ./heimdal/$(HEIMDAL_OUT) ./nginx/$(NGINX_OUT)
+	$Qrsync -a ./ctx/ssh_config ./heimdal/$(HEIMDAL_OUT) ./nginx/$(NGINX_OUT) $(_CTX)/
+	$Qtouch $$@
+endef
+
+define cb_hcp_environment_mit
+$(eval D := $(strip $1))
+$(eval _CTX := $(strip $2))
+$($D_SYNC): ./ctx/ssh_config ./mit/$(MIT_OUT) ./kstart/$(KSTART_OUT) ./nginx/$(NGINX_OUT)
+	$Qrsync -a ./ctx/ssh_config ./mit/$(MIT_OUT) ./kstart/$(KSTART_OUT) ./nginx/$(NGINX_OUT) $(_CTX)/
 	$Qtouch $$@
 endef
 
@@ -162,17 +170,18 @@ $(eval $(call parse_target,hcp_builder_heimdal,hcp_baseline))
 $(eval $(call parse_target,hcp_builder_mit,hcp_builder_heimdal))
 $(eval $(call parse_target,hcp_builder_kstart,hcp_builder_mit,cb_hcp_builder_kstart))
 $(eval $(call parse_target,hcp_builder_nginx,hcp_builder_heimdal,cb_hcp_builder_nginx))
-$(eval $(call parse_target,hcp_environment,hcp_baseline,cb_hcp_environment))
+$(eval $(call parse_target,hcp_environment_heimdal,hcp_baseline,cb_hcp_environment_heimdal))
+$(eval $(call parse_target,hcp_environment_mit,hcp_baseline,cb_hcp_environment_mit))
 ifdef QEMUSUPPORT
 $(eval $(call parse_target,hcp_builder_qemu,hcp_baseline,cb_hcp_builder_qemu))
-$(eval $(call parse_target,hcp_qemu_guest,hcp_environment,cb_hcp_qemu_guest))
-$(eval $(call parse_target,hcp_qemu_host,hcp_environment,cb_hcp_qemu_host))
+$(eval $(call parse_target,hcp_qemu_guest,hcp_environment_heimdal,cb_hcp_qemu_guest))
+$(eval $(call parse_target,hcp_qemu_host,hcp_environment_heimdal,cb_hcp_qemu_host))
 endif
 ifdef UMLSUPPORT
 $(eval $(call parse_target,hcp_builder_uml,hcp_baseline,cb_hcp_builder_uml))
 $(eval $(call parse_target,hcp_builder_uml_kernel,hcp_builder_heimdal,cb_hcp_builder_uml_kernel))
-$(eval $(call parse_target,hcp_uml_guest,hcp_environment,cb_hcp_uml_guest))
-$(eval $(call parse_target,hcp_uml_host,hcp_environment,cb_hcp_uml_host))
+$(eval $(call parse_target,hcp_uml_guest,hcp_environment_heimdal,cb_hcp_uml_guest))
+$(eval $(call parse_target,hcp_uml_host,hcp_environment_heimdal,cb_hcp_uml_host))
 endif
 
 # The usecase requires host configs (and docker-compose.yml) to be generated
@@ -184,7 +193,7 @@ USECASE_OUTS += $(USECASE_DIR)/docker-compose.yml
 
 # default needs to go after parse_target() but before gen_rules()
 default: testcreds $(USECASE_OUTS)
-default: $(foreach i,environment,$(hcp_$i_$(DEBVERSION)))
+default: $(foreach i,environment_heimdal environment_mit,$(hcp_$i_$(DEBVERSION)))
 ifdef QEMUSUPPORT
 default: $(foreach i,builder_qemu qemu_guest qemu_host,$(hcp_$i_$(DEBVERSION)))
 endif

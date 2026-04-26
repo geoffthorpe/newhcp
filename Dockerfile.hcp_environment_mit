@@ -1,0 +1,42 @@
+COPY mit-install.tar.gz kstart-install.tar.gz nginx-install.tar.gz /
+RUN cd / && tar zxf mit-install.tar.gz && rm mit-install.tar.gz
+RUN cd / && tar zxf kstart-install.tar.gz && rm kstart-install.tar.gz
+RUN cd / && tar zxf nginx-install.tar.gz && rm nginx-install.tar.gz
+RUN echo "/install-mit/lib" >> /etc/ld.so.conf.d/mit.conf
+RUN ldconfig
+
+# Do our best to ensure that any/all shells come up with the environment (and
+# functions) set for best UX.
+RUN echo "source /hcp/bash/hcp.sh" > /etc/profile.d/hcp_bash.sh
+RUN echo "source /hcp/bash/hcp.sh" >> /root/.bashrc
+
+# If the system/default ssh client and/or server get used, we assume HCP is
+# being used to setup identities and SSO, so give our base image better
+# defaults than the distro does.
+COPY ssh_config /etc/ssh/
+RUN chmod 644 /etc/ssh/ssh_config
+RUN systemctl disable sshd
+
+# Restrain the system nginx from starting up
+# TODO: actually we're building nginx from source for now...
+#RUN systemctl disable nginx
+
+RUN echo "" > /etc/skel/newbashrc
+RUN echo "source /hcp/bash/hcp.sh" >> /etc/skel/newbashrc
+RUN cat /etc/skel/.bashrc >> /etc/skel/newbashrc
+RUN mv /etc/skel/newbashrc /etc/skel/.bashrc
+
+# Small and static set of users.
+RUN adduser --shell /hcp/bash/shell.sh --disabled-password --quiet --gecos "Alicia Nom-Composé,,,," alicia
+RUN adduser --shell /hcp/bash/shell.sh --disabled-password --quiet --gecos "Barton Moucheboom,,,," barton
+RUN adduser --shell /hcp/bash/shell.sh --disabled-password --quiet --gecos "Catarina Smith,,,," catarina
+RUN echo "alicia:foo" | chpasswd
+RUN echo "barton:foo" | chpasswd
+RUN echo "catarina:foo" | chpasswd
+
+# Save some typing by putting symlinks in the root dir
+RUN ln -s /hcp/python/hcp/tool/launcher.py /launcher
+RUN ln -s /hcp/python/hcp/tool/vm_cmd.py /vm
+
+# Set the launcher as our entrypoint
+ENTRYPOINT ["/hcp/python/hcp/tool/launcher.py"]
