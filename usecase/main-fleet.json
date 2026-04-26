@@ -33,6 +33,9 @@
         "kdc_secondary"
     ],
     "fleet": {
+        "__default__": {
+            "image": "hcp_environment_heimdal:trixie"
+        },
         "orchestrator": {
             "tpm": "none",
             "volumes": [
