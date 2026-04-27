@@ -8,7 +8,6 @@ import argparse
 import copy
 
 from gson.expander import expand
-from gson.union import union
 
 def docker_write_service(fp, name, data, with_sidecar = True, with_cotenant = False):
     vm = data['vm'] if 'vm' in data else None
@@ -238,10 +237,9 @@ if __name__ == '__main__':
     hosts = [ x for x in _input['fleet'] if x != '__default__' ]
     hosts_default = _input['fleet']['__default__']
     for x in hosts:
-        h = union(hosts_default, _input['fleet'][x])
+        h = _input['fleet'][x]
         h['hostname'] = h['hostname'] if 'hostname' in h else 'nada'
         h['tpm'] = h['tpm'] if 'tpm' in h else 'sidecar'
-        _input['fleet'][x] = h
     if 'orchestrator' in _input['fleet']:
         h = _input['fleet']['orchestrator']
         h['volumes'] += [ f"tpm_{y}:/tpm_{y}:rw" for y in hosts if
@@ -267,7 +265,7 @@ if __name__ == '__main__':
 volumes:
 """)
             for host in hosts:
-                h = union(hosts_default, _input['fleet'][host])
+                h = _input['fleet'][host]
                 tpmmode = h['tpm']
                 if tpmmode != 'none' and tpmmode != 'unmanaged':
                     fp.write(f"    tpm_{host}:\n")
@@ -323,7 +321,7 @@ services:
         image: hcp_uml_host:trixie
 """)
             for host in hosts:
-                h = union(hosts_default, _input['fleet'][host])
+                h = _input['fleet'][host]
                 tpmmode = h['tpm']
                 docker_write_service(fp, host, h,
                                      with_sidecar = tpmmode == 'sidecar',
