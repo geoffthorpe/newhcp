@@ -223,8 +223,8 @@ default: $(CRUD)/linux
 ifneq (,$(wildcard $(CRUD)/linux-$(UML_KERN_VER)))
 clean_uml_linux:
 	$Qdocker run -it --rm -v $(CRUD):/crud:rw \
-		hcp_builder_uml_kernel:$(DEBVERSION) \
-		bash -c 'rm -rf /crud/linux-$(UML_KERN_VER)/*'
+		debian:$(DEBVERSION) \
+		bash -c 'rm -rf /crud/linux-$(UML_KERN_VER)/{*,.*}'
 	$Qrmdir $(CRUD)/linux-$(UML_KERN_VER)
 clean: clean_uml_linux
 endif
