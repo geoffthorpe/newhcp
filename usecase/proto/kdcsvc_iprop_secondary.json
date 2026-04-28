@@ -5,7 +5,7 @@
         "kinit",
         "-C",
         "FILE:/assets/pkinit-iprop-{realm}.pem",
-        "iprop/{id}.{domain}@{realm}",
+        "iprop/{id}.{domain}",
         "/install-heimdal/libexec/ipropd-slave",
         "--config-file={kdcsvc_dir}/etc/kdc.conf",
         "--no-keytab",
