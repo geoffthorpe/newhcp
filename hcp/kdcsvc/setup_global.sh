@@ -34,11 +34,11 @@ cat > $HCP_KDCSVC_STATE/etc/kdc.conf << EOF
 	pkinit_max_life_from_cert = yes
 [hdb]
 	db-dir = $HCP_KDCSVC_STATE/var
-	enable_virtual_hostbased_princs = true
+	enable_virtual_hostbased_princs = $HCP_KDCSVC_ENABLE_STATELESS
 	virtual_hostbased_princ_mindots = 1
 	virtual_hostbased_princ_maxdots = 5
-	enable_synthetic_clients = true
-	synthetic_clients_forwardable = true
+	enable_synthetic_clients = $HCP_KDCSVC_ENABLE_STATELESS
+	synthetic_clients_forwardable = $HCP_KDCSVC_ENABLE_STATELESS
 EOF
 if [[ ! -f $KRB5_CONFIG ]]; then
 	echo "Error, no config file at '$KRB5_CONFIG'" >&2

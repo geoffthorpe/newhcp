@@ -18,6 +18,8 @@ export HCP_KDCSVC_KEY_ROTATION_EPOCH=$(echo "$HCP_KDCSVC_JSON" | jq -r ".key_rot
 export HCP_KDCSVC_KEY_ROTATION_PERIOD=$(echo "$HCP_KDCSVC_JSON" | jq -r ".key_rotation_period")
 export HCP_KDCSVC_MAX_TICKET_LIFE=$(echo "$HCP_KDCSVC_JSON" | jq -r ".max_ticket_life")
 export HCP_KDCSVC_MAX_RENEWABLE_LIFE=$(echo "$HCP_KDCSVC_JSON" | jq -r ".max_renewable_life")
+export HCP_KDCSVC_ENABLE_STATELESS=$(echo "$HCP_KDCSVC_JSON" | jq -r ".enable_stateless")
+
 
 echo "Parsed 'kdcsvc': $HCP_HOSTNAME"
 echo "               STATE: $HCP_KDCSVC_STATE"
@@ -34,6 +36,7 @@ echo "  KEY_ROTATION_EPOCH: $HCP_KDCSVC_KEY_ROTATION_EPOCH"
 echo " KEY_ROTATION_PERIOD: $HCP_KDCSVC_KEY_ROTATION_PERIOD"
 echo "     MAX_TICKET_LIFE: $HCP_KDCSVC_MAX_TICKET_LIFE"
 echo "  MAX_RENEWABLE_LIFE: $HCP_KDCSVC_MAX_RENEWABLE_LIFE"
+echo "    ENABLE_STATELESS: $HCP_KDCSVC_ENABLE_STATELESS"
 
 if [[ ! -d $HCP_KDCSVC_STATE ]]; then
 	echo "Error, kdcsvc::state isn't a directory: $HCP_KDCSVC_STATE" >&2
