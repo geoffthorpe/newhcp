@@ -184,7 +184,8 @@ $(eval $(call gen_rules))
 
 ifdef QEMUSUPPORT
 $(CRUD)/hcp_qemu_guest.tar: $(hcp_qemu_guest_$(DEBVERSION)) $(TOP)/Makefile
-	$Qdocker export -o $@ `docker run --entrypoint="" -d hcp_qemu_guest:$(DEBVERSION) /bin/true`
+	$QFOO=`docker run --entrypoint='' -d hcp_qemu_guest:$(DEBVERSION) /bin/true` && \
+		docker export -o $@ $$FOO && docker container rm $$FOO
 $(CRUD)/hcp_qemu_guest.img: $(CRUD)/hcp_qemu_guest.tar $(hcp_builder_qemu_$(DEBVERSION))
 	$Qdocker run -it --rm -v $(CRUD):/crud:rw \
 		--privileged --cap-add SYS_ADMIN \
@@ -195,7 +196,8 @@ endif
 
 ifdef UMLSUPPORT
 $(CRUD)/hcp_uml_guest.tar: $(hcp_uml_guest_$(DEBVERSION)) $(TOP)/Makefile
-	$Qdocker export -o $@ `docker run --entrypoint="" -d hcp_uml_guest:$(DEBVERSION) /bin/true`
+	$QFOO=`docker run --entrypoint="" -d hcp_uml_guest:$(DEBVERSION) /bin/true` && \
+		docker export -o $@ $$FOO && docker container rm $$FOO
 $(CRUD)/hcp_uml_guest.img: $(CRUD)/hcp_uml_guest.tar $(hcp_builder_uml_$(DEBVERSION))
 	$Qdocker run -it --rm -v $(CRUD):/crud:rw \
 		--privileged --cap-add SYS_ADMIN \
