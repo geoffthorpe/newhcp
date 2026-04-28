@@ -23,7 +23,7 @@ The reference usecase uses two namespace principals, as can be seen in the
 following output;
 
 ```
-$ docker compose exec attestsvc /hcp/python/hcp/api/kdc.py \
+$ docker compose run kdc_client /hcp/python/hcp/api/kdc.py \
     --api https://kdc_secondary.hcphacking.xyz \
     --cacert /ca_default \
     --clientcert /cred_kdcclient \

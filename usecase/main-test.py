@@ -77,6 +77,7 @@ if __name__ == '__main__':
     kdc_primary = Container(composer, 'kdc_primary')
     kdc_secondary_tpm = Container(composer, 'kdc_secondary_tpm')
     kdc_secondary = Container(composer, 'kdc_secondary')
+    kdc_client = Container(composer, 'kdc_client')
     shell_tpm = Container(composer, 'shell_tpm')
     shell = Container(composer, 'shell')
     alicia = Container(composer, 'alicia')
@@ -151,7 +152,7 @@ fi
     kdc_secondary_tpm.up()
 
     header('Waiting for kdc_secondary availability')
-    attestsvc.exec([
+    kdc_client.run([
         '/hcp/python/hcp/tool/waitWeb.py',
         '--cacert', '/ca_default',
         '--clientcert', '/cred_kdcclient',

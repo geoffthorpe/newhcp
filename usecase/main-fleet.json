@@ -158,6 +158,16 @@
             },
             "env": [ "tpm2tools", "krb5" ]
         },
+        "kdc_client": {
+            "tpm": "none",
+            "volumes": [
+                "./_crud/testcreds/cred_kdcclient:/cred_kdcclient:ro"
+            ],
+            "args_for": "kdc_client",
+            "result_from": "kdc_client",
+            "foreground": "kdc_client",
+            "services": { "kdc_client": null }
+        },
         "auth_certificate": {
             "hostname": "certificate.auth.{domain}",
             "tpm": "cotenant",
