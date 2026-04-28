@@ -12,4 +12,4 @@
 	url = https://github.com/krb5/krb5
 [submodule "kstart"]
 	path = kstart
-	url = https://github.com/rra/kstart
+	url = https://github.com/geoffthorpe/kstart
