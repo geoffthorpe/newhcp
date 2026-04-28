@@ -145,10 +145,12 @@ fi
     header('Enrolling kdc TPMs')
     orchestrator.run(['-e', 'kdc_primary', 'kdc_secondary'])
 
-    header('Starting KDCs')
+    header('Starting primary KDC')
     kdc_primary.up()
-    kdc_secondary.up()
     kdc_primary_tpm.up()
+
+    header('Starting secondary KDC')
+    kdc_secondary.up()
     kdc_secondary_tpm.up()
 
     header('Waiting for kdc_secondary availability')
