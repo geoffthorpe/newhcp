@@ -218,6 +218,14 @@ uml_kernel_build_shell: $(hcp_builder_uml_kernel_$(DEBVERSION)) | $(CRUD)/linux-
 		hcp_builder_uml_kernel:$(DEBVERSION) \
 		bash
 default: $(CRUD)/linux
+ifneq (,$(wildcard $(CRUD)/linux-$(UML_KERN_VER)))
+clean_uml_linux:
+	$Qdocker run -it --rm -v $(CRUD):/crud:rw \
+		hcp_builder_uml_kernel:$(DEBVERSION) \
+		bash -c 'rm -rf /crud/linux-$(UML_KERN_VER)/*'
+	$Qrmdir $(CRUD)/linux-$(UML_KERN_VER)
+clean: clean_uml_linux
+endif
 endif
 
 $(USECASE_DIR): | $(CRUD)
@@ -232,8 +240,7 @@ endef
 $(foreach i,$(USECASE_HOSTS),$(eval $(call usecase_host,$i)))
 ifneq (,$(wildcard $(USECASE_DIR)))
 clean_usecase:
-	$Qrm $(USECASE_OUTS)
-	$Qrmdir $(USECASE_DIR)
+	$Qrm -rf $(USECASE_DIR)
 clean: clean_usecase
 endif
 
