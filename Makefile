@@ -19,7 +19,8 @@ DRUN := docker run --rm
 HEIMDAL_OUT := heimdal-install.tar.gz
 MIT_OUT := mit-install.tar.gz
 KSTART_OUT := kstart-install.tar.gz
-NGINX_OUT := nginx-install.tar.gz
+NGINX_HEIMDAL_OUT := nginx-heimdal-install.tar.gz
+NGINX_MIT_OUT := nginx-mit-install.tar.gz
 CRUD := $(TOP)/_crud
 MDIRS := $(CRUD)
 TARGETS :=
@@ -48,27 +49,7 @@ umlsupport:
 
 include Makefile.macros
 
-# So the Dockerfile and this Makefile need to agree on dependencies;
-#
-#      hcp_baseline:[bookworm|trixie]
-#             |
-#      hcp_platform:[bookworm|trixie]
-#             |
-#             +---------------+
-#             |               |
-#             |    hcp_builder_heimdal:bookworm
-#             |               |
-#             |       heimdal-install.tar.gz
-#             |               |
-#             |     hcp_builder_nginx:trixie
-#             |               |
-#             |        nginx-install.tar.gz
-#             |               |
-#             +---------------+
-#             |
-#      hcp_environment:trixie
-#
-# Sub-text: heimdal build is broken on trixie, so we need to build on bookworm,
+# The heimdal build is broken on trixie, so we need to build on bookworm,
 # but bookworm's swtpm/tpm2-tools is too old, so we need to install and run on
 # trixie. Fortunately, the bookworm-based build runs fine on trixie.
 #
@@ -83,24 +64,32 @@ endef
 define cb_hcp_environment_heimdal
 $(eval D := $(strip $1))
 $(eval _CTX := $(strip $2))
-$($D_SYNC): ./ctx/ssh_config ./heimdal/$(HEIMDAL_OUT) ./nginx/$(NGINX_OUT)
-	$Qrsync -a ./ctx/ssh_config ./heimdal/$(HEIMDAL_OUT) ./nginx/$(NGINX_OUT) $(_CTX)/
+$($D_SYNC): ./ctx/ssh_config ./heimdal/$(HEIMDAL_OUT) ./nginx/$(NGINX_HEIMDAL_OUT)
+	$Qrsync -a ./ctx/ssh_config ./heimdal/$(HEIMDAL_OUT) ./nginx/$(NGINX_HEIMDAL_OUT) $(_CTX)/
 	$Qtouch $$@
 endef
 
 define cb_hcp_environment_mit
 $(eval D := $(strip $1))
 $(eval _CTX := $(strip $2))
-$($D_SYNC): ./ctx/ssh_config ./mit/$(MIT_OUT) ./kstart/$(KSTART_OUT) ./nginx/$(NGINX_OUT)
-	$Qrsync -a ./ctx/ssh_config ./mit/$(MIT_OUT) ./kstart/$(KSTART_OUT) ./nginx/$(NGINX_OUT) $(_CTX)/
+$($D_SYNC): ./ctx/ssh_config ./mit/$(MIT_OUT) ./kstart/$(KSTART_OUT) ./nginx/$(NGINX_MIT_OUT)
+	$Qrsync -a ./ctx/ssh_config ./mit/$(MIT_OUT) ./kstart/$(KSTART_OUT) ./nginx/$(NGINX_MIT_OUT) $(_CTX)/
 	$Qtouch $$@
 endef
 
-define cb_hcp_builder_nginx
+define cb_hcp_builder_nginx_heimdal
 $(eval D := $(strip $1))
 $(eval _CTX := $(strip $2))
 $($D_SYNC): ./heimdal/$(HEIMDAL_OUT)
 	$Qrsync -a ./heimdal/$(HEIMDAL_OUT) $(_CTX)/
+	$Qtouch $$@
+endef
+
+define cb_hcp_builder_nginx_mit
+$(eval D := $(strip $1))
+$(eval _CTX := $(strip $2))
+$($D_SYNC): ./mit/$(MIT_OUT)
+	$Qrsync -a ./mit/$(MIT_OUT) $(_CTX)/
 	$Qtouch $$@
 endef
 
@@ -169,7 +158,8 @@ $(eval $(call parse_target,hcp_baseline,debian))
 $(eval $(call parse_target,hcp_builder_heimdal,hcp_baseline))
 $(eval $(call parse_target,hcp_builder_mit,hcp_builder_heimdal))
 $(eval $(call parse_target,hcp_builder_kstart,hcp_builder_mit,cb_hcp_builder_kstart))
-$(eval $(call parse_target,hcp_builder_nginx,hcp_builder_heimdal,cb_hcp_builder_nginx))
+$(eval $(call parse_target,hcp_builder_nginx_heimdal,hcp_builder_heimdal,cb_hcp_builder_nginx_heimdal))
+$(eval $(call parse_target,hcp_builder_nginx_mit,hcp_builder_mit,cb_hcp_builder_nginx_mit))
 $(eval $(call parse_target,hcp_environment_heimdal,hcp_baseline,cb_hcp_environment_heimdal))
 $(eval $(call parse_target,hcp_environment_mit,hcp_baseline,cb_hcp_environment_mit))
 ifdef QEMUSUPPORT
@@ -280,9 +270,13 @@ kstart/$(KSTART_OUT): | $(hcp_builder_kstart_trixie)
 	$Q$(DRUN) -v $(TOP)/kstart:/kstart $(hcp_builder_kstart_trixie_DNAME) bash -c \
 		"cd /kstart && ./bootstrap && ./configure --prefix=/install-kstart PATH_KRB5_CONFIG=/install-mit/bin/krb5-config && make && make install && tar zcf /kstart/kstart-install.tar.gz /install-kstart"
 
-nginx/$(NGINX_OUT): | $(hcp_builder_nginx_trixie)
-	$Q$(DRUN) -v $(TOP)/nginx:/nginx -v$(TOP)/spnego-http-auth-nginx-module:/nginx/spnego-http-auth-nginx-module $(hcp_builder_nginx_trixie_DNAME) bash -c \
-		"cd /nginx && perl -pi.bak -e 's/-lgssapi_krb5/-lgssapi/' spnego-http-auth-nginx-module/config && auto/configure --prefix=/install-nginx --with-http_ssl_module --add-module=spnego-http-auth-nginx-module --with-cc-opt='-I /install-heimdal/include' --with-ld-opt='-L /install-heimdal/lib' && make install && tar zcf nginx-install.tar.gz /install-nginx"
+nginx/$(NGINX_HEIMDAL_OUT): | $(hcp_builder_nginx_heimdal_trixie)
+	$Q$(DRUN) -v $(TOP)/nginx:/nginx -v$(TOP)/spnego-http-auth-nginx-module:/nginx/spnego-http-auth-nginx-module $(hcp_builder_nginx_heimdal_trixie_DNAME) bash -c \
+		"cd /nginx && perl -pi.bak -e 's/-lgssapi_krb5/-lgssapi/' spnego-http-auth-nginx-module/config && auto/configure --prefix=/install-nginx --with-http_ssl_module --add-module=spnego-http-auth-nginx-module --with-cc-opt='-I /install-heimdal/include' --with-ld-opt='-L /install-heimdal/lib' && make install && tar zcf nginx-heimdal-install.tar.gz /install-nginx"
+
+nginx/$(NGINX_MIT_OUT): | $(hcp_builder_nginx_mit_trixie)
+	$Q$(DRUN) -v $(TOP)/nginx:/nginx -v$(TOP)/spnego-http-auth-nginx-module:/nginx/spnego-http-auth-nginx-module $(hcp_builder_nginx_mit_trixie_DNAME) bash -c \
+		"cd /nginx && perl -pi.bak -e 's/-lgssapi /-lgssapi_krb5 /' spnego-http-auth-nginx-module/config && auto/configure --prefix=/install-nginx --with-http_ssl_module --add-module=spnego-http-auth-nginx-module --with-cc-opt='-I /install-mit/include' --with-ld-opt='-L /install-mit/lib' && make install && tar zcf nginx-mit-install.tar.gz /install-nginx"
 
 clean:
 ifneq (,$(wildcard $(CRUD)))

@@ -1,7 +1,7 @@
-COPY mit-install.tar.gz kstart-install.tar.gz nginx-install.tar.gz /
+COPY mit-install.tar.gz kstart-install.tar.gz nginx-mit-install.tar.gz /
 RUN cd / && tar zxf mit-install.tar.gz && rm mit-install.tar.gz
 RUN cd / && tar zxf kstart-install.tar.gz && rm kstart-install.tar.gz
-RUN cd / && tar zxf nginx-install.tar.gz && rm nginx-install.tar.gz
+RUN cd / && tar zxf nginx-mit-install.tar.gz && rm nginx-mit-install.tar.gz
 RUN echo "/install-mit/lib" >> /etc/ld.so.conf.d/mit.conf
 RUN ldconfig
 

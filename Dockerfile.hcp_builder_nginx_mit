@@ -1,0 +1,2 @@
+COPY mit-install.tar.gz /
+RUN cd / && tar zxf mit-install.tar.gz && rm mit-install.tar.gz
