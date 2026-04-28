@@ -2,7 +2,8 @@
     "_": "  vim: set expandtab shiftwidth=4 softtabstop=4: ",
     "vars": {
         "realm": "HCPHACKING.XYZ",
-        "domain": "hcphacking.xyz"
+        "domain": "hcphacking.xyz",
+        "UNCOMMENT_kdcsvc_enable_stateless": false
     },
     "defaults": {
         "tpm_create": true,
@@ -31,6 +32,23 @@
         "backend",
         "kdc_primary",
         "kdc_secondary"
+    ],
+    "principals": [
+        "alicia",
+        "barton",
+        "catarina",
+        "healthcheck",
+        "iprop/kdc_primary.hcphacking.xyz",
+        "iprop/kdc_secondary.hcphacking.xyz",
+        "HTTP/kerberos.auth.hcphacking.xyz",
+        "host/alicia.hcphacking.xyz",
+        "host/barton.hcphacking.xyz",
+        "host/catarina.hcphacking.xyz",
+        "host/nfs.hcphacking.xyz",
+        "host/shell.hcphacking.xyz",
+        "nfs/barton.hcphacking.xyz",
+        "nfs/catarina.hcphacking.xyz",
+        "nfs/nfs.hcphacking.xyz"
     ],
     "fleet": {
         "__default__": {

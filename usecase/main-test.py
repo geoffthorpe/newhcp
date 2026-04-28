@@ -149,6 +149,40 @@ fi
     kdc_primary.up()
     kdc_primary_tpm.up()
 
+    # The 'enable_stateless' field of kdcsvc.json is what we'd ideally look at,
+    # but it shows up post-mutate in a temporary file, which is harder to find
+    # and extract. Instead, we check if the namespace principal is present in
+    # the KDC's db.
+    header('Waiting for kdc_primary availability')
+    kdc_client.run([
+        '/hcp/python/hcp/tool/waitWeb.py',
+        '--cacert', '/ca_default',
+        '--clientcert', '/cred_kdcclient',
+        '--retries', '10', '--pause', '1',
+        f"https://kdc_primary.{DOMAIN}/healthcheck" ])
+    header('Testing for stateless KDC behavior')
+    c = kdc_client.runT([
+        '/hcp/python/hcp/api/kdc.py',
+        '--api', 'https://kdc_primary.hcphacking.xyz',
+        '--cacert', '/ca_default',
+        '--clientcert', '/cred_kdcclient',
+        'get', '*' ], stdout = subprocess.PIPE, text = True)
+    output = json.loads(c.stdout)
+    princs = output['principals']
+    stateless = False
+    while not stateless and princs:
+        if princs.pop().startswith(f"WELLKNOWN/HOSTBASED-NAMESPACE/_/{DOMAIN}"):
+            stateless = True
+    if not stateless:
+        header('Stateless: registering kerberos principals')
+        princs = fleet['principals']
+        kdc_client.run([
+            '/hcp/python/hcp/api/kdc.py',
+            '--api', 'https://kdc_primary.hcphacking.xyz',
+            '--cacert', '/ca_default',
+            '--clientcert', '/cred_kdcclient',
+            'add' ] + princs)
+
     header('Starting secondary KDC')
     kdc_secondary.up()
     kdc_secondary_tpm.up()

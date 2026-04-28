@@ -83,9 +83,13 @@ if [[ $HCP_KDCSVC_MODE == "primary" ]]; then
 	echo "Creating $HCP_KDCSVC_STATE/etc/script.kadmin"
 	cat > $HCP_KDCSVC_STATE/etc/script.kadmin << EOF
 init --realm-max-ticket-life=unlimited --realm-max-renewable-life=unlimited $HCP_KDCSVC_REALM
+EOF
+	if [[ "$HCP_KDCSVC_ENABLE_STATELESS" == "true" ]]; then
+	cat >> $HCP_KDCSVC_STATE/etc/script.kadmin << EOF
 add_ns --key-rotation-epoch=$HCP_KDCSVC_KEY_ROTATION_EPOCH --key-rotation-period=$HCP_KDCSVC_KEY_ROTATION_PERIOD --max-ticket-life=$HCP_KDCSVC_MAX_TICKET_LIFE --max-renewable-life=$HCP_KDCSVC_MAX_RENEWABLE_LIFE --attributes= _/$HCP_KDCSVC_NAMESPACE@$HCP_KDCSVC_REALM
 add_ns --key-rotation-epoch=$HCP_KDCSVC_KEY_ROTATION_EPOCH --key-rotation-period=$HCP_KDCSVC_KEY_ROTATION_PERIOD --max-ticket-life=$HCP_KDCSVC_MAX_TICKET_LIFE --max-renewable-life=$HCP_KDCSVC_MAX_RENEWABLE_LIFE --attributes=ok-as-delegate host/$HCP_KDCSVC_NAMESPACE@$HCP_KDCSVC_REALM
 EOF
+	fi
 
 	echo "Initializing KDC via 'kadmin -l'"
 	kadmin --config-file=$HCP_KDCSVC_STATE/etc/kdc.conf -l < $HCP_KDCSVC_STATE/etc/script.kadmin
