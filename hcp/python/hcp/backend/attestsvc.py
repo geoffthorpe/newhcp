@@ -62,7 +62,7 @@ def my_get_assets(ekpubhash, outdir):
         ktgen = profile['ktgen'] if 'ktgen' in profile else None
         if ktgen:
             ktgenapi = ktgen.pop('api')
-        hxcmd = [ 'hxtool', 'issue-certificate',
+        hxcmd = [ '/hcp/python/hcp/tool/hxtool.py', 'issue-certificate',
                   '--generate-key=rsa', '--key-bits=2048',
                   f"--lifetime={str(profile['days'])}d" ]
         def do_cert(filename, arguments):
@@ -70,7 +70,7 @@ def my_get_assets(ekpubhash, outdir):
                 [ f"--certificate=FILE:{tempdir}/{filename}" ]
             c = subprocess.run(cmd)
             if c.returncode != 0:
-                raise Exception(f"hxtool failed: {cmd}")
+                raise Exception(f"hxtool.py failed: {cmd}")
             add_secret(enrollpath, f"{tempdir}/{filename}", f"{outdir}/{filename}")
             result.append([f"{filename}", False])
         for certtype in certgen:
@@ -80,7 +80,7 @@ def my_get_assets(ekpubhash, outdir):
                 for hostname in hostnames:
                     do_cert(f"https-server-{hostname}.pem",
                             [ '--type=https-server', f"--hostname={hostname}",
-                              f"--subject=UID={hostname}",
+                              f"--subject=/UID={hostname}",
                               '--ca-certificate=FILE:/ca_default_private' ])
             elif certtype == 'https-client':
                 clients = profile['https-clients'] if \
@@ -89,7 +89,7 @@ def my_get_assets(ekpubhash, outdir):
                     do_cert(f"https-client-{client}.pem",
                             [ '--type=https-client',
                               '--ca-certificate=FILE:/ca_httpsclient_private',
-                              f"--subject=UID={client}",
+                              f"--subject=/UID={client}",
                               f"--email={client}@{domain}" ])
             elif certtype == 'pkinit-client':
                 clients = profile['pkinit-clients'] if \
@@ -99,7 +99,7 @@ def my_get_assets(ekpubhash, outdir):
                         raise Exception("No realm for pkinit-client")
                     do_cert(f"pkinit-client-{client}.pem",
                             [ '--type=pkinit-client',
-                              f"--subject=UID={client}",
+                              f"--subject=/UID={client}",
                               '--ca-certificate=FILE:/ca_default_private',
                               f"--pk-init-principal={client}@{realm}" ])
             elif certtype == 'pkinit-kdc':
@@ -107,7 +107,7 @@ def my_get_assets(ekpubhash, outdir):
                     raise Exception("No realm for pkinit-kdc")
                 do_cert(f"pkinit-kdc-{realm}.pem",
                         [ '--type=pkinit-kdc',
-                          '--subject=UID=default',
+                          '--subject=/UID=default',
                           '--ca-certificate=FILE:/ca_default_private',
                           f"--pk-init-principal=krbtgt/{realm}@{realm}" ])
             elif certtype == 'pkinit-iprop':
@@ -117,7 +117,7 @@ def my_get_assets(ekpubhash, outdir):
                         [ '--type=pkinit-client',
                           '--ca-certificate=FILE:/ca_default_private',
                           f"--pk-init-principal=iprop/{hostname}@{realm}",
-                          f"--subject=CN=iprop" ])
+                          f"--subject=/CN=iprop" ])
             else:
                 raise Exception(f"unrecognized certtype: {certtype}")
         if krb5conf:
