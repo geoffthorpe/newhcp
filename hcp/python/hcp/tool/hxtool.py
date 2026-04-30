@@ -75,11 +75,17 @@ if __name__ == '__main__':
             raise Exception('pkinit-kdc requires --key-bits=2048')
         with tempfile.TemporaryDirectory() as tempdir:
             with open(f"{tempdir}/openssl.cnf", 'w') as fp:
+                if args.type == 'pkinit-kdc':
+                    keyusage = 'nonRepudiation,digitalSignature,keyEncipherment,keyAgreement'
+                    oid = '1.3.6.1.5.2.3.5'
+                else:
+                    keyusage = 'digitalSignature,keyEncipherment,keyAgreement'
+                    oid = '1.3.6.1.5.2.3.4'
                 fp.write("""
 [kdc_cert]
 basicConstraints=CA:FALSE
-keyUsage=nonRepudiation,digitalSignature,keyEncipherment,keyAgreement
-extendedKeyUsage=1.3.6.1.5.2.3.5
+keyUsage={keyusage}
+extendedKeyUsage={oid}
 subjectKeyIdentifier=hash
 authorityKeyIdentifier=keyid,issuer
 issuerAltName=issuer:copy
@@ -94,7 +100,7 @@ name_type=EXP:0,INTEGER:1
 name_string=EXP:1,SEQUENCE:kdc_principals
 
 [kdc_principals]
-""".format(realm = realm))
+""".format(realm = realm, keyusage = keyusage, oid = oid))
                 tmp = princ.split('/')
                 princnum = 1
                 while tmp:
