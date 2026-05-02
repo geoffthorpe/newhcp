@@ -63,6 +63,11 @@ if __name__ == '__main__':
 
     fleet = json.load(open('usecase/fleet.json'))
     DOMAIN = fleet['vars']['domain']
+    # We decide whether to start kdc_secondary based on the fleet krb5.conf,
+    # i.e. if hosts are pointed at the primary, that's probably because there's
+    # no secondary.
+    use_kdc_secondary = not \
+        fleet['defaults']['enroll_profile']['krb5conf']['kdchost'].startswith('kdc_primary')
 
     yml = yaml.safe_load(open('docker-compose.yml', 'r'))
     def hostimage(name):
@@ -183,7 +188,7 @@ fi
         if princs.pop().startswith(f"WELLKNOWN/HOSTBASED-NAMESPACE/_/{DOMAIN}"):
             stateless = True
     if not stateless:
-        header('Stateless: registering kerberos principals')
+        header('Not stateless -> registering kerberos principals')
         princs = fleet['principals']
         kdc_client.run([
             '/hcp/python/hcp/api/kdc.py',
@@ -192,17 +197,17 @@ fi
             '--clientcert', '/cred_kdcclient',
             'add' ] + princs)
 
-    header('Starting secondary KDC')
-    kdc_secondary.up()
-    kdc_secondary_tpm.up()
-
-    header('Waiting for kdc_secondary availability')
-    kdc_client.run([
-        '/hcp/python/hcp/tool/waitWeb.py',
-        '--cacert', '/ca_default',
-        '--clientcert', '/cred_kdcclient',
-        '--retries', '10', '--pause', '1',
-        f"https://kdc_secondary.{DOMAIN}/healthcheck" ])
+    if use_kdc_secondary:
+        header('Starting secondary KDC')
+        kdc_secondary.up()
+        kdc_secondary_tpm.up()
+        header('Waiting for kdc_secondary availability')
+        kdc_client.run([
+            '/hcp/python/hcp/tool/waitWeb.py',
+            '--cacert', '/ca_default',
+            '--clientcert', '/cred_kdcclient',
+            '--retries', '10', '--pause', '1',
+            f"https://kdc_secondary.{DOMAIN}/healthcheck" ])
 
     header('Enrolling the remaining TPMs')
     orchestrator.run(['-e'])

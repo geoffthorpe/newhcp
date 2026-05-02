@@ -1,9 +1,38 @@
 {
-    "_": "  vim: set expandtab shiftwidth=4 softtabstop=4: ",
+    "_": [ "  vim: set expandtab shiftwidth=4 softtabstop=4: ",
+        "",
+        "By default, we use the heimdal KDC implementation and MIT kerberos",
+        "everywhere else. The '.fleet.__default__.image' attribute defines the",
+        "default image to use across (non-VM) hosts in general, which we set",
+        "that to the MIT-specific image. Any '.fleet.<hostname>.image'",
+        "attributes will override that for their respective hosts, and we use",
+        "this in the cases of 'kdc_primary' and 'kdc_secondary' to force the",
+        "use of the heimdal-specific image.",
+        "",
+        "If you want to switch the KDCs over to use the MIT implementation, you",
+        "will also need to;",
+        " - Change '.vars.kdcsvc_enable_stateless' to 'false', as the MIT",
+        "   implementation doesn't support the required features. (This will",
+        "   force explicit registration of the principals in '.principals'.)",
+        " - Change '.fleet.kdc_primary.kdcsvc.provider' to 'mit'.",
+        " - Change '.defaults.enroll_profile.krb5conf.kdchost' and",
+        "   '.defaults.enroll_profile.ktgen.api' to be 'kdc_primary' rather",
+        "   than 'kdc_secondary', because we don't yet support the MIT KDC",
+        "   replication idiosynchrasies.",
+        "",
+        "If you want to switch a VM host over to use the heimdal kerberos",
+        "implementation, set '.fleet.<hostname>.vm' to 'qemu_heimdal' or",
+        "'uml_heimdal', depending on the preferred virtualisation.",
+        "",
+        "If you want to enable the 'stateless' feature, set",
+        "'.vars.kdcsvc_enable_stateless' to 'true'. This presently requires",
+        "heimdal on both the KDC and client ends, but should eventually support",
+        "mit clients (waiting on a heimdal KDC fix)."
+    ],
     "vars": {
         "realm": "HCPHACKING.XYZ",
         "domain": "hcphacking.xyz",
-        "UNCOMMENT_kdcsvc_enable_stateless": false
+        "kdcsvc_enable_stateless": false
     },
     "defaults": {
         "tpm_create": true,
@@ -18,7 +47,7 @@
             "realm": "{realm}",
             "days": 1,
             "ktgen": {
-                "api": "https://kdc_secondary.{domain}"
+                "api": "https://kdc_primary.{domain}"
             },
             "krb5conf": {
                 "pkinit_anchors": "/ca_default",
@@ -52,7 +81,7 @@
     ],
     "fleet": {
         "__default__": {
-            "image": "hcp_environment_heimdal:trixie"
+            "image": "hcp_environment_mit:trixie"
         },
         "orchestrator": {
             "tpm": "none",
@@ -104,6 +133,7 @@
         },
         "kdc_primary": {
             "hostname": "kdc_primary.{domain}",
+            "image": "hcp_environment_heimdal:trixie",
             "enroll_profile": {
                 "certgen": [ "pkinit-kdc", "pkinit-client" ],
                 "pkinit-clients": [ "healthcheck" ]
@@ -116,7 +146,8 @@
             "rootproto": {
                 "kdcsvc": {
                     "secondaries": [ "kdc_secondary.{domain}" ],
-                    "pkinit_identity": "/assets/pkinit-kdc-{realm}.pem"
+                    "pkinit_identity": "/assets/pkinit-kdc-{realm}.pem",
+                    "provider": "heimdal"
                 }
             },
             "services": {
@@ -128,26 +159,18 @@
                     "https_healthclient": "/cred_kdcclient"
                 },
                 "attester": null,
-                "kdcsvc_TGS": null,
+                "kdcsvc_TGS_heimdal": null,
                 "kdcsvc_iprop_primary": null
             },
-            "env": [ "tpm2tools", "krb5" ]
+            "env": [ "tpm2tools", "krb5", "kdc_heimdal" ]
         },
         "kdc_secondary": {
             "hostname": "kdc_secondary.{domain}",
+            "image": "hcp_environment_heimdal:trixie",
             "enroll_profile": {
-                "certgen": [
-                    "pkinit-kdc",
-                    "pkinit-iprop",
-                    "pkinit-client"
-                ],
+                "certgen": [ "pkinit-kdc", "pkinit-iprop", "pkinit-client" ],
                 "pkinit-clients": [ "healthcheck" ],
-                "krb5conf": {
-                    "_": ["The point here is that kdc_secondary is the only host",
-                          "that doesn't have kdc_secondary as its KDC, so we",
-                          "override the setting in this one case."],
-                    "kdchost": "kdc_primary.{domain}"
-                }
+                "krb5conf": { "kdchost": "kdc_primary.{domain}" }
             },
             "volumes": [
                 "kdc_secondary:/kdc_secondary",
@@ -159,7 +182,8 @@
                     "dir": "/kdc_secondary",
                     "mode": "secondary",
                     "primary": "kdc_primary.{domain}",
-                    "pkinit_identity": "/assets/pkinit-kdc-{realm}.pem"
+                    "pkinit_identity": "/assets/pkinit-kdc-{realm}.pem",
+                    "provider": "heimdal"
                 }
             },
             "services": {
@@ -171,10 +195,10 @@
                     "https_healthclient": "/cred_kdcclient"
                 },
                 "attester": null,
-                "kdcsvc_TGS": null,
+                "kdcsvc_TGS_heimdal": null,
                 "kdcsvc_iprop_secondary": null
             },
-            "env": [ "tpm2tools", "krb5" ]
+            "env": [ "tpm2tools", "krb5", "kdc_heimdal" ]
         },
         "kdc_client": {
             "tpm": "none",
@@ -240,7 +264,7 @@
         "nfs": {
             "hostname": "nfs.{domain}",
             "tpm": "cotenant",
-            "vm": "qemu",
+            "vm": "qemu_mit",
             "volumes": [ "./_crud:/crud:ro" ],
             "enroll_profile": {
                 "ktgen": {
@@ -294,7 +318,7 @@
         "barton": {
             "hostname": "barton.{domain}",
             "tpm": "cotenant",
-            "vm": "qemu",
+            "vm": "qemu_heimdal",
             "volumes": [ "./_crud:/crud:ro" ],
             "enroll_profile": {
                 "certgen": [ "pkinit-client", "https-client" ],
@@ -317,7 +341,7 @@
         "catarina": {
             "hostname": "catarina.{domain}",
             "tpm": "cotenant",
-            "vm": "uml",
+            "vm": "uml_heimdal",
             "volumes": [ "./_crud:/crud:ro" ],
             "enroll_profile": {
                 "certgen": [ "pkinit-client", "https-client" ],

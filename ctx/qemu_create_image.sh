@@ -7,8 +7,9 @@ set -e
 UID_HOST=$1
 GID_HOST=$2
 VM_DISK_SIZE_MB=$3
+VM_FLAVOR=$4
 
-IMG=/crud/hcp_qemu_guest.img
+IMG=/crud/hcp_qemu_guest_$VM_FLAVOR.img
 
 echo "[Create disk image]"
 [ -z "${VM_DISK_SIZE_MB}" ] && VM_DISK_SIZE_MB=1024

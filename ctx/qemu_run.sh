@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Copy the r/o VM image locally
-cp /crud/hcp_qemu_guest.img /myvm.img
+cp /crud/hcp_qemu_guest_$VM_FLAVOR.img /myvm.img
 
 # Create 1G swap file
 dd if=/dev/zero of=/swapfile bs=1M count=1024

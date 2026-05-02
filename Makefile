@@ -101,7 +101,17 @@ $($D_SYNC): ./ctx/qemu_create_image.sh ./ctx/syslinux.cfg
 	$Qrsync -a ./ctx/qemu_create_image.sh ./ctx/syslinux.cfg $(_CTX)/
 	$Qtouch $$@
 endef
-define cb_hcp_qemu_guest
+define cb_hcp_qemu_guest_heimdal
+$(eval D := $(strip $1))
+$(eval _CTX := $(strip $2))
+$($D_SYNC): ./ctx/systemd-shim-startup.sh ./ctx/hcp-startup.service \
+	./ctx/systemd-shim-launcher.sh ./ctx/hcp-launcher.service
+	$Qrsync -a ./ctx/systemd-shim-startup.sh ./ctx/hcp-startup.service \
+		./ctx/systemd-shim-launcher.sh ./ctx/hcp-launcher.service \
+		$(_CTX)/
+	$Qtouch $$@
+endef
+define cb_hcp_qemu_guest_mit
 $(eval D := $(strip $1))
 $(eval _CTX := $(strip $2))
 $($D_SYNC): ./ctx/systemd-shim-startup.sh ./ctx/hcp-startup.service \
@@ -135,7 +145,17 @@ $($D_SYNC): ./ctx/uml-kernel.config
 	$Qrsync -a ./ctx/uml-kernel.config $(_CTX)/
 	$Qtouch $$@
 endef
-define cb_hcp_uml_guest
+define cb_hcp_uml_guest_heimdal
+$(eval D := $(strip $1))
+$(eval _CTX := $(strip $2))
+$($D_SYNC): ./ctx/systemd-shim-startup.sh ./ctx/hcp-startup.service \
+	./ctx/systemd-shim-launcher.sh ./ctx/hcp-launcher.service
+	$Qrsync -a ./ctx/systemd-shim-startup.sh ./ctx/hcp-startup.service \
+		./ctx/systemd-shim-launcher.sh ./ctx/hcp-launcher.service \
+		$(_CTX)/
+	$Qtouch $$@
+endef
+define cb_hcp_uml_guest_mit
 $(eval D := $(strip $1))
 $(eval _CTX := $(strip $2))
 $($D_SYNC): ./ctx/systemd-shim-startup.sh ./ctx/hcp-startup.service \
@@ -164,14 +184,16 @@ $(eval $(call parse_target,hcp_environment_heimdal,hcp_baseline,cb_hcp_environme
 $(eval $(call parse_target,hcp_environment_mit,hcp_baseline,cb_hcp_environment_mit))
 ifdef QEMUSUPPORT
 $(eval $(call parse_target,hcp_builder_qemu,hcp_baseline,cb_hcp_builder_qemu))
-$(eval $(call parse_target,hcp_qemu_guest,hcp_environment_heimdal,cb_hcp_qemu_guest))
-$(eval $(call parse_target,hcp_qemu_host,hcp_environment_heimdal,cb_hcp_qemu_host))
+$(eval $(call parse_target,hcp_qemu_guest_heimdal,hcp_environment_heimdal,cb_hcp_qemu_guest_heimdal))
+$(eval $(call parse_target,hcp_qemu_guest_mit,hcp_environment_mit,cb_hcp_qemu_guest_mit))
+$(eval $(call parse_target,hcp_qemu_host,hcp_environment_mit,cb_hcp_qemu_host))
 endif
 ifdef UMLSUPPORT
 $(eval $(call parse_target,hcp_builder_uml,hcp_baseline,cb_hcp_builder_uml))
 $(eval $(call parse_target,hcp_builder_uml_kernel,hcp_builder_heimdal,cb_hcp_builder_uml_kernel))
-$(eval $(call parse_target,hcp_uml_guest,hcp_environment_heimdal,cb_hcp_uml_guest))
-$(eval $(call parse_target,hcp_uml_host,hcp_environment_heimdal,cb_hcp_uml_host))
+$(eval $(call parse_target,hcp_uml_guest_heimdal,hcp_environment_heimdal,cb_hcp_uml_guest_heimdal))
+$(eval $(call parse_target,hcp_uml_guest_mit,hcp_environment_mit,cb_hcp_uml_guest_mit))
+$(eval $(call parse_target,hcp_uml_host,hcp_environment_mit,cb_hcp_uml_host))
 endif
 
 # The usecase requires host configs (and docker-compose.yml) to be generated
@@ -185,36 +207,42 @@ USECASE_OUTS += $(USECASE_DIR)/docker-compose.yml
 default: testcreds $(USECASE_OUTS)
 default: $(foreach i,environment_heimdal environment_mit,$(hcp_$i_$(DEBVERSION)))
 ifdef QEMUSUPPORT
-default: $(foreach i,builder_qemu qemu_guest qemu_host,$(hcp_$i_$(DEBVERSION)))
+default: $(foreach i,builder_qemu qemu_guest_heimdal qemu_guest_mit qemu_host,$(hcp_$i_$(DEBVERSION)))
 endif
 ifdef UMLSUPPORT
-default: $(foreach i,builder_uml builder_uml_kernel uml_guest uml_host,$(hcp_$i_$(DEBVERSION)))
+default: $(foreach i,builder_uml builder_uml_kernel uml_guest_heimdal uml_guest_mit uml_host,$(hcp_$i_$(DEBVERSION)))
 endif
 
 $(eval $(call gen_rules))
 
 ifdef QEMUSUPPORT
-$(CRUD)/hcp_qemu_guest.tar: $(hcp_qemu_guest_$(DEBVERSION)) $(TOP)/Makefile
-	$QFOO=`docker run --entrypoint='' -d hcp_qemu_guest:$(DEBVERSION) /bin/true` && \
-		docker export -o $@ $$FOO && docker container rm $$FOO
-$(CRUD)/hcp_qemu_guest.img: $(CRUD)/hcp_qemu_guest.tar $(hcp_builder_qemu_$(DEBVERSION))
+define qemu_img_rules
+$(CRUD)/hcp_qemu_guest_$1.tar: $(hcp_qemu_guest_$1_$(DEBVERSION)) $(TOP)/Makefile
+	$QFOO=`docker run --entrypoint='' -d hcp_qemu_guest_$1:$(DEBVERSION) /bin/true` && \
+		docker export -o $$@ $$$$FOO && docker container rm $$$$FOO
+$(CRUD)/hcp_qemu_guest_$1.img: $(CRUD)/hcp_qemu_guest_$1.tar $(hcp_builder_qemu_$(DEBVERSION))
 	$Qdocker run -it --rm -v $(CRUD):/crud:rw \
 		--privileged --cap-add SYS_ADMIN \
 		hcp_builder_qemu:$(DEBVERSION) \
-		bash -c 'mkdir -p /poo && tar -C /poo --numeric-owner -xf /crud/hcp_qemu_guest.tar && qemu_create_image.sh $(shell id -u) $(shell id -g) $(QEMU_DISK_SIZE_MB)'
-default: $(CRUD)/hcp_qemu_guest.img
+		bash -c 'mkdir -p /poo && tar -C /poo --numeric-owner -xf /crud/hcp_qemu_guest_$1.tar && qemu_create_image.sh $(shell id -u) $(shell id -g) $(QEMU_DISK_SIZE_MB) $1'
+default: $(CRUD)/hcp_qemu_guest_$1.img
+endef
+$(foreach i,heimdal mit,$(eval $(call qemu_img_rules,$i)))
 endif
 
 ifdef UMLSUPPORT
-$(CRUD)/hcp_uml_guest.tar: $(hcp_uml_guest_$(DEBVERSION)) $(TOP)/Makefile
-	$QFOO=`docker run --entrypoint="" -d hcp_uml_guest:$(DEBVERSION) /bin/true` && \
-		docker export -o $@ $$FOO && docker container rm $$FOO
-$(CRUD)/hcp_uml_guest.img: $(CRUD)/hcp_uml_guest.tar $(hcp_builder_uml_$(DEBVERSION))
+define uml_img_rules
+$(CRUD)/hcp_uml_guest_$1.tar: $(hcp_uml_guest_$1_$(DEBVERSION)) $(TOP)/Makefile
+	$QFOO=`docker run --entrypoint="" -d hcp_uml_guest_$1:$(DEBVERSION) /bin/true` && \
+		docker export -o $$@ $$$$FOO && docker container rm $$$$FOO
+$(CRUD)/hcp_uml_guest_$1.img: $(CRUD)/hcp_uml_guest_$1.tar $(hcp_builder_uml_$(DEBVERSION))
 	$Qdocker run -it --rm -v $(CRUD):/crud:rw \
 		--privileged --cap-add SYS_ADMIN \
 		hcp_builder_uml:$(DEBVERSION) \
-		bash -c 'mkdir -p /poo && tar -C /poo --numeric-owner -xf /crud/hcp_uml_guest.tar && uml_create_image.sh $(shell id -u) $(shell id -g) $(UML_DISK_SIZE_MB)'
-default: $(CRUD)/hcp_uml_guest.img
+		bash -c 'mkdir -p /poo && tar -C /poo --numeric-owner -xf /crud/hcp_uml_guest_$1.tar && uml_create_image.sh $(shell id -u) $(shell id -g) $(UML_DISK_SIZE_MB) $1'
+default: $(CRUD)/hcp_uml_guest_$1.img
+endef
+$(foreach i,heimdal mit,$(eval $(call uml_img_rules,$i)))
 $(CRUD)/linux-$(UML_KERN_VER).tar.xz:
 	$Qcd $(CRUD) && wget https://cdn.kernel.org/pub/linux/kernel/v6.x/linux-$(UML_KERN_VER).tar.xz
 $(CRUD)/linux-$(UML_KERN_VER): | $(CRUD)/linux-$(UML_KERN_VER).tar.xz

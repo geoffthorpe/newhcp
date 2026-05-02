@@ -8,6 +8,7 @@
         "policy_url": "{kdcsvc_policyurl}",
         "anchor": "{kdcsvc_anchor}",
         "pkinit_identity": "{kdcsvc_pkinit_identity}",
+        "provider": "{kdcsvc_provider}",
         "enable_stateless": "{kdcsvc_enable_stateless}",
         "key_rotation_epoch": "{kdcsvc_key_rotation_epoch}",
         "key_rotation_period": "{kdcsvc_key_rotation_period}",

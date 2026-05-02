@@ -1,0 +1,16 @@
+{
+    "priority": 60,
+    "exec": [
+        "/hcp/python/hcp/svc/restarter.py",
+        "-t", "10",
+        "/install-mit/sbin/krb5kdc",
+        "-n", "-p", "88"
+    ],
+    "__TODO_fix_healthcheck": null,
+    "healthcheck": [
+        "k5start",
+        "-X", "X509_user_identity=FILE:/assets/pkinit-client-healthcheck.pem",
+        "healthcheck",
+        "klist"
+    ]
+}

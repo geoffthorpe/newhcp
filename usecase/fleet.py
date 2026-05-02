@@ -11,8 +11,10 @@ from gson.expander import expand
 
 def docker_write_service(fp, name, data, with_sidecar = True, with_cotenant = False):
     vm = data['vm'] if 'vm' in data else None
-    baseimg = 'common_qemu' if vm == 'qemu' else \
-              'common_uml' if vm == 'uml' else \
+    baseimg = 'common_qemu_heimdal' if vm == 'qemu_heimdal' else \
+              'common_qemu_mit' if vm == 'qemu_mit' else \
+              'common_uml_heimdal' if vm == 'uml_heimdal' else \
+              'common_uml_mit' if vm == 'uml_mit' else \
               'common_nontpm'
     print(f"Writing service '{name}' to docker compose file")
     fp.write(f"    {name}:\n")
@@ -312,13 +314,29 @@ services:
         environment:
           - DISPLAY=${DISPLAY}
 
-    common_qemu:
+    common_qemu_heimdal:
         extends: common_vm
         image: hcp_qemu_host:trixie
+        environment:
+          - VM_FLAVOR=heimdal
 
-    common_uml:
+    common_qemu_mit:
+        extends: common_vm
+        image: hcp_qemu_host:trixie
+        environment:
+          - VM_FLAVOR=mit
+
+    common_uml_heimdal:
         extends: common_vm
         image: hcp_uml_host:trixie
+        environment:
+          - VM_FLAVOR=heimdal
+
+    common_uml_mit:
+        extends: common_vm
+        image: hcp_uml_host:trixie
+        environment:
+          - VM_FLAVOR=mit
 """)
             for host in hosts:
                 h = _input['fleet'][host]

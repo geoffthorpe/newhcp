@@ -15,7 +15,7 @@ from gson.union import union
 import gson.expander as x
 
 # Usage:
-# do_kadmin.py <cmd> <principals_list> <clientprofile>
+# do_kadmin.py <cmd> <principals> <clientprofile>
 
 if len(sys.argv) != 4:
 	bail(f"Wrong number of arguments: {len(sys.argv)}")
@@ -34,8 +34,8 @@ mylog("\n" +
 	f" - clientjson={clientjson}")
 
 defdomain = hcp_config_extract('.kdcsvc.namespace', must_exist = True)
-
 adminemail = hcp_config_extract('.kdcsvc.admin_email', or_default = True)
+provider = hcp_config_extract('.kdcsvc.provider', must_exist = True)
 
 # Load the server's config and extract the "preclient" and "postclient"
 # profiles. Let exceptions do our error-checking.
@@ -77,9 +77,9 @@ if 'realm' not in resultprofile[cmd]:
 	mylog(f"'realm' not in the profile")
 	sys.exit(http2exit(500))
 realm = resultprofile[cmd]['realm']
-principals_list = json.loads(principals_json)
-resultprofile[cmd]['principals'] = principals_list
-mylog(f"principals_list={principals_list}")
+principals = json.loads(principals_json)
+resultprofile[cmd]['principals'] = principals
+mylog(f"principals={principals}")
 
 # The JSON profile is fully curated. Before acting on it, (a) check whether
 # _we_ allow the command to be contemplated at all, and if so (b) send it to
@@ -110,150 +110,119 @@ if policy_url and cmd != 'realm_healthcheck':
 		mylog(f"policy-checker refused operation: {response.status_code}")
 		sys.exit(http2exit(403))
 
-# Automatically suffix all the requested principals with the requested realm
 realm_suffix = f"@{realm}"
+
 realm_healthcheck = False
 if cmd == 'realm_healthcheck':
-	cmd = 'ext_keytab'
+	cmd = 'get'
 	realm_healthcheck = True
-	principals_list = [ f"host/healthcheck.{defdomain}" ]
-principals_args = [ f"{x}{realm_suffix}" for x in principals_list ]
-mylog(f"principals_args={principals_args}")
-# Verbosity is an option
-verbose = 'verbose' in clientdata and clientdata['verbose']
+	principals = '*'
 
 kdcstate = hcp_config_extract('.kdcsvc.state', must_exist = True)
-args = [ 'kadmin', f"--config-file={kdcstate}/etc/kdc.conf",
-		'-l', cmd ]
 
-def run_subprocess(cmd_args, base64wrap = None):
-	if base64wrap:
-		with tempfile.TemporaryDirectory() as td:
-			tf = f"{td}/kt"
-			all_args = args + [ base64wrap, tf ] + cmd_args
-			mylog(f"running: {all_args}")
-			c = subprocess.run(all_args,
-				stdout = subprocess.PIPE,
-				text = True)
-			if c.returncode != 0:
-				mylog(f"FAIL, exitcode={c.returncode}")
-				sys.exit(http2exit(500))
-			b64args = ['base64', '--wrap=0', tf]
-			mylog(f"running: {b64args}")
-			c = subprocess.run(b64args,
-				stdout = subprocess.PIPE,
-				text = True)
-	else:
-		all_args = args + cmd_args
-		mylog(f"running: {all_args}")
-		c = subprocess.run(all_args,
-				stdout = subprocess.PIPE,
-				text = True)
-	if c.returncode != 0:
-		mylog(f"FAIL, exitcode={c.returncode}")
-		sys.exit(http2exit(500))
-	res = {
-		'cmd': cmd,
-		'realm': realm,
-		# Not 'principals', as that may be what we want to call the
-		# output (eg. for "get"), so "requested" instead.
-		'requested': principals_list,
-		# Either this remains in raw form all the way to the user, or
-		# the handler pop()s it and inserts something curated.
-		'stdout': c.stdout
-	}
-	return res
+kadmin = [ 'kadmin.local' ] if provider == 'mit' else [ 'kadmin', '-l' ]
 
-# Add args to "kadmin -l", run it, and process the output
-if cmd == "add":
-	# TODO: support user profile for options
-	add_args = [ '--use-defaults', '--random-key' ] + principals_args
-	print(json.dumps(run_subprocess(add_args)))
+res = {
+	'cmd': cmd,
+	'realm': realm,
+	'requested': principals
+}
 
-elif cmd == "add_ns":
-	# TODO: support user profile for options
-	add_ns_args = [
-		'--key-rotation-epoch=-1d',
-		'--key-rotation-period=5m',
-		'--max-ticket-life=1d',
-		'--max-renewable-life=5d',
-		'--attributes='
-	] + principals_args
-	print(json.dumps(run_subprocess(add_ns_args)))
-
-elif cmd == "get":
-	get_args = [ '--long' ] + principals_args
-	# If no principals provided, we need to put a "*" on the cmd-line
-	if len(principals_args) == 0:
-		get_args += [ '*' ]
-	res = run_subprocess(get_args)
-	myout = res.pop('stdout')
-	lines = myout.split('\n')
-	if verbose:
-		princs = {}
-		current_fields = {}
-	else:
-		princs = []
-	current_princ = ""
-	lines += [ "" ] # This ensures the last output entry is flushed
-	for i in lines:
-		if len(i) == 0:
-			# Assume this is the blank line between princs. Note
-			# that an empty listing will hit this case once.
-			if len(current_princ) == 0:
-				continue
-			# Flush the entry we've been parsing
-			if current_princ in princs:
-				mylog(f"FAIL, princ occurs twice?!: {current_princ}")
-				sys.exit(http2exit(500))
-			mylog(f"inserting {current_princ}")
-			if verbose:
-				princs[current_princ] = current_fields
-				current_fields = {}
+if cmd == 'add' or cmd == 'add_ns':
+	if isinstance(principals, str):
+		principals = [ principals ]
+	principals = [ f"{p}{realm_suffix}" for p in principals ]
+	res['added'] = []
+	retcode = 200
+	for p in principals:
+		tmp = kadmin.copy()
+		if provider == 'mit':
+			if cmd == 'add_ns':
+				raise Exception('mit doesn\'t implement \'add_ns\'')
 			else:
-				princs += [ current_princ ]
-			current_princ = ""
-			continue
-		# Otherwise the line should be "<attribute>:<value>"
-		# GOTCHA: <value> may contain ":", so set 'maxsplit=1'
-		# GOTCHA: <attribute> may have indenting whitespace
-		parts = i.split(":", 1)
-		if len(parts) != 2:
-			mylog(f"FAIL, non-empty line doesn't split\n{i}")
-		a = parts[0].strip()
-		v = parts[1].strip()
-		if len(current_princ) == 0:
-			# The first attribute must be the "Principal"
-			if a != "Principal":
-				mylog(f"FAIL, first entry is not 'Principal': {a}")
-				sys.exit(http2exit(500))
-			current_princ = v
-		elif verbose:
-			if a in current_fields:
-				mylog(f"FAIL, attribute occurs twice?!: {a}")
-				sys.exit(http2exit(500))
-			current_fields[a] = v
-	res['principals'] = princs
+				tmp += [ 'addprinc', '+requires_preauth', '-nokey', p ]
+		else:
+			if cmd == 'add_ns':
+				tmp += [ cmd, '--key-rotation-epoch=-1d',
+					 '--key-rotation-period=5m',
+					 '--max-ticket-life=1d',
+					 '--max-renewable-life=5d',
+					 '--attributes=', p ]
+			else:
+				tmp += [ cmd, '--use-defaults', '--random-key', p ]
+		c = subprocess.run(tmp, stdout = subprocess.PIPE, text = True)
+		if c.returncode != 0:
+			retcode = 409
+			break
+		res['added'].append(p)
 	print(json.dumps(res))
+	sys.exit(http2exit(retcode))
 
-elif cmd == 'del' or cmd == 'del_ns':
-	del_args = principals_args
-	print(json.dumps(run_subprocess(del_args)))
-
-elif cmd == 'ext_keytab':
-	# TODO: support user profile for options
-	kt_args = principals_args
-	res = run_subprocess(kt_args, base64wrap = '-k')
-	# Special case, 'cmd==realm_healthcheck' is rewritten to ext_keytab and we
-	# finish that hook here.
-	if realm_healthcheck:
-		print("OK: healthcheck principal obtained")
+if cmd == 'get':
+	retcode = 200
+	if isinstance(principals, list):
+		principals = principals.pop(0)
+	if provider == 'mit':
+		kadmin += [ 'listprincs', principals ]
 	else:
-		print(json.dumps(res))
+		kadmin += [ cmd, '-t', principals ]
+	c = subprocess.run(kadmin, stdout = subprocess.PIPE, text = True)
+	if c.returncode != 0:
+		sys.exit(http2exit(500))
+	res['principals'] = c.stdout.strip().split('\n')
+	print(json.dumps(res))
+	sys.exit(http2exit(200))
 
-else:
-	mylog(f"Error, cmd={cmd} unrecognized")
-	sys.exit(http2exit(500))
+if cmd == 'del' or cmd == 'del_ns':
+	if isinstance(principals, str):
+		principals = [ principals ]
+	principals = [ f"{p}{realm_suffix}" for p in principals ]
+	res['deleted'] = []
+	retcode = 200
+	for p in principals:
+		tmp = kadmin.copy()
+		if provider == 'mit':
+			if cmd == 'del_ns':
+				raise Exception('mit doesn\'t implement \'del_ns\'')
+			else:
+				tmp += [ 'delprinc', p ]
+		else:
+			tmp += [ cmd, p ]
+		c = subprocess.run([ tmp, 'delprinc', p ])
+		if c.returncode != 0:
+			retcode = 409
+			break
+		res['deleted'].append(p)
+	print(json.dumps(res))
+	sys.exit(http2exit(retcode))
 
-mylog(f"JSON output produced, exiting with code 200")
-sys.exit(http2exit(200))
+if cmd == 'ext_keytab':
+	if isinstance(principals, str):
+		principals = [ principals ]
+	principals = [ f"{p}{realm_suffix}" for p in principals ]
+	res['added'] = []
+	retcode = 200
+	with tempfile.TemporaryDirectory() as tempdir:
+		for p in principals:
+			tmp = kadmin.copy()
+			if provider == 'mit':
+				tmp += [ 'ktadd', '-k', f"{tempdir}/kt", p ]
+			else:
+				tmp += [ cmd, '-k', f"{tempdir}/kt", p ]
+			c = subprocess.run(tmp, stdout = subprocess.PIPE, text = True)
+			if c.returncode != 0:
+				retcode = 404
+				break
+			res['added'].append(p)
+		if retcode == 200:
+			c = subprocess.run([ 'base64', '--wrap=0', f"{tempdir}/kt" ],
+					   stdout = subprocess.PIPE, text = True)
+			if c.returncode == 0:
+				res['stdout'] = c.stdout
+			else:
+				retcode = 500
+	print(json.dumps(res))
+	sys.exit(http2exit(retcode))
+
+mylog(f"Error, cmd={cmd} unrecognized")
+sys.exit(http2exit(500))

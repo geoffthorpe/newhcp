@@ -1,0 +1,3 @@
+{
+    "KRB5_KDC_PROFILE": "{kdcsvc_dir}/etc/kdc.conf"
+}

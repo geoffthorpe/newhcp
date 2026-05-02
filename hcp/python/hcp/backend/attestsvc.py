@@ -135,6 +135,7 @@ def my_get_assets(ekpubhash, outdir):
     forwardable = true
     #proxiable = true
     rdns = false
+    pkinit_anchors = FILE:{pkinit_anchors}
 [realms]
     {realm} = {{
         kdc = {kdchost}

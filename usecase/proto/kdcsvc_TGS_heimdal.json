@@ -2,10 +2,10 @@
     "priority": 60,
     "exec": [
         "/hcp/python/hcp/svc/restarter.py",
-        "-t", "0",
+        "-t", "10",
         "/install-heimdal/libexec/kdc",
-        "--config-file={kdcsvc_dir}/etc/kdc.conf",
-        "--ports=88"
+	"--config-file={kdcsvc_dir}/etc/kdc.conf",
+	"--ports=88"
     ],
     "__TODO_fix_healthcheck": null,
     "healthcheck": [

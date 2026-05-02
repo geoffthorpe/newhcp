@@ -20,6 +20,7 @@
     "kdcsvc_policyurl": null,
     "kdcsvc_anchor": "/ca_default",
     "NODEFAULT_kdcsvc_pkinit_identity": "none",
+    "kdcsvc_provider": "mit",
     "kdcsvc_enable_stateless": true,
     "kdcsvc_key_rotation_epoch": "-1d",
     "kdcsvc_key_rotation_period": "1h",
