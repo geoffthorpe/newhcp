@@ -23,7 +23,7 @@ with open(fleetconfpath, 'r') as fp:
     fleetconf = expand(json.loads(fp.read()))
 fleetdefaults = fleetconf.pop('defaults') if 'defaults' in fleetconf else {}
 fleet = fleetconf.pop('fleet') if 'fleet' in fleetconf else {}
-fleethosts = [ name for name in fleet if name != '_']
+fleethosts = [ name for name in fleet if name != '_' and name != '__default__']
 
 class FleetHost:
     def post_exist(self):
