@@ -61,19 +61,27 @@ $($D_SYNC): ./mit/$(MIT_OUT)
 	$Qtouch $$@
 endef
 
+define cb_hcp_environment
+$(eval D := $(strip $1))
+$(eval _CTX := $(strip $2))
+$($D_SYNC): ./ctx/ssh_config
+	$Qrsync -a ./ctx/ssh_config $(_CTX)/
+	$Qtouch $$@
+endef
+
 define cb_hcp_environment_heimdal
 $(eval D := $(strip $1))
 $(eval _CTX := $(strip $2))
-$($D_SYNC): ./ctx/ssh_config ./heimdal/$(HEIMDAL_OUT) ./nginx/$(NGINX_HEIMDAL_OUT)
-	$Qrsync -a ./ctx/ssh_config ./heimdal/$(HEIMDAL_OUT) ./nginx/$(NGINX_HEIMDAL_OUT) $(_CTX)/
+$($D_SYNC): ./heimdal/$(HEIMDAL_OUT) ./nginx/$(NGINX_HEIMDAL_OUT)
+	$Qrsync -a ./heimdal/$(HEIMDAL_OUT) ./nginx/$(NGINX_HEIMDAL_OUT) $(_CTX)/
 	$Qtouch $$@
 endef
 
 define cb_hcp_environment_mit
 $(eval D := $(strip $1))
 $(eval _CTX := $(strip $2))
-$($D_SYNC): ./ctx/ssh_config ./mit/$(MIT_OUT) ./kstart/$(KSTART_OUT) ./nginx/$(NGINX_MIT_OUT)
-	$Qrsync -a ./ctx/ssh_config ./mit/$(MIT_OUT) ./kstart/$(KSTART_OUT) ./nginx/$(NGINX_MIT_OUT) $(_CTX)/
+$($D_SYNC): ./mit/$(MIT_OUT) ./kstart/$(KSTART_OUT) ./nginx/$(NGINX_MIT_OUT)
+	$Qrsync -a ./mit/$(MIT_OUT) ./kstart/$(KSTART_OUT) ./nginx/$(NGINX_MIT_OUT) $(_CTX)/
 	$Qtouch $$@
 endef
 
@@ -180,8 +188,9 @@ $(eval $(call parse_target,hcp_builder_mit,hcp_builder_heimdal))
 $(eval $(call parse_target,hcp_builder_kstart,hcp_builder_mit,cb_hcp_builder_kstart))
 $(eval $(call parse_target,hcp_builder_nginx_heimdal,hcp_builder_heimdal,cb_hcp_builder_nginx_heimdal))
 $(eval $(call parse_target,hcp_builder_nginx_mit,hcp_builder_mit,cb_hcp_builder_nginx_mit))
-$(eval $(call parse_target,hcp_environment_heimdal,hcp_baseline,cb_hcp_environment_heimdal))
-$(eval $(call parse_target,hcp_environment_mit,hcp_baseline,cb_hcp_environment_mit))
+$(eval $(call parse_target,hcp_environment,hcp_baseline,cb_hcp_environment))
+$(eval $(call parse_target,hcp_environment_heimdal,hcp_environment,cb_hcp_environment_heimdal))
+$(eval $(call parse_target,hcp_environment_mit,hcp_environment,cb_hcp_environment_mit))
 ifdef QEMUSUPPORT
 $(eval $(call parse_target,hcp_builder_qemu,hcp_baseline,cb_hcp_builder_qemu))
 $(eval $(call parse_target,hcp_qemu_guest_heimdal,hcp_environment_heimdal,cb_hcp_qemu_guest_heimdal))
