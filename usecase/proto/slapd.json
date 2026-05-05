@@ -1,0 +1,5 @@
+{
+    "priority": 70,
+    "exec": "/hcp/python/hcp/svc/slapd.py",
+    "block": "/var/run/slapd/slapd.pid"
+}

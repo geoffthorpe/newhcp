@@ -59,6 +59,7 @@
     },
     "volumes": [
         "backend",
+        "slapd",
         "kdc_primary",
         "kdc_secondary"
     ],
@@ -130,6 +131,17 @@
                 "attester": null
             },
             "env": [ "tpm2tools" ]
+        },
+        "slapd": {
+            "hostname": "slapd.{domain}",
+            "volumes": [
+                "slapd:/slapd"
+            ],
+            "services": {
+                "attester": null,
+                "slapd": null
+            },
+            "env": [ "tpm2tools", "krb5" ]
         },
         "kdc_primary": {
             "hostname": "kdc_primary.{domain}",

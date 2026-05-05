@@ -87,6 +87,8 @@ if __name__ == '__main__':
     attestsvc = Container(composer, 'attestsvc')
     enrollsvc_tpm = Container(composer, 'enrollsvc_tpm')
     enrollsvc = Container(composer, 'enrollsvc')
+    slapd_tpm = Container(composer, 'slapd_tpm')
+    slapd = Container(composer, 'slapd')
     kdc_primary_tpm = Container(composer, 'kdc_primary_tpm')
     kdc_primary = Container(composer, 'kdc_primary')
     kdc_secondary_tpm = Container(composer, 'kdc_secondary_tpm')
@@ -155,6 +157,14 @@ fi
         '--clientcert', '/cred_enrollclient',
         '--retries', '10', '--pause', '1',
         f"https://enrollsvc.{DOMAIN}/healthcheck" ])
+
+    header('Enrolling slapd TPM')
+    orchestrator.run(['-e', 'slapd'])
+
+    header('Starting slapd')
+    slapd_tpm.up()
+    slapd.up()
+    sys.exit(0)
 
     header('Enrolling kdc TPMs')
     orchestrator.run(['-e', 'kdc_primary', 'kdc_secondary'])
