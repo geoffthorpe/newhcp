@@ -36,7 +36,7 @@ class Container:
             stdout = subprocess.PIPE if not self.composer.verbose else sys.stdout,
             stderr = subprocess.PIPE if not self.composer.verbose else sys.stderr)
     def runT(self, args, **runargs):
-        args = [ 'docker', 'compose', 'run', '-iT', '--rm', self.name ] + args
+        args = [ 'docker', 'compose', 'run', '-iTq', '--rm', self.name ] + args
         self.composer.log(True, f"subprocess.run({args})")
         return _srun(args, **runargs)
 
