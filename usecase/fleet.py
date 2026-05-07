@@ -9,19 +9,23 @@ import copy
 
 from gson.expander import expand
 
-def docker_write_service(fp, name, data, with_sidecar = True, with_cotenant = False):
-    vm = data['vm'] if 'vm' in data else None
-    baseimg = 'common_qemu_heimdal' if vm == 'qemu_heimdal' else \
-              'common_qemu_mit' if vm == 'qemu_mit' else \
-              'common_uml_heimdal' if vm == 'uml_heimdal' else \
-              'common_uml_mit' if vm == 'uml_mit' else \
-              'common_nontpm'
+def docker_write_service(fp, name, data, managed = True,
+                         with_sidecar = True, with_cotenant = False):
     print(f"Writing service '{name}' to docker compose file")
     fp.write(f"    {name}:\n")
     if 'image' in data:
         fp.write(f"        image: {data['image']}\n")
-    fp.write(f"        extends: {baseimg}\n")
+    elif not managed:
+        raise Exception(f'Unmanaged hosts (like {name}) must specify \'image\'')
     fp.write(f"        hostname: {data['hostname']}\n")
+    vm = data['vm'] if 'vm' in data else None
+    if managed:
+        baseimg = 'common_qemu_heimdal' if vm == 'qemu_heimdal' else \
+                  'common_qemu_mit' if vm == 'qemu_mit' else \
+                  'common_uml_heimdal' if vm == 'uml_heimdal' else \
+                  'common_uml_mit' if vm == 'uml_mit' else \
+                  'common_nontpm'
+        fp.write(f"        extends: {baseimg}\n")
     vols = data['volumes'] if 'volumes' in data else []
     if with_sidecar or with_cotenant or len(vols) > 0:
         fp.write('        volumes:\n')
@@ -36,9 +40,10 @@ def docker_write_service(fp, name, data, with_sidecar = True, with_cotenant = Fa
         fp.write('        devices:\n')
     for item in devs:
         fp.write(f"          - {item}\n")
-    fp.write('        environment:\n')
-    mutate = f"{name}_runner" if vm else name
-    fp.write(f"          - HCP_CONFIG_MUTATE=/_usecase/{mutate}.json\n\n")
+    if managed:
+        mutate = f"{name}_runner" if vm else name
+        fp.write(f"          - HCP_CONFIG_MUTATE=/_usecase/{mutate}.json\n")
+    fp.write('\n')
 
 def docker_write_sidecar(fp, name, data, with_tpm = True):
     print(f"Writing service '{name}_tpm' to docker compose file")
@@ -57,6 +62,17 @@ def produce_host_config(host, _input, outputdir):
         raise Exception(f"'{host}' is not a known fleet host id")
     print(f"Producing '{host}' config file")
     data = _input['fleet'][host]
+    managed = True
+    if '__default__' in _input['fleet'] and \
+            'managed' in _input['fleet']['__default__']:
+        managed = _input['fleet']['__default__']['managed']
+    if 'managed' in data:
+        managed = data['managed']
+    if not managed:
+        # Write dummy host config and bail out
+        with open(f"{outputdir}/{host}.json", 'w') as fp:
+            json.dump(None, fp, indent = 4)
+        return
     hostname = data['hostname']
     tpm_mode = data['tpm']
     if tpm_mode not in [ 'none', 'sidecar', 'cotenant', 'unmanaged' ]:
@@ -337,11 +353,20 @@ services:
         image: hcp_uml_host:trixie
         environment:
           - VM_FLAVOR=mit
+
 """)
+            managed = True
+            if '__default__' in _input['fleet'] and \
+                    'managed' in _input['fleet']['__default__']:
+                managed = _input['fleet']['__default__']['managed']
             for host in hosts:
                 h = _input['fleet'][host]
+                tmpmanaged = managed
+                if 'managed' in h:
+                    tmpmanaged = h['managed']
                 tpmmode = h['tpm']
                 docker_write_service(fp, host, h,
+                                     managed = tmpmanaged,
                                      with_sidecar = tpmmode == 'sidecar',
                                      with_cotenant = tpmmode == 'cotenant')
                 if tpmmode == 'sidecar':
