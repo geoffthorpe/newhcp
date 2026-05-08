@@ -56,6 +56,7 @@ def requester_loop(request_fn, retries = 0, pause = 0):
         try:
             debug("requester_loop: calling request_fn()")
             response = request_fn()
+            debug("requester_loop: great, no exception")
         except Exception as e:
             if retries > 0:
                 debug(f"requester_loop: caught exception, retries={retries}")
