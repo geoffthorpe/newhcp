@@ -42,6 +42,7 @@ def docker_write_service(fp, name, data, managed = True,
         fp.write(f"          - {item}\n")
     if managed:
         mutate = f"{name}_runner" if vm else name
+        fp.write('        environment:\n')
         fp.write(f"          - HCP_CONFIG_MUTATE=/_usecase/{mutate}.json\n")
     fp.write('\n')
 
