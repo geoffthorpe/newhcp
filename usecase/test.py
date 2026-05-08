@@ -206,7 +206,7 @@ fi
             '/hcp/python/hcp/tool/waitWeb.py',
             '--cacert', '/ca_default',
             '--clientcert', '/cred_kdcclient',
-            '--retries', '10', '--pause', '1',
+            '--retries', '20', '--pause', '1',
             f"https://kdc_secondary.{DOMAIN}/healthcheck" ])
 
     header('Enrolling the remaining TPMs')
