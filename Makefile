@@ -8,7 +8,7 @@ endif
 
 TOP ?= $(shell pwd)
 DEBVERSION ?= trixie
-DEBSUPPORTED := bookworm trixie
+DEBSUPPORTED := trixie
 QEMUSUPPORT := yes
 UMLSUPPORT := yes
 TAG ?= $(DEBVERSION)
@@ -49,10 +49,6 @@ umlsupport:
 
 include Makefile.macros
 
-# The heimdal build is broken on trixie, so we need to build on bookworm,
-# but bookworm's swtpm/tpm2-tools is too old, so we need to install and run on
-# trixie. Fortunately, the bookworm-based build runs fine on trixie.
-#
 define cb_hcp_builder_kstart
 $(eval D := $(strip $1))
 $(eval _CTX := $(strip $2))
@@ -295,8 +291,8 @@ clean: clean_usecase
 endif
 
 # NB: the following dep uses "|" to avoid gratuitous rebuilds
-heimdal/$(HEIMDAL_OUT): | $(hcp_builder_heimdal_bookworm)
-	$Q$(DRUN) -v $(TOP)/heimdal:/heimdal $(hcp_builder_heimdal_bookworm_DNAME) bash -c \
+heimdal/$(HEIMDAL_OUT): | $(hcp_builder_heimdal_trixie)
+	$Q$(DRUN) -v $(TOP)/heimdal:/heimdal $(hcp_builder_heimdal_trixie_DNAME) bash -c \
 		"cd /heimdal && ./autogen.sh && MAKEINFO=true ./configure --disable-texinfo --prefix=/install-heimdal && MAKEINFO=true make && MAKEINFO=true make install && tar zcf heimdal-install.tar.gz /install-heimdal"
 
 mit/$(MIT_OUT): | $(hcp_builder_mit_trixie)
