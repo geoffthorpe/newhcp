@@ -21,6 +21,7 @@ MIT_OUT := mit-install.tar.gz
 KSTART_OUT := kstart-install.tar.gz
 NGINX_HEIMDAL_OUT := nginx-heimdal-install.tar.gz
 NGINX_MIT_OUT := nginx-mit-install.tar.gz
+DCTX := docker/ctx
 CRUD := $(TOP)/_crud
 MDIRS := $(CRUD)
 TARGETS :=
@@ -60,8 +61,8 @@ endef
 define cb_hcp_environment
 $(eval D := $(strip $1))
 $(eval _CTX := $(strip $2))
-$($D_SYNC): ./ctx/ssh_config
-	$Qrsync -a ./ctx/ssh_config $(_CTX)/
+$($D_SYNC): $(DCTX)/ssh_config
+	$Qrsync -a $(DCTX)/ssh_config $(_CTX)/
 	$Qtouch $$@
 endef
 
@@ -101,35 +102,35 @@ ifdef QEMUSUPPORT
 define cb_hcp_builder_qemu
 $(eval D := $(strip $1))
 $(eval _CTX := $(strip $2))
-$($D_SYNC): ./ctx/qemu_create_image.sh ./ctx/syslinux.cfg
-	$Qrsync -a ./ctx/qemu_create_image.sh ./ctx/syslinux.cfg $(_CTX)/
+$($D_SYNC): $(DCTX)/qemu_create_image.sh $(DCTX)/syslinux.cfg
+	$Qrsync -a $(DCTX)/qemu_create_image.sh $(DCTX)/syslinux.cfg $(_CTX)/
 	$Qtouch $$@
 endef
 define cb_hcp_qemu_guest_heimdal
 $(eval D := $(strip $1))
 $(eval _CTX := $(strip $2))
-$($D_SYNC): ./ctx/systemd-shim-startup.sh ./ctx/hcp-startup.service \
-	./ctx/systemd-shim-launcher.sh ./ctx/hcp-launcher.service
-	$Qrsync -a ./ctx/systemd-shim-startup.sh ./ctx/hcp-startup.service \
-		./ctx/systemd-shim-launcher.sh ./ctx/hcp-launcher.service \
+$($D_SYNC): $(DCTX)/systemd-shim-startup.sh $(DCTX)/hcp-startup.service \
+	$(DCTX)/systemd-shim-launcher.sh $(DCTX)/hcp-launcher.service
+	$Qrsync -a $(DCTX)/systemd-shim-startup.sh $(DCTX)/hcp-startup.service \
+		$(DCTX)/systemd-shim-launcher.sh $(DCTX)/hcp-launcher.service \
 		$(_CTX)/
 	$Qtouch $$@
 endef
 define cb_hcp_qemu_guest_mit
 $(eval D := $(strip $1))
 $(eval _CTX := $(strip $2))
-$($D_SYNC): ./ctx/systemd-shim-startup.sh ./ctx/hcp-startup.service \
-	./ctx/systemd-shim-launcher.sh ./ctx/hcp-launcher.service
-	$Qrsync -a ./ctx/systemd-shim-startup.sh ./ctx/hcp-startup.service \
-		./ctx/systemd-shim-launcher.sh ./ctx/hcp-launcher.service \
+$($D_SYNC): $(DCTX)/systemd-shim-startup.sh $(DCTX)/hcp-startup.service \
+	$(DCTX)/systemd-shim-launcher.sh $(DCTX)/hcp-launcher.service
+	$Qrsync -a $(DCTX)/systemd-shim-startup.sh $(DCTX)/hcp-startup.service \
+		$(DCTX)/systemd-shim-launcher.sh $(DCTX)/hcp-launcher.service \
 		$(_CTX)/
 	$Qtouch $$@
 endef
 define cb_hcp_qemu_host
 $(eval D := $(strip $1))
 $(eval _CTX := $(strip $2))
-$($D_SYNC): ./ctx/qemu_run.sh
-	$Qrsync -a ./ctx/qemu_run.sh $(_CTX)/
+$($D_SYNC): $(DCTX)/qemu_run.sh
+	$Qrsync -a $(DCTX)/qemu_run.sh $(_CTX)/
 	$Qtouch $$@
 endef
 endif
@@ -138,42 +139,42 @@ ifdef UMLSUPPORT
 define cb_hcp_builder_uml
 $(eval D := $(strip $1))
 $(eval _CTX := $(strip $2))
-$($D_SYNC): ./ctx/uml_create_image.sh ./ctx/syslinux.cfg
-	$Qrsync -a ./ctx/uml_create_image.sh ./ctx/syslinux.cfg $(_CTX)/
+$($D_SYNC): $(DCTX)/uml_create_image.sh $(DCTX)/syslinux.cfg
+	$Qrsync -a $(DCTX)/uml_create_image.sh $(DCTX)/syslinux.cfg $(_CTX)/
 	$Qtouch $$@
 endef
 define cb_hcp_builder_uml_kernel
 $(eval D := $(strip $1))
 $(eval _CTX := $(strip $2))
-$($D_SYNC): ./ctx/uml-kernel.config
-	$Qrsync -a ./ctx/uml-kernel.config $(_CTX)/
+$($D_SYNC): $(DCTX)/uml-kernel.config
+	$Qrsync -a $(DCTX)/uml-kernel.config $(_CTX)/
 	$Qtouch $$@
 endef
 define cb_hcp_uml_guest_heimdal
 $(eval D := $(strip $1))
 $(eval _CTX := $(strip $2))
-$($D_SYNC): ./ctx/systemd-shim-startup.sh ./ctx/hcp-startup.service \
-	./ctx/systemd-shim-launcher.sh ./ctx/hcp-launcher.service
-	$Qrsync -a ./ctx/systemd-shim-startup.sh ./ctx/hcp-startup.service \
-		./ctx/systemd-shim-launcher.sh ./ctx/hcp-launcher.service \
+$($D_SYNC): $(DCTX)/systemd-shim-startup.sh $(DCTX)/hcp-startup.service \
+	$(DCTX)/systemd-shim-launcher.sh $(DCTX)/hcp-launcher.service
+	$Qrsync -a $(DCTX)/systemd-shim-startup.sh $(DCTX)/hcp-startup.service \
+		$(DCTX)/systemd-shim-launcher.sh $(DCTX)/hcp-launcher.service \
 		$(_CTX)/
 	$Qtouch $$@
 endef
 define cb_hcp_uml_guest_mit
 $(eval D := $(strip $1))
 $(eval _CTX := $(strip $2))
-$($D_SYNC): ./ctx/systemd-shim-startup.sh ./ctx/hcp-startup.service \
-	./ctx/systemd-shim-launcher.sh ./ctx/hcp-launcher.service
-	$Qrsync -a ./ctx/systemd-shim-startup.sh ./ctx/hcp-startup.service \
-		./ctx/systemd-shim-launcher.sh ./ctx/hcp-launcher.service \
+$($D_SYNC): $(DCTX)/systemd-shim-startup.sh $(DCTX)/hcp-startup.service \
+	$(DCTX)/systemd-shim-launcher.sh $(DCTX)/hcp-launcher.service
+	$Qrsync -a $(DCTX)/systemd-shim-startup.sh $(DCTX)/hcp-startup.service \
+		$(DCTX)/systemd-shim-launcher.sh $(DCTX)/hcp-launcher.service \
 		$(_CTX)/
 	$Qtouch $$@
 endef
 define cb_hcp_uml_host
 $(eval D := $(strip $1))
 $(eval _CTX := $(strip $2))
-$($D_SYNC): ./ctx/uml_run.sh
-	$Qrsync -a ./ctx/uml_run.sh $(_CTX)/
+$($D_SYNC): $(DCTX)/uml_run.sh
+	$Qrsync -a $(DCTX)/uml_run.sh $(_CTX)/
 	$Qtouch $$@
 endef
 endif
